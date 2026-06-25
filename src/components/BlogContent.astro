@@ -56,11 +56,13 @@ const fmt = (d: string) =>
               {articles.map((a) => (
                 <div role="listitem" class="w-dyn-item">
                   <a href={base + a.slug} class="link_article w-inline-block">
-                    {a.cover_url && (
-                      <div class="image-wrap_article">
+                    <div class="image-wrap_article">
+                      {a.cover_url ? (
                         <img src={a.cover_url} loading="eager" alt={a.title} class="image_cover" />
-                      </div>
-                    )}
+                      ) : (
+                        <div class="image_cover" style="background:#eef3fd"></div>
+                      )}
+                    </div>
                     <div class="article-card_bottom-tile">
                       <div class="text-wrap_article-card">
                         <div class="text-size-small">{fmt(a.created_at)}</div>
