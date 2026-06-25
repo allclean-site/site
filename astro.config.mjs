@@ -6,7 +6,7 @@ import tailwindcss from '@tailwindcss/vite';
 // To later make Romanian primary, this is a one-line config change
 // (swap defaultLocale) + content move — no painful URL migration.
 export default defineConfig({
-  site: 'https://allclean.example', // TODO: real domain before launch
+  site: 'https://allclean.pages.dev', // update to custom domain when connected
   i18n: {
     locales: ['ru', 'ro'],
     defaultLocale: 'ru',
