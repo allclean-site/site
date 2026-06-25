@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
+import sitemap from '@astrojs/sitemap';
 
 // Russian is the primary (root) locale, Romanian lives under /ro.
 // To later make Romanian primary, this is a one-line config change
@@ -14,6 +15,7 @@ export default defineConfig({
       prefixDefaultLocale: false, // ru at /, ro at /ro
     },
   },
+  integrations: [sitemap()],
   vite: {
     plugins: [tailwindcss()],
   },
