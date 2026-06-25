@@ -1,0 +1,7 @@
+# Cloudflare Pages runtime config for Astro SSR (@astrojs/cloudflare).
+# Build command stays in the Pages dashboard (npm run build); this file supplies
+# the runtime compatibility flags the adapter needs + the build output directory.
+name = "allclean"
+compatibility_date = "2024-11-01"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "./dist"

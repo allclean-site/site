@@ -1,0 +1,38 @@
+---
+export const prerender = false;
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import ArticleView from '../../components/ArticleView.astro';
+import { getArticle, counterpartSlug } from '../../lib/articles';
+
+const { slug } = Astro.params;
+const article = await getArticle('ru', slug!);
+if (!article) return new Response('Статья не найдена', { status: 404 });
+
+const otherSlug = await counterpartSlug(article.group_id, 'ro');
+const site = Astro.site ?? new URL('https://allclean.pages.dev');
+const ruUrl = new URL('/blog/' + article.slug, site).href;
+const roUrl = otherSlug ? new URL('/ro/blog/' + otherSlug, site).href : ruUrl;
+const desc = article.seo_description || article.excerpt || '';
+---
+<Base
+  title={article.seo_title || article.title}
+  description={desc}
+  lang="ru"
+  ruAlternate={ruUrl}
+  roAlternate={roUrl}
+>
+  <Fragment slot="head">
+    {article.jsonld && <script type="application/ld+json" set:html={JSON.stringify(article.jsonld)} is:inline />}
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content={article.seo_title || article.title} />
+    {desc && <meta property="og:description" content={desc} />}
+    {article.cover_url && <meta property="og:image" content={article.cover_url} />}
+  </Fragment>
+  <div class="page-wrapper">
+    <Header />
+    <ArticleView article={article} locale="ru" />
+    <Footer />
+  </div>
+</Base>

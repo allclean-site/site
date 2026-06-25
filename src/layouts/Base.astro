@@ -6,14 +6,17 @@ interface Props {
   title: string;
   description?: string;
   lang?: Lang;
+  // Optional alternate overrides — used by blog articles, where RU and RO slugs differ.
+  ruAlternate?: string;
+  roAlternate?: string;
 }
-const { title, description = '', lang = 'ru' } = Astro.props;
+const { title, description = '', lang = 'ru', ruAlternate, roAlternate } = Astro.props;
 
 const site = Astro.site ?? new URL('https://allclean.example');
 // Path without the /ro locale prefix, so we can build both alternates.
 const basePath = Astro.url.pathname.replace(/^\/ro(?=\/|$)/, '') || '/';
-const ruUrl = new URL(basePath, site).href;
-const roUrl = new URL('/ro' + (basePath === '/' ? '' : basePath), site).href;
+const ruUrl = ruAlternate ?? new URL(basePath, site).href;
+const roUrl = roAlternate ?? new URL('/ro' + (basePath === '/' ? '' : basePath), site).href;
 const canonical = lang === 'ru' ? ruUrl : roUrl;
 const htmlLang = lang === 'ru' ? 'ru-MD' : 'ro-MD';
 

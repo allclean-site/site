@@ -1,0 +1,55 @@
+---
+import type { Article, Locale } from '../lib/articles';
+
+interface Props {
+  locale: Locale;
+  articles: Pick<Article, 'id' | 'slug' | 'title' | 'excerpt' | 'cover_url' | 'created_at'>[];
+}
+const { locale, articles } = Astro.props;
+const base = locale === 'ru' ? '/blog/' : '/ro/blog/';
+const t =
+  locale === 'ru'
+    ? { heading: 'Блог', sub: 'Советы по уборке и полезные статьи', empty: 'Скоро здесь появятся статьи.', read: 'Читать' }
+    : { heading: 'Blog', sub: 'Sfaturi de curățenie și articole utile', empty: 'În curând vor apărea articole.', read: 'Citește' };
+const fmt = (d: string) =>
+  new Date(d).toLocaleDateString(locale === 'ru' ? 'ru-RU' : 'ro-RO', { day: 'numeric', month: 'long', year: 'numeric' });
+---
+<section class="blog">
+  <div class="blog-head">
+    <h1>{t.heading}</h1>
+    <p>{t.sub}</p>
+  </div>
+  {articles.length === 0 ? (
+    <p class="blog-empty">{t.empty}</p>
+  ) : (
+    <div class="blog-grid">
+      {articles.map((a) => (
+        <a class="blog-card" href={base + a.slug}>
+          {a.cover_url && <img src={a.cover_url} alt={a.title} loading="lazy" />}
+          <div class="blog-card-body">
+            <time>{fmt(a.created_at)}</time>
+            <h2>{a.title}</h2>
+            {a.excerpt && <p>{a.excerpt}</p>}
+            <span class="blog-read">{t.read} →</span>
+          </div>
+        </a>
+      ))}
+    </div>
+  )}
+</section>
+<style>
+  .blog { max-width: 1100px; margin: 0 auto; padding: 80px 24px; }
+  .blog-head { text-align: center; margin-bottom: 48px; }
+  .blog-head h1 { font-size: clamp(2rem, 5vw, 3rem); color: #0c2959; margin: 0 0 10px; }
+  .blog-head p { color: #5b6b8c; font-size: 1.1rem; margin: 0; }
+  .blog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 28px; }
+  .blog-card { display: flex; flex-direction: column; background: #fff; border: 1px solid #e6ecf7; border-radius: 16px; overflow: hidden; text-decoration: none; transition: transform .2s, box-shadow .2s; }
+  .blog-card:hover { transform: translateY(-3px); box-shadow: 0 18px 40px rgba(12, 41, 89, .12); }
+  .blog-card img { width: 100%; height: 200px; object-fit: cover; }
+  .blog-card-body { padding: 22px; display: flex; flex-direction: column; gap: 10px; }
+  .blog-card time { color: #8a99b5; font-size: .85rem; }
+  .blog-card h2 { color: #0c2959; font-size: 1.25rem; margin: 0; line-height: 1.3; }
+  .blog-card p { color: #5b6b8c; margin: 0; font-size: .95rem; line-height: 1.5; }
+  .blog-read { color: #2b6cf6; font-weight: 600; margin-top: 4px; }
+  .blog-empty { text-align: center; color: #5b6b8c; padding: 40px 0 60px; font-size: 1.05rem; }
+</style>

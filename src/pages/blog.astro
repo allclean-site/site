@@ -1,13 +1,21 @@
 ---
+export const prerender = false;
 import Base from '../layouts/Base.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import Content from '../components/BlogContent.astro';
+import BlogList from '../components/BlogList.astro';
+import { listArticles } from '../lib/articles';
+
+const articles = await listArticles('ru');
 ---
-<Base title="Блог — советы по уборке | AllClean Кишинёв" description="Полезные статьи об уборке дома, лайфхаки и советы от клининговой службы AllClean в Кишинёве." lang="ru">
+<Base
+  title="Блог — советы по уборке | All Clean Кишинёв"
+  description="Полезные статьи об уборке дома и офиса, лайфхаки и советы от клининговой службы All Clean в Кишинёве."
+  lang="ru"
+>
   <div class="page-wrapper">
     <Header />
-    <Content />
+    <BlogList locale="ru" articles={articles} />
     <Footer />
   </div>
 </Base>

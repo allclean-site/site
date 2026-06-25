@@ -1,13 +1,21 @@
 ---
+export const prerender = false;
 import Base from '../../layouts/Base.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
-import Content from '../../components/BlogContent.astro';
+import BlogList from '../../components/BlogList.astro';
+import { listArticles } from '../../lib/articles';
+
+const articles = await listArticles('ro');
 ---
-<Base title="Blog — sfaturi de curățenie | AllClean Chișinău" description="Articole utile despre curățenia casei, trucuri și sfaturi de la serviciul de curățenie AllClean din Chișinău." lang="ro">
+<Base
+  title="Blog — sfaturi de curățenie | All Clean Chișinău"
+  description="Articole utile despre curățenia casei și a biroului, trucuri și sfaturi de la serviciul de curățenie All Clean din Chișinău."
+  lang="ro"
+>
   <div class="page-wrapper">
     <Header lang="ro" />
-    <Content />
+    <BlogList locale="ro" articles={articles} />
     <Footer lang="ro" />
   </div>
 </Base>
