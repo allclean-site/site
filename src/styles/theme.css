@@ -1,0 +1,37 @@
+/* AllClean brand theme — overrides Sparkles palette.
+   Target (from allclean.md): white background, dark-blue text (#0c2959),
+   light-blue buttons. Imported AFTER sparkles.css so these :root values win. */
+:root {
+  /* ---- Background: cream (#fdf8f1) -> white ---- */
+  --_🎨-color--base---base--light-100: #ffffff;
+  --_🎨-color--base---base--light-88: #ffffffe0;
+  --_🎨-color--base---base--light-64: #ffffffa3;
+  --_🎨-color--base---base--light-48: #ffffff7a;
+  --_🎨-color--base---base--light-32: #ffffff52;
+  --_🎨-color--base---base--light-16: #ffffff29;
+  --_🎨-color--base---base--light-8: #ffffff14;
+  --_🎨-color--base---base--light-4: #ffffff0a;
+  --_🎨-color--base---base--light-0: #ffffff00;
+  --_🎨-color--base---lift--light: #ffffff;
+  --_🎨-color--base---depth--light: #eef3fd; /* subtle light-blue tint for alternate sections */
+
+  /* ---- Text & dark surfaces: #0d1526 -> brand dark blue #0c2959 ---- */
+  --_🎨-color--base---base--dark-100: #0c2959;
+  --_🎨-color--base---base--dark-88: #0c2959e0;
+  --_🎨-color--base---base--dark-64: #0c2959a3;
+  --_🎨-color--base---base--dark-48: #0c29597a;
+  --_🎨-color--base---base--dark-32: #0c295952;
+  --_🎨-color--base---base--dark-16: #0c295929;
+  --_🎨-color--base---base--dark-8: #0c295914;
+  --_🎨-color--base---base--dark-4: #0c29590a;
+  --_🎨-color--base---base--dark-0: #0c295900;
+  --_🎨-color--base---lift--dark: #16356b;  /* lighter brand blue */
+  --_🎨-color--base---depth--dark: #081f47; /* deeper brand blue */
+
+  /* ---- Buttons: keep light blue (already on-brand) ---- */
+  --_🎨-color--base---colors--light-blue: #b6cbf9;
+  --_🎨-color--base---colors--dark-blue: #537fdd;
+
+  /* ---- Lavender accent (banner, tags) -> pale blue to fit the palette ---- */
+  --_🎨-color--base---colors--orchid: #dbe6fb;
+}

@@ -1,0 +1,12 @@
+/* Tailwind utilities + theme WITHOUT preflight, so Tailwind's reset
+   does not clobber the Sparkles (Webflow) base styles. Use Tailwind
+   for net-new UI (CMS admin, custom bits); Sparkles CSS owns the design. */
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+/* Sparkles (Webflow) design system — authoritative base + components. */
+@import './sparkles.css';
+
+/* AllClean brand palette — overrides Sparkles colors (must be last). */
+@import './theme.css';
