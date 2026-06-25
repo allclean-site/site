@@ -1,0 +1,20 @@
+---
+export const prerender = false;
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import Calculator from '../../components/Calculator.astro';
+import { getCalculator } from '../../lib/calculators';
+
+const { slug } = Astro.params;
+const calc = await getCalculator(slug!);
+if (!calc) return new Response('Калькулятор не найден', { status: 404 });
+const title = (calc.name?.ru || 'Калькулятор') + ' | All Clean Кишинёв';
+---
+<Base title={title} description="Рассчитайте примерную стоимость уборки онлайн. Точную цену подтвердит менеджер." lang="ru">
+  <div class="page-wrapper">
+    <Header />
+    <Calculator calc={calc} locale="ru" />
+    <Footer />
+  </div>
+</Base>

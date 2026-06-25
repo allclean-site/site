@@ -1,0 +1,196 @@
+---
+import { SUPABASE_URL, SUPABASE_KEY } from '../lib/supabasePublic';
+interface Props { calc: any; locale: 'ru' | 'ro'; }
+const { calc, locale } = Astro.props;
+const cfg = calc.config || {};
+const L = locale;
+const name = (calc.name && calc.name[L]) || (locale === 'ru' ? 'Калькулятор' : 'Calculator');
+const PROJECT_ID = '8878db57-c541-4502-bfa6-ae812dc3aefd';
+const t = locale === 'ru'
+  ? { label: 'Калькулятор', est: 'Примерная стоимость', note: 'Это предварительная оценка. Точную цену подтвердит менеджер после уточнения деталей.', name: 'Ваше имя', phone: 'Телефон', submit: 'Получить расчёт и заявку', ok: 'Заявка отправлена! Менеджер свяжется с вами.', err: 'Не удалось отправить. Позвоните нам: +373 79 955 044', need: 'Заполните имя и телефон.', from: 'от' }
+  : { label: 'Calculator', est: 'Cost aproximativ', note: 'Aceasta este o estimare. Prețul exact va fi confirmat de manager după precizarea detaliilor.', name: 'Numele dvs.', phone: 'Telefon', submit: 'Obține calculul și solicitarea', ok: 'Cererea a fost trimisă! Managerul vă va contacta.', err: 'Nu s-a putut trimite. Sunați-ne: +373 79 955 044', need: 'Completați numele și telefonul.', from: 'de la' };
+const fields = cfg.fields || [];
+---
+<main class="main-wrapper">
+  <section class="section_hero-faq">
+    <div class="padding-global">
+      <div class="w-layout-blockcontainer container-large w-container">
+        <div class="calc-head">
+          <div data-wf--tag--variant="depth" class="master_label w-variant-9a59c277-b838-5a8e-f25e-39f9204dca4d">
+            <div class="label-large">{t.label}</div>
+          </div>
+          <h1>{name}</h1>
+        </div>
+
+        <div class="calc-grid">
+          <form class="calc-form" id="calc-form">
+            {fields.map((f: any) => (
+              <div class="calc-field" data-key={f.key} data-type={f.type}>
+                <div class="calc-q">{f.label?.[L] || f.key}</div>
+                {f.type === 'select' && (
+                  <div class="calc-opts">
+                    {(f.options || []).map((o: any, i: number) => (
+                      <button type="button" class={'calc-opt' + (i === 0 ? ' on' : '')} data-val={o.value}>
+                        <span>{o.label?.[L] || o.value}</span>
+                        {o.badge && <em class="calc-badge">{o.badge}</em>}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {f.type === 'number' && (
+                  <div class="calc-num">
+                    <input type="range" min={f.min ?? 0} max={f.max ?? 100} step={f.step ?? 1} value={f.default ?? f.min ?? 0} class="calc-range" />
+                    <output class="calc-val">{f.default ?? f.min ?? 0}</output>
+                  </div>
+                )}
+                {f.type === 'multi' && (
+                  <div class="calc-opts">
+                    {(f.options || []).map((o: any) => (
+                      <button type="button" class="calc-opt calc-multi" data-val={o.value}>
+                        <span>{o.label?.[L] || o.value}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </form>
+
+          <aside class="calc-result">
+            <div class="calc-est-label">{t.est}</div>
+            <div class="calc-price"><span id="calc-low">0</span><span class="calc-cur"> MDL</span></div>
+            <p class="calc-note">{t.note}</p>
+            <div class="calc-lead">
+              <input id="calc-name" class="calc-input" placeholder={t.name} />
+              <input id="calc-phone" class="calc-input" placeholder={t.phone} inputmode="tel" />
+              <button type="button" id="calc-submit" class="calc-cta">{t.submit}</button>
+              <p id="calc-msg" class="calc-msg"></p>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script type="application/json" id="calc-cfg" set:html={JSON.stringify(cfg)} is:inline />
+<script define:vars={{ SUPABASE_URL, SUPABASE_KEY, PROJECT_ID, locale, slug: calc.slug, t }}>
+  (function () {
+    var cfg = JSON.parse(document.getElementById('calc-cfg').textContent);
+    var state = {};
+    cfg.fields.forEach(function (f) {
+      if (f.type === 'select') state[f.key] = (f.options && f.options[0] && f.options[0].value) || null;
+      else if (f.type === 'number') state[f.key] = f.default != null ? f.default : (f.min || 0);
+      else if (f.type === 'multi') state[f.key] = [];
+    });
+
+    function compute() {
+      var total = cfg.base || 0, mult = 1, rate = 0;
+      cfg.fields.forEach(function (f) {
+        if (f.type === 'select' && f.affects === 'rate') {
+          var o = (f.options || []).find(function (x) { return x.value === state[f.key]; });
+          if (o && o.rate != null) rate = o.rate;
+        }
+      });
+      cfg.fields.forEach(function (f) {
+        if (f.type === 'select') {
+          var o = (f.options || []).find(function (x) { return x.value === state[f.key]; }); if (!o) return;
+          if (o.add) total += o.add; if (o.mult != null) mult *= o.mult;
+        } else if (f.type === 'number') {
+          var per = f.perUnitFrom === 'rate' ? rate : (f.perUnit || 0);
+          total += (Number(state[f.key]) || 0) * per;
+        } else if (f.type === 'multi') {
+          (state[f.key] || []).forEach(function (v) { var o = (f.options || []).find(function (x) { return x.value === v; }); if (o && o.add) total += o.add; });
+        }
+      });
+      total *= mult;
+      if (cfg.minPrice) total = Math.max(total, cfg.minPrice);
+      return Math.max(0, Math.round(total / 10) * 10);
+    }
+    function render() {
+      var low = compute();
+      var lowEl = document.getElementById('calc-low');
+      if (cfg.showRange) {
+        var high = Math.round(low * (cfg.rangeUpRatio || 1.25) / 10) * 10;
+        lowEl.textContent = t.from + ' ' + low.toLocaleString('ru-RU') + '–' + high.toLocaleString('ru-RU');
+      } else lowEl.textContent = low.toLocaleString('ru-RU');
+    }
+
+    document.querySelectorAll('.calc-field').forEach(function (fl) {
+      var key = fl.dataset.key, type = fl.dataset.type;
+      if (type === 'select') {
+        fl.querySelectorAll('.calc-opt').forEach(function (b) {
+          b.addEventListener('click', function () {
+            fl.querySelectorAll('.calc-opt').forEach(function (x) { x.classList.remove('on'); });
+            b.classList.add('on'); state[key] = b.dataset.val; render();
+          });
+        });
+      } else if (type === 'multi') {
+        fl.querySelectorAll('.calc-opt').forEach(function (b) {
+          b.addEventListener('click', function () {
+            b.classList.toggle('on');
+            state[key] = [].slice.call(fl.querySelectorAll('.calc-opt.on')).map(function (x) { return x.dataset.val; });
+            render();
+          });
+        });
+      } else if (type === 'number') {
+        var rng = fl.querySelector('.calc-range'), out = fl.querySelector('.calc-val');
+        rng.addEventListener('input', function () { state[key] = Number(rng.value); out.textContent = rng.value; render(); });
+      }
+    });
+    render();
+
+    document.getElementById('calc-submit').addEventListener('click', function () {
+      var nm = document.getElementById('calc-name').value.trim();
+      var ph = document.getElementById('calc-phone').value.trim();
+      var msg = document.getElementById('calc-msg');
+      if (!nm || !ph) { msg.textContent = t.need; msg.className = 'calc-msg err'; return; }
+      msg.textContent = '…'; msg.className = 'calc-msg';
+      var sel = {};
+      cfg.fields.forEach(function (f) {
+        var v = state[f.key];
+        if (f.type === 'multi') sel[f.label[locale] || f.key] = (v || []).map(function (val) { var o = f.options.find(function (x) { return x.value === val; }); return o ? (o.label[locale] || val) : val; });
+        else if (f.type === 'select') { var o = (f.options || []).find(function (x) { return x.value === v; }); sel[f.label[locale] || f.key] = o ? (o.label[locale] || v) : v; }
+        else sel[f.label[locale] || f.key] = v;
+      });
+      fetch(SUPABASE_URL + '/rest/v1/site_leads', {
+        method: 'POST',
+        headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+        body: JSON.stringify({ project_id: PROJECT_ID, name: nm, phone: ph, service: 'Калькулятор: ' + slug, notes: JSON.stringify({ selections: sel, estimate: compute() + ' MDL' }), locale: locale, source_url: location.href }),
+      }).then(function (r) {
+        if (r.ok) { msg.textContent = t.ok; msg.className = 'calc-msg ok'; document.getElementById('calc-name').value = ''; document.getElementById('calc-phone').value = ''; }
+        else { msg.textContent = t.err; msg.className = 'calc-msg err'; }
+      }).catch(function () { msg.textContent = t.err; msg.className = 'calc-msg err'; });
+    });
+  })();
+</script>
+
+<style>
+  .calc-head { text-align: center; margin: 0 auto 40px; }
+  .calc-head h1 { color: #0c2959; margin-top: 12px; }
+  .calc-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 28px; align-items: start; }
+  .calc-form { display: flex; flex-direction: column; gap: 26px; }
+  .calc-q { color: #0c2959; font-weight: 700; font-size: 1.05rem; margin-bottom: 12px; }
+  .calc-opts { display: flex; flex-wrap: wrap; gap: 10px; }
+  .calc-opt { display: inline-flex; align-items: center; gap: 8px; padding: 11px 16px; border: 1px solid #dbe6fb; border-radius: 12px; background: #fff; color: #1c2b47; font-weight: 600; cursor: pointer; transition: .15s; font-size: .95rem; }
+  .calc-opt:hover { border-color: #b6cbf9; }
+  .calc-opt.on { background: #0c2959; color: #fff; border-color: #0c2959; }
+  .calc-badge { font-style: normal; font-size: .8rem; background: #b6cbf9; color: #0c2959; border-radius: 999px; padding: 1px 8px; font-weight: 700; }
+  .calc-opt.on .calc-badge { background: #fff; }
+  .calc-num { display: flex; align-items: center; gap: 16px; }
+  .calc-range { flex: 1; accent-color: #2b6cf6; height: 6px; }
+  .calc-val { min-width: 64px; text-align: center; font-weight: 800; color: #0c2959; font-size: 1.2rem; background: #eef3fd; border-radius: 10px; padding: 6px 10px; }
+  .calc-result { position: sticky; top: 100px; background: #0c2959; color: #fff; border-radius: 20px; padding: 28px; box-shadow: 0 24px 60px rgba(12, 41, 89, .25); }
+  .calc-est-label { opacity: .8; font-size: .95rem; }
+  .calc-price { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 800; margin: 6px 0 14px; line-height: 1.1; }
+  .calc-cur { font-size: 1.2rem; opacity: .85; }
+  .calc-note { font-size: .88rem; opacity: .8; line-height: 1.5; margin: 0 0 18px; }
+  .calc-lead { display: flex; flex-direction: column; gap: 10px; }
+  .calc-input { padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .25); background: rgba(255, 255, 255, .1); color: #fff; font-size: 1rem; }
+  .calc-input::placeholder { color: rgba(255, 255, 255, .6); }
+  .calc-cta { padding: 14px; border: 0; border-radius: 12px; background: #b6cbf9; color: #0c2959; font-weight: 800; cursor: pointer; font-size: 1rem; transition: .15s; }
+  .calc-cta:hover { filter: brightness(1.06); }
+  .calc-msg { font-size: .9rem; margin: 2px 0 0; min-height: 1.2em; }
+  .calc-msg.ok { color: #86efac; } .calc-msg.err { color: #fca5a5; }
+  @media (max-width: 860px) { .calc-grid { grid-template-columns: 1fr; } .calc-result { position: static; } }
+</style>

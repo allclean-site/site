@@ -1,0 +1,20 @@
+---
+export const prerender = false;
+import Base from '../../../layouts/Base.astro';
+import Header from '../../../components/Header.astro';
+import Footer from '../../../components/Footer.astro';
+import Calculator from '../../../components/Calculator.astro';
+import { getCalculator } from '../../../lib/calculators';
+
+const { slug } = Astro.params;
+const calc = await getCalculator(slug!);
+if (!calc) return new Response('Calculator negăsit', { status: 404 });
+const title = (calc.name?.ro || 'Calculator') + ' | All Clean Chișinău';
+---
+<Base title={title} description="Calculați costul aproximativ al curățeniei online. Prețul exact va fi confirmat de manager." lang="ro">
+  <div class="page-wrapper">
+    <Header lang="ro" />
+    <Calculator calc={calc} locale="ro" />
+    <Footer lang="ro" />
+  </div>
+</Base>
