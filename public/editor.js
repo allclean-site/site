@@ -87,7 +87,11 @@
     '[data-eedit][contenteditable="true"]{outline:2px solid #2b6cf6;outline-offset:2px}' +
     '.eed-sel{outline:2px solid #16a34a!important;outline-offset:2px}' +
     'body.eed-del,body.eed-del *{cursor:crosshair!important}' +
-    'body.eed-mobile{max-width:390px;margin:0 auto;box-shadow:0 0 0 100vmax rgba(0,0,0,.35);overflow-x:hidden}' +
+    '#eedmob-ov{position:fixed;inset:0;z-index:1000000;background:rgba(8,5,20,.62);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center}' +
+    '.eedmob-frame{width:390px;max-width:94vw;height:84vh;background:#000;border:9px solid #15131c;border-radius:30px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.6);display:flex;flex-direction:column}' +
+    '.eedmob-bar{flex:none;background:#0c2959;color:#fff;font:600 13px Inter,system-ui,sans-serif;padding:9px 14px;display:flex;justify-content:space-between;align-items:center}' +
+    '.eedmob-bar button{background:rgba(255,255,255,.16);color:#fff;border:0;border-radius:8px;padding:3px 10px;cursor:pointer;font-weight:700}' +
+    '.eedmob-frame iframe{flex:1;width:390px;max-width:100%;border:0;background:#fff}' +
     '.eed-badge{position:absolute;z-index:999998;background:#2b6cf6;color:#fff;font:600 12px Inter,system-ui,sans-serif;' +
       'border:0;border-radius:6px;padding:4px 8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.4)}' +
     '.eed-badge.lnk{background:#0c2959}' +
@@ -308,6 +312,24 @@
   }, true);
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && delMode) setDelMode(false); });
 
+  // ---------- mobile preview (true 390px viewport via iframe, shows current edits) ----------
+  var mobOverlay = null;
+  function toggleMobile(btn) {
+    if (mobOverlay) { mobOverlay.remove(); mobOverlay = null; btn.classList.remove('on'); return; }
+    var clone = document.documentElement.cloneNode(true);
+    // strip editor UI + scripts so the preview is a clean static mobile render of the current DOM
+    clone.querySelectorAll('#eed,#eedmob-ov,.eed-badge,script').forEach(function (n) { n.remove(); });
+    clone.querySelectorAll('[contenteditable]').forEach(function (e) { e.removeAttribute('contenteditable'); });
+    clone.querySelectorAll('.eed-sel').forEach(function (e) { e.classList.remove('eed-sel'); });
+    var ov = document.createElement('div'); ov.id = 'eedmob-ov';
+    ov.innerHTML = '<div class="eedmob-frame"><div class="eedmob-bar"><span>📱 Мобильный предпросмотр (390px)</span><button type="button">✕ закрыть</button></div><iframe></iframe></div>';
+    document.body.appendChild(ov);
+    ov.querySelector('iframe').srcdoc = '<!doctype html>' + clone.outerHTML;
+    ov.querySelector('.eedmob-bar button').addEventListener('click', function () { toggleMobile(btn); });
+    ov.addEventListener('click', function (e) { if (e.target === ov) toggleMobile(btn); });
+    mobOverlay = ov; btn.classList.add('on');
+  }
+
   // ---------- toolbar ----------
   var bar = document.createElement('div'); bar.id = 'eed';
   bar.innerHTML =
@@ -331,7 +353,7 @@
   }
   bar.addEventListener('click', function (e) {
     var t = e.target;
-    if (t.id === 'eedmob') { document.body.classList.toggle('eed-mobile'); t.classList.toggle('on'); placeBadges(); return; }
+    if (t.id === 'eedmob') { toggleMobile(t); return; }
     if (t.id === 'eeddel') { setDelMode(!delMode); return; }
     if (t.dataset && t.dataset.w !== undefined && SEL) {
       var cw = parseInt(SEL.style.width) || Math.round(SEL.getBoundingClientRect().width);
