@@ -7,7 +7,13 @@ interface Props {
   locale: Locale;
 }
 const { article, locale } = Astro.props;
-const html = article.body ? await marked.parse(article.body) : '';
+// The Sparkles rich-text design styles body subheads as h5/h6; Markdown ## would render huge h2,
+// so downshift heading levels (h1→h4, h2→h5, h3→h6) to match the template.
+let html = article.body ? await marked.parse(article.body) : '';
+html = html
+  .replace(/<(\/?)h1(\b[^>]*)>/g, '<$1h4$2>')
+  .replace(/<(\/?)h2(\b[^>]*)>/g, '<$1h5$2>')
+  .replace(/<(\/?)h3(\b[^>]*)>/g, '<$1h6$2>');
 const p = locale === 'ru' ? '' : '/ro';
 const t =
   locale === 'ru'

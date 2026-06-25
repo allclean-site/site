@@ -35,3 +35,10 @@
   /* ---- Lavender accent (banner, tags) -> pale blue to fit the palette ---- */
   --_🎨-color--base---colors--orchid: #dbe6fb;
 }
+
+/* ---- FAQ accordion: ink--lift resolves to white in this theme, so the default card
+       подложка is invisible on the white page. Give cards a soft tint + a defined plus circle.
+       (.expandable-single / .faq_animated-box / .faq-* are FAQ-only classes — safe to target.) ---- */
+.expandable-single { background-color: #eef3fd; border: 1px solid #dbe6fb; }
+.faq_animated-box { background-color: #ffffff; border: 1px solid #cdddfb; }
+.faq-horizontal, .faq-vertical { background-color: #0c2959; }
