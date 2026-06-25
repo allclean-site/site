@@ -273,6 +273,7 @@
     '<span class="grp off" id="eedw">Ширина <button data-w="-1">−</button><button data-w="1">+</button></span>' +
     '<span class="grp off" id="eedl">Интервал <button data-l="-1">−</button><button data-l="1">+</button></span>' +
     '<span class="grp off" id="eedf">Шрифт <button data-f="-1">−</button><button data-f="1">+</button></span>' +
+    '<button class="alt off" id="eedup" title="выбрать родительский блок (чтобы менять ширину контейнера)">⬆ блок</button>' +
     '<button class="alt" id="eedmob" title="мобильный вид">📱 Моб.</button>' +
     '<button class="alt" id="eeddel" title="режим удаления">🗑</button>' +
     '<span style="flex:1"></span>' +
@@ -282,10 +283,11 @@
     '<button id="eedpub">🚀 Опубликовать</button>';
   document.body.appendChild(bar);
 
-  function updateBar() { var on = !!SEL; ['eedw', 'eedl', 'eedf'].forEach(function (id) { document.getElementById(id).classList.toggle('off', !on); }); }
+  function updateBar() { var on = !!SEL; ['eedw', 'eedl', 'eedf'].forEach(function (id) { document.getElementById(id).classList.toggle('off', !on); }); document.getElementById('eedup').classList.toggle('off', !(SEL && SEL.parentElement && SEL.parentElement !== document.body)); }
   bar.addEventListener('click', function (e) {
     var t = e.target;
     if (t.id === 'eedmob') { toggleMobile(t); return; }
+    if (t.id === 'eedup' && SEL && SEL.parentElement && SEL.parentElement !== document.body) { SEL = SEL.parentElement; showSel(); updateBar(); return; }
     if (t.id === 'eeddel') { setDelMode(!delMode); return; }
     if (t.dataset && t.dataset.w !== undefined && SEL) { var cw = parseInt(SEL.style.width) || Math.round(SEL.getBoundingClientRect().width); var nw = Math.max(80, cw + (t.dataset.w === '1' ? 40 : -40)); SEL.style.setProperty('width', nw + 'px', 'important'); SEL.style.setProperty('max-width', nw + 'px', 'important'); recStyle(SEL); }
     if (t.dataset && t.dataset.l !== undefined && SEL) { var cl = parseFloat(SEL.style.lineHeight) || parseFloat(getComputedStyle(SEL).lineHeight) || 24; SEL.style.lineHeight = Math.max(10, cl + (t.dataset.l === '1' ? 2 : -2)) + 'px'; recStyle(SEL); }
