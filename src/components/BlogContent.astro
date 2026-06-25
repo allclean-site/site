@@ -1,531 +1,133 @@
 ---
-// BlogContent
+import type { Article, Locale } from '../lib/articles';
+
+interface Props {
+  locale: Locale;
+  articles: Pick<Article, 'slug' | 'title' | 'excerpt' | 'cover_url' | 'created_at'>[];
+}
+const { locale, articles } = Astro.props;
+const base = locale === 'ru' ? '/blog/' : '/ro/blog/';
+const p = locale === 'ru' ? '' : '/ro';
+const t =
+  locale === 'ru'
+    ? {
+        label: 'Блог',
+        h1: 'ПОЛЕЗНЫЕ СОВЕТЫ ДЛЯ ЧИСТОГО ДОМА',
+        sub: 'Короткие и честные гиды о том, как поддерживать дом чистым, спокойным и под контролем — даже когда жизнь в городе превращается в хаос.',
+        read: 'Читать статью',
+        empty: 'Скоро здесь появятся статьи.',
+        ctaH: 'ГОТОВЫ К ЧИСТОМУ И СПОКОЙНОМУ ДОМУ?',
+        ctaSub: 'Закажите проверенных клинеров, которые приезжают вовремя, работают с заботой и оставляют дом свежим.',
+        book: 'Записаться на уборку',
+        price: 'Смотреть цены',
+      }
+    : {
+        label: 'Blog',
+        h1: 'SFATURI UTILE PENTRU O CASĂ CURATĂ',
+        sub: 'Ghiduri scurte și sincere despre cum să-ți menții casa curată, calmă și sub control — chiar și când viața în oraș devine agitată.',
+        read: 'Citește articolul',
+        empty: 'În curând vor apărea articole.',
+        ctaH: 'GATA PENTRU O CASĂ CURATĂ ȘI LINIȘTITĂ?',
+        ctaSub: 'Rezervă curățători de încredere care vin la timp, lucrează cu grijă și îți lasă casa proaspătă.',
+        book: 'Programează curățenia',
+        price: 'Vezi prețuri',
+      };
+const fmt = (d: string) =>
+  new Date(d).toLocaleDateString(locale === 'ru' ? 'ru-RU' : 'ro-RO', { day: 'numeric', month: 'long', year: 'numeric' });
 ---
-      <main class="main-wrapper">
-        <section class="section_hero-blog">
-          <div class="padding-global">
-            <div class="w-layout-blockcontainer container-large w-container">
-              <div
-                data-w-id="ad1a3029-1630-4dbd-9a8f-fd5ea3c4eb1b"
-                style="opacity:1"
-                class="headline_blog"
-              >
-                <div
-                  data-wf--tag--variant="depth"
-                  class="master_label w-variant-9a59c277-b838-5a8e-f25e-39f9204dca4d"
-                >
-                  <div class="label-large">Blog</div>
-                </div>
-                <h1>REAL TIPS FOR A CLEANER HOME</h1>
-                <div class="subtext_blog">
-                  <p class="text-size-large">
-                    Quick, honest guides for keeping your home clean, calm, and
-                    under control — even when life in the city gets messy.
-                  </p>
-                </div>
-              </div>
-              <div class="blog w-dyn-list">
-                <div role="list" class="grid_blog w-dyn-items">
-                  <div role="listitem" class="w-dyn-item">
-                    <a
-                      cms-item=""
-                      href="/blog/the-real-difference-between-standard-and-deep-cleaning"
-                      class="link_article w-inline-block"
-                      ><div class="image-wrap_article">
-                        <img
-                          src="https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cae2/6937ee59d87a1055f3a92c17_blog-thumbnail.jpg"
-                          loading="eager"
-                          cms-image=""
-                          alt=""
-                          sizes="(max-width: 767px) 100vw, (max-width: 991px) 727px, 940px"
-                          srcset="
-                            https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cae2/6937ee59d87a1055f3a92c17_blog-thumbnail-p-500.jpg   500w,
-                            https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cae2/6937ee59d87a1055f3a92c17_blog-thumbnail-p-800.jpg   800w,
-                            https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cae2/6937ee59d87a1055f3a92c17_blog-thumbnail-p-1080.jpg 1080w,
-                            https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cae2/6937ee59d87a1055f3a92c17_blog-thumbnail.jpg        1344w
-                          "
-                          class="image_cover"
-                        />
-                      </div>
-                      <div class="article-card_bottom-tile">
-                        <div class="text-wrap_article-card">
-                          <div class="text-size-small">December 1, 2025</div>
-                          <div class="heading-style-h4">
-                            The Real Difference Between Standard and Deep
-                            Cleaning
-                          </div>
-                        </div>
-                        <div button-tertiary="" class="cta_tertiary">
-                          <div>Read article</div>
-                          <div
-                            icon-tertiary=""
-                            class="icon_button-tertiary w-embed"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="100%"
-                              height="100%"
-                              viewBox="0 0 16 16"
-                              fill="none"
-                            >
-                              <path
-                                d="M6 12L10 8L6 4"
-                                stroke="currentColor"
-                                stroke-width="var(--_❇️-icon---icon-stroke)"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                              />
-                            </svg>
-                          </div>
-                        </div></div
-                    ></a>
-                  </div>
-                  <div role="listitem" class="w-dyn-item">
-                    <a
-                      cms-item=""
-                      href="/blog/nyc-apartment-cleaning-checklist-room-by-room-guide"
-                      class="link_article w-inline-block"
-                      ><div class="image-wrap_article">
-                        <img
-                          src="https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cae2/6937ee49b47ac39e761caf78_blog-thumbnail-1.jpg"
-                          loading="eager"
-                          cms-image=""
-                          alt=""
-                          sizes="(max-width: 767px) 100vw, (max-width: 991px) 727px, 940px"
-                          srcset="
-                            https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cae2/6937ee49b47ac39e761caf78_blog-thumbnail-1-p-500.jpg   500w,
-                            https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cae2/6937ee49b47ac39e761caf78_blog-thumbnail-1-p-800.jpg   800w,
-                            https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cae2/6937ee49b47ac39e761caf78_blog-thumbnail-1-p-1080.jpg 1080w,
-                            https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cae2/6937ee49b47ac39e761caf78_blog-thumbnail-1.jpg        1344w
-                          "
-                          class="image_cover"
-                        />
-                      </div>
-                      <div class="article-card_bottom-tile">
-                        <div class="text-wrap_article-card">
-                          <div class="text-size-small">December 1, 2025</div>
-                          <div class="heading-style-h4">
-                            NYC Apartment Cleaning Checklist: Room-By-Room Guide
-                          </div>
-                        </div>
-                        <div button-tertiary="" class="cta_tertiary">
-                          <div>Read article</div>
-                          <div
-                            icon-tertiary=""
-                            class="icon_button-tertiary w-embed"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="100%"
-                              height="100%"
-                              viewBox="0 0 16 16"
-                              fill="none"
-                            >
-                              <path
-                                d="M6 12L10 8L6 4"
-                                stroke="currentColor"
-                                stroke-width="var(--_❇️-icon---icon-stroke)"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                              />
-                            </svg>
-                          </div>
-                        </div></div
-                    ></a>
-                  </div>
-                  <div role="listitem" class="w-dyn-item">
-                    <a
-                      cms-item=""
-                      href="/blog/7-things-cleaners-wish-clients-knew"
-                      class="link_article w-inline-block"
-                      ><div class="image-wrap_article">
-                        <img
-                          src="https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cae2/6937ee3c30d1ae1913d61e7f_blog-thumbnail-2.jpg"
-                          loading="eager"
-                          cms-image=""
-                          alt=""
-                          sizes="(max-width: 767px) 100vw, (max-width: 991px) 727px, 940px"
-                          srcset="
-                            https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cae2/6937ee3c30d1ae1913d61e7f_blog-thumbnail-2-p-500.jpg   500w,
-                            https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cae2/6937ee3c30d1ae1913d61e7f_blog-thumbnail-2-p-800.jpg   800w,
-                            https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cae2/6937ee3c30d1ae1913d61e7f_blog-thumbnail-2-p-1080.jpg 1080w,
-                            https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cae2/6937ee3c30d1ae1913d61e7f_blog-thumbnail-2.jpg        1344w
-                          "
-                          class="image_cover"
-                        />
-                      </div>
-                      <div class="article-card_bottom-tile">
-                        <div class="text-wrap_article-card">
-                          <div class="text-size-small">December 1, 2025</div>
-                          <div class="heading-style-h4">
-                            7 Things Cleaners Wish Clients Knew
-                          </div>
-                        </div>
-                        <div button-tertiary="" class="cta_tertiary">
-                          <div>Read article</div>
-                          <div
-                            icon-tertiary=""
-                            class="icon_button-tertiary w-embed"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="100%"
-                              height="100%"
-                              viewBox="0 0 16 16"
-                              fill="none"
-                            >
-                              <path
-                                d="M6 12L10 8L6 4"
-                                stroke="currentColor"
-                                stroke-width="var(--_❇️-icon---icon-stroke)"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                              />
-                            </svg>
-                          </div>
-                        </div></div
-                    ></a>
-                  </div>
-                  <div role="listitem" class="w-dyn-item">
-                    <a
-                      cms-item=""
-                      href="/blog/how-often-should-you-really-clean-your-home"
-                      class="link_article w-inline-block"
-                      ><div class="image-wrap_article">
-                        <img
-                          src="https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cae2/6937ee292fc67b792e8de64b_blog-thumbnail-3.jpg"
-                          loading="eager"
-                          cms-image=""
-                          alt=""
-                          sizes="(max-width: 767px) 100vw, (max-width: 991px) 727px, 940px"
-                          srcset="
-                            https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cae2/6937ee292fc67b792e8de64b_blog-thumbnail-3-p-500.jpg   500w,
-                            https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cae2/6937ee292fc67b792e8de64b_blog-thumbnail-3-p-800.jpg   800w,
-                            https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cae2/6937ee292fc67b792e8de64b_blog-thumbnail-3-p-1080.jpg 1080w,
-                            https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cae2/6937ee292fc67b792e8de64b_blog-thumbnail-3.jpg        1344w
-                          "
-                          class="image_cover"
-                        />
-                      </div>
-                      <div class="article-card_bottom-tile">
-                        <div class="text-wrap_article-card">
-                          <div class="text-size-small">December 1, 2025</div>
-                          <div class="heading-style-h4">
-                            How Often Should You Really Clean Your Home?
-                          </div>
-                        </div>
-                        <div button-tertiary="" class="cta_tertiary">
-                          <div>Read article</div>
-                          <div
-                            icon-tertiary=""
-                            class="icon_button-tertiary w-embed"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="100%"
-                              height="100%"
-                              viewBox="0 0 16 16"
-                              fill="none"
-                            >
-                              <path
-                                d="M6 12L10 8L6 4"
-                                stroke="currentColor"
-                                stroke-width="var(--_❇️-icon---icon-stroke)"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                              />
-                            </svg>
-                          </div>
-                        </div></div
-                    ></a>
-                  </div>
-                  <div role="listitem" class="w-dyn-item">
-                    <a
-                      cms-item=""
-                      href="/blog/the-best-eco-friendly-products-we-actually-use"
-                      class="link_article w-inline-block"
-                      ><div class="image-wrap_article">
-                        <img
-                          src="https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cae2/6937ee1a6c9dadcfbd9378fb_blog-thumbnail-4.jpg"
-                          loading="eager"
-                          cms-image=""
-                          alt=""
-                          sizes="(max-width: 767px) 100vw, (max-width: 991px) 727px, 940px"
-                          srcset="
-                            https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cae2/6937ee1a6c9dadcfbd9378fb_blog-thumbnail-4-p-500.jpg   500w,
-                            https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cae2/6937ee1a6c9dadcfbd9378fb_blog-thumbnail-4-p-800.jpg   800w,
-                            https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cae2/6937ee1a6c9dadcfbd9378fb_blog-thumbnail-4-p-1080.jpg 1080w,
-                            https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cae2/6937ee1a6c9dadcfbd9378fb_blog-thumbnail-4.jpg        1344w
-                          "
-                          class="image_cover"
-                        />
-                      </div>
-                      <div class="article-card_bottom-tile">
-                        <div class="text-wrap_article-card">
-                          <div class="text-size-small">December 1, 2025</div>
-                          <div class="heading-style-h4">
-                            The Best Eco-Friendly Products We Actually Use
-                          </div>
-                        </div>
-                        <div button-tertiary="" class="cta_tertiary">
-                          <div>Read article</div>
-                          <div
-                            icon-tertiary=""
-                            class="icon_button-tertiary w-embed"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="100%"
-                              height="100%"
-                              viewBox="0 0 16 16"
-                              fill="none"
-                            >
-                              <path
-                                d="M6 12L10 8L6 4"
-                                stroke="currentColor"
-                                stroke-width="var(--_❇️-icon---icon-stroke)"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                              />
-                            </svg>
-                          </div>
-                        </div></div
-                    ></a>
-                  </div>
-                  <div role="listitem" class="w-dyn-item">
-                    <a
-                      cms-item=""
-                      href="/blog/move-in-move-out-cleaning-whats-actually-included"
-                      class="link_article w-inline-block"
-                      ><div class="image-wrap_article">
-                        <img
-                          src="https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cae2/6937dca614b3623eb72ade6a_blog-thumbnail-5.jpg"
-                          loading="eager"
-                          cms-image=""
-                          alt=""
-                          sizes="(max-width: 767px) 100vw, (max-width: 991px) 727px, 940px"
-                          srcset="
-                            https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cae2/6937dca614b3623eb72ade6a_blog-thumbnail-5-p-500.jpg   500w,
-                            https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cae2/6937dca614b3623eb72ade6a_blog-thumbnail-5-p-800.jpg   800w,
-                            https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cae2/6937dca614b3623eb72ade6a_blog-thumbnail-5-p-1080.jpg 1080w,
-                            https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cae2/6937dca614b3623eb72ade6a_blog-thumbnail-5.jpg        1344w
-                          "
-                          class="image_cover"
-                        />
-                      </div>
-                      <div class="article-card_bottom-tile">
-                        <div class="text-wrap_article-card">
-                          <div class="text-size-small">December 1, 2025</div>
-                          <div class="heading-style-h4">
-                            Move-In / Move-Out Cleaning: What’s Actually
-                            Included
-                          </div>
-                        </div>
-                        <div button-tertiary="" class="cta_tertiary">
-                          <div>Read article</div>
-                          <div
-                            icon-tertiary=""
-                            class="icon_button-tertiary w-embed"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="100%"
-                              height="100%"
-                              viewBox="0 0 16 16"
-                              fill="none"
-                            >
-                              <path
-                                d="M6 12L10 8L6 4"
-                                stroke="currentColor"
-                                stroke-width="var(--_❇️-icon---icon-stroke)"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                              />
-                            </svg>
-                          </div>
-                        </div></div
-                    ></a>
-                  </div>
-                </div>
-              </div>
-            </div>
+<main class="main-wrapper">
+  <section class="section_hero-blog">
+    <div class="padding-global">
+      <div class="w-layout-blockcontainer container-large w-container">
+        <div style="opacity:1" class="headline_blog">
+          <div data-wf--tag--variant="depth" class="master_label w-variant-9a59c277-b838-5a8e-f25e-39f9204dca4d">
+            <div class="label-large">{t.label}</div>
           </div>
-        </section>
-      </main>
-      <section class="section_cta">
-        <div class="padding-global">
-          <div class="w-layout-blockcontainer container-large w-container">
-            <div class="master_cta">
-              <div class="content_cta">
-                <h2>READY FOR A CLEANER &amp; CALMER HOME?</h2>
-                <div class="subtext_cta">
-                  <p class="text-size-large">
-                    Book trusted cleaners who actually show up, care, and leave
-                    your place feeling fresh.
-                  </p>
-                </div>
-                <div class="button-group_center">
-                  <a
-                    href="/book-cleaning"
-                    button=""
-                    data-wf--cta-primary--variant="lift"
-                    class="cta_primary w-inline-block"
-                    ><div class="button_text-mask">
-                      <div button-icon-right="" class="icon-wrap_button">
-                        <div class="wrap_icon-btn">
-                          <div class="icon_button w-embed">
-                            <svg
-                              width="100%"
-                              height="100%"
-                              viewBox="0 0 16 16"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M3.33337 8.00016H12.6667M12.6667 8.00016L8.00004 3.3335M12.6667 8.00016L8.00004 12.6668"
-                                stroke="currentColor"
-                                stroke-width="var(--_❇️-icon---icon-stroke)"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                              />
-                            </svg>
-                          </div>
-                        </div>
-                      </div>
-                      <div button-text="" class="text-button">
-                        Book your cleaning
-                      </div>
-                    </div>
-                    <div
-                      button-bg=""
-                      class="btn-bg w-variant-f3c49ac3-5f19-afad-90be-3c82d51179b6"
-                    ></div></a
-                  ><a
-                    href="/pricing"
-                    button=""
-                    data-wf--cta-primary--variant="secondary"
-                    class="cta_primary w-variant-1ff8d96e-78cc-eac8-de90-206ecdaded5f w-inline-block"
-                    ><div class="button_text-mask">
-                      <div button-icon-right="" class="icon-wrap_button">
-                        <div class="wrap_icon-btn">
-                          <div class="icon_button w-embed">
-                            <svg
-                              width="100%"
-                              height="100%"
-                              viewBox="0 0 16 16"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M3.33337 8.00016H12.6667M12.6667 8.00016L8.00004 3.3335M12.6667 8.00016L8.00004 12.6668"
-                                stroke="currentColor"
-                                stroke-width="var(--_❇️-icon---icon-stroke)"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                              />
-                            </svg>
-                          </div>
-                        </div>
-                      </div>
-                      <div button-text="" class="text-button">View pricing</div>
-                    </div>
-                    <div
-                      button-bg=""
-                      class="btn-bg w-variant-1ff8d96e-78cc-eac8-de90-206ecdaded5f"
-                    ></div
-                  ></a>
-                </div>
-              </div>
-            </div>
+          <h1>{t.h1}</h1>
+          <div class="subtext_blog">
+            <p class="text-size-large">{t.sub}</p>
           </div>
         </div>
-      </section>
-      <section class="section_features">
-        <div class="padding-global">
-          <div class="w-layout-blockcontainer container-large w-container">
-            <div class="w-layout-grid features_thirds">
-              <div class="card_feature">
-                <div class="icon-wrap_feature">
-                  <div class="icon-feature w-embed">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="100%"
-                      height="100%"
-                      viewBox="0 0 32 32"
-                      fill="none"
-                    >
-                      <path
-                        d="M11.9987 29.3337V24.0003H19.9987V29.3337M10.6654 8.00033H10.6787M21.332 8.00033H21.3454M15.9987 8.00033H16.012M15.9987 13.3337H16.012M15.9987 18.667H16.012M21.332 13.3337H21.3454M21.332 18.667H21.3454M10.6654 13.3337H10.6787M10.6654 18.667H10.6787M7.9987 2.66699H23.9987C25.4715 2.66699 26.6654 3.8609 26.6654 5.33366V26.667C26.6654 28.1398 25.4715 29.3337 23.9987 29.3337H7.9987C6.52594 29.3337 5.33203 28.1398 5.33203 26.667V5.33366C5.33203 3.8609 6.52594 2.66699 7.9987 2.66699Z"
-                        stroke="currentColor"
-                        stroke-width="var(--_❇️-icon---icon-stroke)"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg>
-                  </div>
+        <div class="blog w-dyn-list">
+          {articles.length === 0 ? (
+            <p class="text-size-large">{t.empty}</p>
+          ) : (
+            <div role="list" class="grid_blog w-dyn-items">
+              {articles.map((a) => (
+                <div role="listitem" class="w-dyn-item">
+                  <a href={base + a.slug} class="link_article w-inline-block">
+                    {a.cover_url && (
+                      <div class="image-wrap_article">
+                        <img src={a.cover_url} loading="eager" alt={a.title} class="image_cover" />
+                      </div>
+                    )}
+                    <div class="article-card_bottom-tile">
+                      <div class="text-wrap_article-card">
+                        <div class="text-size-small">{fmt(a.created_at)}</div>
+                        <div class="heading-style-h4">{a.title}</div>
+                      </div>
+                      <div button-tertiary="" class="cta_tertiary">
+                        <div>{t.read}</div>
+                        <div icon-tertiary="" class="icon_button-tertiary w-embed">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 16 16" fill="none">
+                            <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="var(--_❇️-icon---icon-stroke)" stroke-linecap="round" stroke-linejoin="round" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  </a>
                 </div>
-                <div class="text-wrap_feature-card">
-                  <div class="text-size-large text_body-bold">
-                    Лицензия и страховка
-                  </div>
-                  <div>Fully compliant with local regulations.</div>
-                </div>
-              </div>
-              <div class="card_feature">
-                <div class="icon-wrap_feature">
-                  <div class="icon-feature w-embed">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="100%"
-                      height="100%"
-                      viewBox="0 0 32 32"
-                      fill="none"
-                    >
-                      <path
-                        d="M9.33464 13.3337V29.3337M20.0013 7.84033L18.668 13.3337H26.4413C26.8553 13.3337 27.2636 13.43 27.6339 13.6152C28.0042 13.8003 28.3262 14.0691 28.5746 14.4003C28.823 14.7315 28.9909 15.116 29.065 15.5233C29.139 15.9306 29.1172 16.3496 29.0013 16.747L25.8946 27.4137C25.7331 27.9676 25.3962 28.4541 24.9346 28.8003C24.473 29.1465 23.9116 29.3337 23.3346 29.3337H5.33464C4.62739 29.3337 3.94911 29.0527 3.44902 28.5526C2.94892 28.0525 2.66797 27.3742 2.66797 26.667V16.0003C2.66797 15.2931 2.94892 14.6148 3.44902 14.1147C3.94911 13.6146 4.62739 13.3337 5.33464 13.3337H9.01464C9.51075 13.3334 9.99695 13.1947 10.4186 12.9333C10.8402 12.6718 11.1805 12.2979 11.4013 11.8537L16.0013 2.66699C16.6301 2.67478 17.249 2.82455 17.8117 3.10512C18.3745 3.38569 18.8665 3.7898 19.2512 4.28726C19.6358 4.78472 19.9031 5.36267 20.033 5.97793C20.1628 6.59318 20.152 7.22984 20.0013 7.84033Z"
-                        stroke="currentColor"
-                        stroke-width="var(--_❇️-icon---icon-stroke)"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                <div class="text-wrap_feature-card">
-                  <div class="text-size-large text_body-bold">
-                    1,200+ recurring clients
-                  </div>
-                  <div>Across Manhattan, Brooklyn &amp; Queens.</div>
-                </div>
-              </div>
-              <div class="card_feature">
-                <div class="icon-wrap_feature">
-                  <div class="icon-feature w-embed">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="100%"
-                      height="100%"
-                      viewBox="0 0 32 32"
-                      fill="none"
-                    >
-                      <path
-                        d="M15.3665 3.06018C15.4249 2.94213 15.5152 2.84276 15.6271 2.77328C15.739 2.70381 15.8681 2.66699 15.9998 2.66699C16.1315 2.66699 16.2606 2.70381 16.3725 2.77328C16.4844 2.84276 16.5747 2.94213 16.6331 3.06018L19.7131 9.29885C19.916 9.70947 20.2155 10.0647 20.586 10.3341C20.9564 10.6035 21.3866 10.779 21.8398 10.8455L28.7278 11.8535C28.8583 11.8724 28.9809 11.9275 29.0818 12.0124C29.1826 12.0974 29.2577 12.2089 29.2985 12.3343C29.3393 12.4597 29.3442 12.5941 29.3126 12.7221C29.281 12.8501 29.2142 12.9668 29.1198 13.0589L24.1385 17.9095C23.8099 18.2297 23.5642 18.6248 23.4222 19.061C23.2803 19.4972 23.2465 19.9614 23.3238 20.4135L24.4998 27.2669C24.5228 27.3973 24.5087 27.5316 24.4591 27.6544C24.4095 27.7773 24.3264 27.8837 24.2192 27.9615C24.112 28.0394 23.9851 28.0855 23.8529 28.0947C23.7208 28.1039 23.5887 28.0758 23.4718 28.0135L17.3145 24.7762C16.9088 24.5632 16.4574 24.4519 15.9991 24.4519C15.5409 24.4519 15.0895 24.5632 14.6838 24.7762L8.52779 28.0135C8.4109 28.0754 8.27899 28.1032 8.14706 28.0939C8.01514 28.0845 7.88849 28.0383 7.78152 27.9605C7.67456 27.8827 7.59157 27.7764 7.542 27.6538C7.49243 27.5312 7.47827 27.3971 7.50113 27.2669L8.67579 20.4149C8.75339 19.9625 8.71977 19.498 8.57785 19.0616C8.43592 18.6251 8.18994 18.2297 7.86113 17.9095L2.8798 13.0602C2.78459 12.9682 2.71712 12.8514 2.68508 12.7229C2.65304 12.5945 2.65771 12.4597 2.69857 12.3338C2.73942 12.2079 2.81482 12.096 2.91616 12.0108C3.01751 11.9257 3.14073 11.8707 3.2718 11.8522L10.1585 10.8455C10.6121 10.7795 11.043 10.6043 11.4139 10.3348C11.7848 10.0654 12.0847 9.70988 12.2878 9.29885L15.3665 3.06018Z"
-                        stroke="currentColor"
-                        stroke-width="var(--_❇️-icon---icon-stroke)"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                <div class="text-wrap_feature-card">
-                  <div class="text-size-large text_body-bold">
-                    Top Rated 2025
-                  </div>
-                  <div>Recognized by Cleaners NYC Awards</div>
-                </div>
-              </div>
+              ))}
             </div>
+          )}
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<section class="section_cta">
+  <div class="padding-global">
+    <div class="w-layout-blockcontainer container-large w-container">
+      <div class="master_cta">
+        <div class="content_cta">
+          <h2>{t.ctaH}</h2>
+          <div class="subtext_cta">
+            <p class="text-size-large">{t.ctaSub}</p>
+          </div>
+          <div class="button-group_center">
+            <a href={p + '/book-cleaning'} button="" data-wf--cta-primary--variant="lift" class="cta_primary w-inline-block">
+              <div class="button_text-mask">
+                <div button-icon-right="" class="icon-wrap_button">
+                  <div class="wrap_icon-btn">
+                    <div class="icon_button w-embed">
+                      <svg width="100%" height="100%" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3.33337 8.00016H12.6667M12.6667 8.00016L8.00004 3.3335M12.6667 8.00016L8.00004 12.6668" stroke="currentColor" stroke-width="var(--_❇️-icon---icon-stroke)" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                <div button-text="" class="text-button">{t.book}</div>
+              </div>
+              <div button-bg="" class="btn-bg w-variant-f3c49ac3-5f19-afad-90be-3c82d51179b6"></div>
+            </a>
+            <a href={p + '/pricing'} button="" data-wf--cta-primary--variant="secondary" class="cta_primary w-variant-1ff8d96e-78cc-eac8-de90-206ecdaded5f w-inline-block">
+              <div class="button_text-mask">
+                <div button-icon-right="" class="icon-wrap_button">
+                  <div class="wrap_icon-btn">
+                    <div class="icon_button w-embed">
+                      <svg width="100%" height="100%" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3.33337 8.00016H12.6667M12.6667 8.00016L8.00004 3.3335M12.6667 8.00016L8.00004 12.6668" stroke="currentColor" stroke-width="var(--_❇️-icon---icon-stroke)" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                <div button-text="" class="text-button">{t.price}</div>
+              </div>
+              <div button-bg="" class="btn-bg w-variant-1ff8d96e-78cc-eac8-de90-206ecdaded5f"></div>
+            </a>
           </div>
         </div>
-      </section>
+      </div>
+    </div>
+  </div>
+</section>

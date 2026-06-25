@@ -3,7 +3,7 @@ export const prerender = false;
 import Base from '../../../layouts/Base.astro';
 import Header from '../../../components/Header.astro';
 import Footer from '../../../components/Footer.astro';
-import ArticleView from '../../../components/ArticleView.astro';
+import BlogPostContent from '../../../components/BlogPostContent.astro';
 import { getArticle, counterpartSlug } from '../../../lib/articles';
 
 const { slug } = Astro.params;
@@ -32,7 +32,7 @@ const desc = article.seo_description || article.excerpt || '';
   </Fragment>
   <div class="page-wrapper">
     <Header lang="ro" />
-    <ArticleView article={article} locale="ro" />
+    <BlogPostContent article={article} locale="ro" />
     <Footer lang="ro" />
   </div>
 </Base>
