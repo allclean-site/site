@@ -85,11 +85,12 @@ const fields = cfg.fields || [];
     });
 
     function compute() {
-      var total = cfg.base || 0, mult = 1, rate = 0;
+      var total = cfg.base || 0, mult = 1, rates = {};
+      // pass 1: selects that set a named rate (e.g. m² rate by cleaning type, per-window rate by window type)
       cfg.fields.forEach(function (f) {
-        if (f.type === 'select' && f.affects === 'rate') {
+        if (f.type === 'select' && f.affects) {
           var o = (f.options || []).find(function (x) { return x.value === state[f.key]; });
-          if (o && o.rate != null) rate = o.rate;
+          if (o && o.rate != null) rates[f.affects] = o.rate;
         }
       });
       cfg.fields.forEach(function (f) {
@@ -97,8 +98,10 @@ const fields = cfg.fields || [];
           var o = (f.options || []).find(function (x) { return x.value === state[f.key]; }); if (!o) return;
           if (o.add) total += o.add; if (o.mult != null) mult *= o.mult;
         } else if (f.type === 'number') {
-          var per = f.perUnitFrom === 'rate' ? rate : (f.perUnit || 0);
-          total += (Number(state[f.key]) || 0) * per;
+          var per = f.perUnit != null ? f.perUnit : (f.perUnitFrom ? (rates[f.perUnitFrom] || 0) : 0);
+          var c = (Number(state[f.key]) || 0) * per;
+          if (f.doubleIf && (f.doubleIf.in || []).indexOf(state[f.doubleIf.field]) >= 0) c *= 2;  // e.g. windows ×2 for post-renovation
+          total += c;
         } else if (f.type === 'multi') {
           (state[f.key] || []).forEach(function (v) { var o = (f.options || []).find(function (x) { return x.value === v; }); if (o && o.add) total += o.add; });
         }
