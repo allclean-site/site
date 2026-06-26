@@ -306,6 +306,10 @@ const tileIco: Record<string, string> = { surfaces: '🧴', kitchen: '🍳', bat
 <style>
   .calc-head { text-align: center; margin: 0 auto 26px; }
   .calc-head h1, .calc-head h2 { color: #0c2959; margin: 0; }
+  /* embedded on a service page: give the section real top/bottom padding and
+     more air between the heading and the calculator so it doesn't look glued. */
+  .calc-embedded { padding-top: 72px; padding-bottom: 72px; }
+  .calc-embedded .calc-head { margin-bottom: 40px; }
   /* wider — fills the container (margins = page padding); columns equal height */
   .calc-layout { display: grid; grid-template-columns: 2.2fr 1fr; gap: 22px; align-items: stretch; }
   .calc-wizard { display: flex; flex-direction: column; background: #fff; border: 1px solid #dbe6fb; border-radius: 24px; box-shadow: 0 24px 60px rgba(12, 41, 89, .10); overflow: hidden; position: relative; }

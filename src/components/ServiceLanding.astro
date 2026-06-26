@@ -22,7 +22,7 @@ const faq = (loc.faq || []) as Array<{ q: string; a: string }>;
 const hero = loc.hero || {};
 const bookHref = locale === 'ru' ? '/book-cleaning' : '/ro/book-cleaning';
 ---
-<main class="main-wrapper">
+<main class="main-wrapper service-landing">
   <Hero
     words={hero.words}
     cities={hero.cities}
@@ -70,6 +70,11 @@ const bookHref = locale === 'ru' ? '/book-cleaning' : '/ro/book-cleaning';
   <FeaturesBottom />
 </main>
 
+<style is:global>
+  /* Breathing room after the hero (homepage gives this via the 80px Services block,
+     which is removed here) — match that spacing so the hero isn't glued to the next block. */
+  .service-landing .section_hero-home { padding-bottom: 48px; }
+</style>
 <style>
   /* Self-contained accordion (Webflow IX2 doesn't bind on this page's FAQ markup). */
   .svc-faq .expandable-bottom { max-height: 0; overflow: hidden; transition: max-height .35s ease; }
