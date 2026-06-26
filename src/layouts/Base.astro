@@ -9,8 +9,9 @@ interface Props {
   // Optional alternate overrides — used by blog articles, where RU and RO slugs differ.
   ruAlternate?: string;
   roAlternate?: string;
+  ogImage?: string;
 }
-const { title, description = '', lang = 'ru', ruAlternate, roAlternate } = Astro.props;
+const { title, description = '', lang = 'ru', ruAlternate, roAlternate, ogImage } = Astro.props;
 
 const site = Astro.site ?? new URL('https://allclean.example');
 // Path without the /ro locale prefix, so we can build both alternates.
@@ -19,6 +20,8 @@ const ruUrl = ruAlternate ?? new URL(basePath, site).href;
 const roUrl = roAlternate ?? new URL('/ro' + (basePath === '/' ? '' : basePath), site).href;
 const canonical = lang === 'ru' ? ruUrl : roUrl;
 const htmlLang = lang === 'ru' ? 'ru-MD' : 'ro-MD';
+const ogImg = ogImage ?? 'https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cac6%2F693817393d800624450974eb_hero%20%281%29_poster.0000000.jpg';
+const ogLocale = lang === 'ru' ? 'ru_MD' : 'ro_MD';
 
 const orgSchema = {
   '@context': 'https://schema.org',
@@ -60,6 +63,17 @@ const orgSchema = {
     <link rel="alternate" hreflang="ru-MD" href={ruUrl} />
     <link rel="alternate" hreflang="ro-MD" href={roUrl} />
     <link rel="alternate" hreflang="x-default" href={ruUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="All Clean" />
+    <meta property="og:locale" content={ogLocale} />
+    <meta property="og:title" content={title} />
+    {description && <meta property="og:description" content={description} />}
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImg} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    {description && <meta name="twitter:description" content={description} />}
+    <meta name="twitter:image" content={ogImg} />
     <script type="application/ld+json" set:html={JSON.stringify(orgSchema)} is:inline />
     <slot name="head" />
   </head>

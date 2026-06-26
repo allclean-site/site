@@ -18,8 +18,24 @@
 - Реставрация полов (линолеум, паркет, мрамор)
 - Подбор и обучение персонала по уборке
 
-## Цены
-- От 890 MDL за уборку 1-комнатной квартиры. Скидки на регулярные уборки (еженедельно/раз в 2 недели/ежемесячно).
+## Цены и онлайн-калькуляторы
+У каждой услуги есть онлайн-калькулятор предварительной стоимости. Точная цена подтверждается менеджером (для коммерческих объектов — после бесплатного осмотра).
+- Уборка после ремонта: до 40 м² от 3700 MDL, до 60 м² от 4700 MDL, до 90 м² от 5700 MDL; офисы от 35 MDL/м².
+- Мойка окон: внутри от 40 MDL/м², снаружи от 45 MDL/м², фасады от 35 MDL/м².
+- Чистка ковров от 55 MDL/м², ковролина от 45 MDL/м². Чистка мягкой мебели от 50 до 450 MDL за предмет.
+- Скидки на регулярное и абонементное обслуживание (еженедельно, ежедневно).
+
+## Страницы услуг (с калькулятором стоимости)
+- Уборка квартир и домов: https://allclean.pages.dev/services/home-cleaning
+- Уборка офисов: https://allclean.pages.dev/services/office
+- Уборка после ремонта: https://allclean.pages.dev/services/post-construction
+- Мойка окон и фасадов: https://allclean.pages.dev/services/windows
+- Чистка ковров и ковролина: https://allclean.pages.dev/services/carpet
+- Химчистка мягкой мебели: https://allclean.pages.dev/services/upholstery
+- Уборка складов и промышленных помещений: https://allclean.pages.dev/services/warehouse
+- Уборка магазинов и супермаркетов: https://allclean.pages.dev/services/retail
+- Реставрация полов (линолеум, паркет, мрамор): https://allclean.pages.dev/services/floor-restoration
+- Мойка и дезинфекция пищевых производств: https://allclean.pages.dev/services/disinfection
 
 ## Ключевые страницы
 - Услуги: https://allclean.pages.dev/services
@@ -27,3 +43,5 @@
 - Запись на уборку: https://allclean.pages.dev/book-cleaning
 - Блог: https://allclean.pages.dev/blog
 - О нас: https://allclean.pages.dev/about
+
+Румынская версия сайта: префикс /ro (например, https://allclean.pages.dev/ro/services/office).
