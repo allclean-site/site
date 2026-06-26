@@ -15,10 +15,13 @@ interface Props { service: any; calc: any; locale: 'ru' | 'ro'; }
 const { service, calc, locale } = Astro.props;
 const L = locale;
 const tx = locale === 'ru'
-  ? { faqLabel: 'FAQ', faqTitle: 'ОТВЕТЫ НА ВАШИ ВОПРОСЫ', calcCta: 'Рассчитать стоимость', book: 'Записаться' }
-  : { faqLabel: 'FAQ', faqTitle: 'RĂSPUNSURI LA ÎNTREBĂRILE DVS.', calcCta: 'Calculează prețul', book: 'Programează' };
+  ? { faqLabel: 'FAQ', faqTitle: 'ОТВЕТЫ НА ВАШИ ВОПРОСЫ', calcCta: 'Рассчитать стоимость', book: 'Записаться',
+      tLabel: 'Отзывы', tHeading: 'НАМ ДОВЕРЯЮТ · РЕЙТИНГ 4.9/5', reviewLabel: 'Отзыв в Google', allLabel: 'Все отзывы' }
+  : { faqLabel: 'FAQ', faqTitle: 'RĂSPUNSURI LA ÎNTREBĂRILE DVS.', calcCta: 'Calculează prețul', book: 'Programează',
+      tLabel: 'Recenzii', tHeading: 'AVEM ÎNCREDEREA CLIENȚILOR · RATING 4.9/5', reviewLabel: 'Recenzie pe Google', allLabel: 'Toate recenziile' };
 const loc = service[L] || {};
 const faq = (loc.faq || []) as Array<{ q: string; a: string }>;
+const testimonials = (loc.testimonials || []) as string[];
 const hero = loc.hero || {};
 const bookHref = locale === 'ru' ? '/book-cleaning' : '/ro/book-cleaning';
 ---
@@ -32,7 +35,7 @@ const bookHref = locale === 'ru' ? '/book-cleaning' : '/ro/book-cleaning';
     secondaryText={tx.calcCta}
   />
   <Features />
-  <Testimonials />
+  <Testimonials items={testimonials} heading={tx.tHeading} label={tx.tLabel} reviewLabel={tx.reviewLabel} allLabel={tx.allLabel} lang={locale} />
   <Calculator calc={calc} locale={locale} embedded={true} />
   <HowItWorks />
   <AboutSection />
