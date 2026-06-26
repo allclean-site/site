@@ -99,7 +99,16 @@ async function main() {
   let touched = 0;
   for (const file of files) {
     const path = pathFor(file);
-    const payload = byPath.get(path);
+    let payload = byPath.get(path);
+    // Mirror language-neutral VIDEO overrides from the RU counterpart onto /ro pages,
+    // so a hero video set on /services/X (RU) also shows on /ro/services/X.
+    if (path === '/ro' || path.startsWith('/ro/')) {
+      const ruPath = path.replace(/^\/ro/, '') || '/';
+      const ru = byPath.get(ruPath);
+      if (ru && Array.isArray(ru.videos) && ru.videos.length) {
+        payload = { ...(payload || {}), videos: [ ...((payload && payload.videos) || []), ...ru.videos ] };
+      }
+    }
     if (!payload) continue;
     try {
       const html = await readFile(file, 'utf8');
