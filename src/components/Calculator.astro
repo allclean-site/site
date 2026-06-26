@@ -257,10 +257,13 @@ const tileIco: Record<string, string> = { surfaces: '🧴', kitchen: '🍳', bat
     fileInput.addEventListener('change', function () {
       [].slice.call(fileInput.files).forEach(function (f) {
         if (photos.length >= 6 || !/^image\//.test(f.type)) return;
-        var ph = document.createElement('div'); ph.className = 'calc-photo'; ph.innerHTML = '<span>…</span>'; photosBox.appendChild(ph);
+        var ph = document.createElement('div'); ph.className = 'calc-photo';
+        // inline styles — scoped CSS doesn't reach runtime-created nodes, so fix the thumbnail size here
+        ph.style.cssText = 'position:relative;width:88px;height:88px;border-radius:12px;overflow:hidden;background:#eef3fd;display:flex;align-items:center;justify-content:center;flex:none;color:#8a99b5;font-size:.8rem';
+        ph.innerHTML = '<span>…</span>'; photosBox.appendChild(ph);
         var path = 'apartments/' + Date.now() + '-' + Math.random().toString(36).slice(2, 7) + '.' + (f.name.split('.').pop() || 'jpg').toLowerCase();
         fetch(SUPABASE_URL + '/storage/v1/object/calc-uploads/' + path, { method: 'POST', headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY, 'content-type': f.type, 'x-upsert': 'true' }, body: f })
-          .then(function (r) { if (!r.ok) throw 0; var url = SUPABASE_URL + '/storage/v1/object/public/calc-uploads/' + path; photos.push(url); ph.innerHTML = '<img src="' + url + '" alt=""/><button type="button" class="calc-photo-x">✕</button>'; ph.querySelector('.calc-photo-x').addEventListener('click', function () { photos = photos.filter(function (u) { return u !== url; }); ph.remove(); }); })
+          .then(function (r) { if (!r.ok) throw 0; var url = SUPABASE_URL + '/storage/v1/object/public/calc-uploads/' + path; photos.push(url); ph.innerHTML = '<img src="' + url + '" alt="" style="width:100%;height:100%;object-fit:cover;display:block"/><button type="button" class="calc-photo-x" style="position:absolute;top:3px;right:3px;width:20px;height:20px;border:0;border-radius:50%;background:rgba(12,41,89,.85);color:#fff;cursor:pointer;font-size:.7rem;line-height:1;display:flex;align-items:center;justify-content:center">✕</button>'; ph.querySelector('.calc-photo-x').addEventListener('click', function () { photos = photos.filter(function (u) { return u !== url; }); ph.remove(); }); })
           .catch(function () { ph.remove(); });
       });
       fileInput.value = '';
@@ -361,6 +364,9 @@ const tileIco: Record<string, string> = { surfaces: '🧴', kitchen: '🍳', bat
   .calc-cta { width: 100%; padding: 16px; border: 0; border-radius: 14px; background: #b6cbf9; color: #0c2959; font-weight: 800; cursor: pointer; font-size: 1.05rem; }
   .calc-cta:hover { filter: brightness(1.06); }
   .calc-msg { font-size: .9rem; margin: 2px 0 0; min-height: 1.2em; } .calc-msg.ok { color: #86efac; } .calc-msg.err { color: #fca5a5; }
+  /* comment textarea — lives on the white left side; override the dark-panel .calc-input look */
+  .calc-area { background: #f1f5fd !important; border: 1px solid #c9d6ef !important; color: #1c2b47 !important; }
+  .calc-area::placeholder { color: #8a99b5 !important; }
   @media (max-width: 900px) {
     .calc-layout { grid-template-columns: 1fr; }
     .calc-side-form { margin-top: 18px; }
