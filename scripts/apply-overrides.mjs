@@ -60,6 +60,23 @@ function applyPayload($, p) {
       });
     } catch {}
   });
+  (p.videos || []).forEach((c) => {
+    if (!c.selector || !c.mp4) return;
+    try {
+      const cont = $(c.selector).first();
+      if (!cont.length) return;
+      const urls = [c.mp4, c.webm].filter(Boolean).join(',');
+      if (urls) cont.attr('data-video-urls', urls);
+      if (c.poster) cont.attr('data-poster-url', c.poster);
+      const vid = cont.find('video').first();
+      if (vid.length) {
+        vid.find('source').remove();
+        if (c.mp4) vid.append(`<source src="${c.mp4}" data-wf-ignore="true"/>`);
+        if (c.webm) vid.append(`<source src="${c.webm}" data-wf-ignore="true"/>`);
+        if (c.poster) vid.attr('poster', c.poster);
+      }
+    } catch {}
+  });
   (p.removed || []).forEach((sel) => { try { $(sel).remove(); } catch {} });
 }
 

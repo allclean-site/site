@@ -11,14 +11,14 @@
   var LANG = document.documentElement.lang && document.documentElement.lang.indexOf('ro') === 0 ? 'ro' : 'ru';
   var PROJECT = 'allclean';
   var PAGE = (location.pathname.replace(/\/+$/, '') || '/');
-  var CH = { texts: [], textsel: [], links: [], images: [], backgrounds: [], styles: [], removed: [] };
+  var CH = { texts: [], textsel: [], links: [], images: [], backgrounds: [], styles: [], removed: [], videos: [] };
   var KEY = sessionStorage.getItem('ac_edit_key') || '';
   var SEL = null, delMode = false;
 
   var setStatus = function () {};
   var refreshPw = function () {};
   function focusPw() { var i = document.getElementById('eedpw'); if (i) { i.focus(); i.select(); } }
-  function payload() { return { texts: CH.texts, textsel: CH.textsel, links: CH.links, images: CH.images, backgrounds: CH.backgrounds, styles: CH.styles, removed: CH.removed }; }
+  function payload() { return { texts: CH.texts, textsel: CH.textsel, links: CH.links, images: CH.images, backgrounds: CH.backgrounds, styles: CH.styles, removed: CH.removed, videos: CH.videos }; }
 
   // ---------- save / publish ----------
   var saveT = null;
@@ -169,6 +169,18 @@
   });
   function pickFile(cb) { pickCb = cb; picker.value = ''; picker.click(); }
 
+  // video picker (no downscale; uploads as-is)
+  var vpicker = document.createElement('input'); vpicker.type = 'file'; vpicker.accept = 'video/mp4,video/webm,video/*'; vpicker.style.display = 'none'; document.body.appendChild(vpicker);
+  var vpickCb = null;
+  vpicker.addEventListener('change', function () {
+    var f = vpicker.files[0]; if (!f || !vpickCb) return; var cb = vpickCb; vpickCb = null;
+    if (!KEY) { setStatus('✗ введите пароль для загрузки видео'); refreshPw(); focusPw(); return; }
+    if (f.size > 30 * 1024 * 1024) { setStatus('✗ видео >30 МБ — сожмите (см. рекомендации)'); return; }
+    setStatus('загружаю видео…');
+    uploadFile(f, function (url) { if (!url) { setStatus('✗ видео не загружено'); return; } try { cb(url); } catch (e) {} scheduleSave(); });
+  });
+  function pickVideo(cb) { vpickCb = cb; vpicker.value = ''; vpicker.click(); }
+
   // ---------- replace actions ----------
   function replaceImage(img) {
     pickFile(function (url) {
@@ -190,6 +202,32 @@
     pickFile(function (url) {
       el.style.backgroundImage = bgTmpl.replace('__URL__', url); el.style.backgroundSize = 'cover'; el.style.backgroundPosition = 'center';
       var sel = cssPath(el); CH.backgrounds = CH.backgrounds.filter(function (c) { return c.selector !== sel; }); CH.backgrounds.push({ selector: sel, css: bgTmpl, url: url }); setStatus('✓ фон заменён');
+    });
+  }
+  function replaceVideo(container) {
+    if (!KEY) { setStatus('✗ введите пароль'); refreshPw(); focusPw(); return; }
+    pickVideo(function (vurl) {
+      var v = container.querySelector('video');
+      if (v) {
+        v.querySelectorAll('source').forEach(function (s) { s.remove(); });
+        var src = document.createElement('source'); src.src = vurl; v.appendChild(src);
+        try { v.load(); } catch (e) {}
+      }
+      container.setAttribute('data-video-urls', vurl);
+      var sel = cssPath(container);
+      CH.videos = CH.videos.filter(function (c) { return c.selector !== sel; });
+      CH.videos.push({ selector: sel, mp4: vurl });
+      setStatus('✓ видео заменено'); scheduleSave();
+      setTimeout(function () {
+        if (confirm('Загрузить постер (картинку-превью, видна пока видео грузится)?')) {
+          pickFile(function (purl) {
+            var e = CH.videos.filter(function (c) { return c.selector === sel; })[0]; if (e) e.poster = purl;
+            if (v) v.setAttribute('poster', purl);
+            container.setAttribute('data-poster-url', purl);
+            setStatus('✓ постер добавлен'); scheduleSave();
+          });
+        }
+      }, 300);
     });
   }
   function setLink(el) {
@@ -216,6 +254,12 @@
   function bgAncestor(t) { var el = t; while (el && el !== document.body) { if (el.tagName !== 'IMG' && isBg(el)) { var r = el.getBoundingClientRect(); if (r.width * r.height > 40000) return el; } el = el.parentElement; } return null; }
   function actionsFor(t) {
     var acts = [], anchor = null;
+    var videoCont = t.closest('.video_hero-home, .w-background-video');
+    if (!videoCont && t.closest('video')) videoCont = t.closest('video').closest('.video_hero-home, .w-background-video') || t.closest('video');
+    if (videoCont) {
+      acts.push({ l: '🎬 видео', run: function () { replaceVideo(videoCont); } });
+      return { acts: acts, anchor: videoCont };  // video container: only the video action (skip bg)
+    }
     var img = t.closest('img'); var svg = !img && t.closest('svg'); var bg = bgAncestor(t);
     var link = t.closest('a,button'); var txt = t.closest('[data-eedit]');
     if (img) { acts.push({ l: '📷 фото', run: function () { replaceImage(img); } }); anchor = img; }
