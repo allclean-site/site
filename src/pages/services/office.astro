@@ -1,0 +1,71 @@
+---
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import ServiceLanding from '../../components/ServiceLanding.astro';
+import { getService } from '../../data/services';
+import { getCalculator } from '../../lib/calculators';
+
+const service = getService('office')!;
+const calc = await getCalculator(service.calcSlug);
+const L = service.ru;
+const SITE = 'https://allclean.pages.dev';
+const pageUrl = `${SITE}/services/office`;
+
+const jsonld = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Service',
+      name: L.schemaName,
+      description: L.schemaDescription,
+      serviceType: 'Office cleaning',
+      areaServed: { '@type': 'City', name: 'Chișinău' },
+      provider: {
+        '@type': 'LocalBusiness',
+        name: 'All Clean',
+        telephone: '+373 79 955 044',
+        email: 'info@allclean.md',
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: 'ул. Месаджер 7',
+          addressLocality: 'Кишинёв',
+          postalCode: 'MD-2069',
+          addressCountry: 'MD',
+        },
+      },
+      url: pageUrl,
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: L.faq.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Главная', item: SITE + '/' },
+        { '@type': 'ListItem', position: 2, name: 'Услуги', item: SITE + '/services' },
+        { '@type': 'ListItem', position: 3, name: L.schemaName, item: pageUrl },
+      ],
+    },
+  ],
+};
+---
+<Base
+  title={L.metaTitle}
+  description={L.metaDescription}
+  lang="ru"
+  ruAlternate={pageUrl}
+  roAlternate={`${SITE}/ro/services/office`}
+>
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(jsonld)} />
+  <div class="page-wrapper">
+    <Header />
+    <ServiceLanding service={service} calc={calc} locale="ru" />
+    <Footer />
+  </div>
+</Base>

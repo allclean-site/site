@@ -1,0 +1,87 @@
+---
+// Service landing — homepage layout MINUS the "Услуги" block, with the step
+// calculator embedded in place of the pricing block, and service-relevant FAQ.
+// Design is identical to the homepage (reuses the same Sparkles section components).
+import Hero from './Hero.astro';
+import Features from './Features.astro';
+import Testimonials from './Testimonials.astro';
+import HowItWorks from './HowItWorks.astro';
+import AboutSection from './AboutSection.astro';
+import CtaSection from './CtaSection.astro';
+import FeaturesBottom from './FeaturesBottom.astro';
+import Calculator from './Calculator.astro';
+
+interface Props { service: any; calc: any; locale: 'ru' | 'ro'; }
+const { service, calc, locale } = Astro.props;
+const L = locale;
+const tx = locale === 'ru'
+  ? { faqLabel: 'FAQ', faqTitle: 'ОТВЕТЫ НА ВАШИ ВОПРОСЫ', calcCta: 'Рассчитать стоимость', book: 'Записаться' }
+  : { faqLabel: 'FAQ', faqTitle: 'RĂSPUNSURI LA ÎNTREBĂRILE DVS.', calcCta: 'Calculează prețul', book: 'Programează' };
+const loc = service[L] || {};
+const faq = (loc.faq || []) as Array<{ q: string; a: string }>;
+const hero = loc.hero || {};
+const bookHref = locale === 'ru' ? '/book-cleaning' : '/ro/book-cleaning';
+---
+<main class="main-wrapper">
+  <Hero
+    words={hero.words}
+    cities={hero.cities}
+    primaryHref={bookHref}
+    primaryText={tx.book}
+    secondaryHref="#calc-section"
+    secondaryText={tx.calcCta}
+  />
+  <Features />
+  <Testimonials />
+  <Calculator calc={calc} locale={locale} embedded={true} />
+  <HowItWorks />
+  <AboutSection />
+
+  <section class="section_faq">
+    <div class="padding-global">
+      <div class="w-layout-blockcontainer container-large w-container">
+        <div class="master_faq">
+          <div class="headline_faq">
+            <div class="master_label"><div class="label-large">{tx.faqLabel}</div></div>
+            <h2><strong>{tx.faqTitle}</strong></h2>
+          </div>
+          <div class="faq-block svc-faq">
+            {faq.map((f) => (
+              <div class="expandable-single">
+                <div class="expandable-top">
+                  <div class="text-size-large text_body-bold">{f.q}</div>
+                  <div class="faq_animated-box">
+                    <div class="faq-horizontal"></div>
+                    <div class="faq-vertical"></div>
+                  </div>
+                </div>
+                <div class="expandable-bottom">
+                  <p class="faq-paragraph">{f.a}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CtaSection />
+  <FeaturesBottom />
+</main>
+
+<style>
+  /* Self-contained accordion (Webflow IX2 doesn't bind on this page's FAQ markup). */
+  .svc-faq .expandable-bottom { max-height: 0; overflow: hidden; transition: max-height .35s ease; }
+  .svc-faq .expandable-single.is-open .expandable-bottom { max-height: 600px; }
+  .svc-faq .expandable-top { cursor: pointer; }
+  .svc-faq .faq-vertical { transition: transform .3s ease, opacity .3s ease; }
+  .svc-faq .expandable-single.is-open .faq-vertical { transform: rotate(90deg); opacity: 0; }
+</style>
+<script>
+  document.querySelectorAll('.svc-faq .expandable-top').forEach((top) => {
+    top.addEventListener('click', () => {
+      top.closest('.expandable-single')?.classList.toggle('is-open');
+    });
+  });
+</script>

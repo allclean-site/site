@@ -1,5 +1,13 @@
 ---
-// Home hero lifted from All Clean.
+// Home hero lifted from All Clean. Parameterized for service pages (design unchanged).
+const {
+  words = ['УБОРКА', 'ДЛЯ', 'ЗАНЯТЫХ', 'ЛЮДЕЙ', 'В'],
+  cities = ['КИШИНЁВЕ', 'ЧОКАНЕ', 'БОТАНИКЕ', 'РЫШКАНОВКЕ', 'КИШИНЁВЕ'],
+  primaryHref = '/book-cleaning',
+  primaryText = 'Записаться на уборку',
+  secondaryHref = '/pricing',
+  secondaryText = 'Смотреть цены',
+} = Astro.props;
 ---
         <section class="section_hero-home">
           <div class="padding-global">
@@ -82,33 +90,19 @@
                       >
                     </div>
                     <h1 id="" class="heading_hero-home">
-                      <div class="heading-style-h1">УБОРКА</div>
-                      <div class="heading-style-h1">ДЛЯ</div>
-                      <div class="heading-style-h1">ЗАНЯТЫХ</div>
-                      <div class="heading-style-h1">ЛЮДЕЙ</div>
-                      <div class="heading-style-h1">В</div>
+                      {words.map((w: string) => <div class="heading-style-h1">{w}</div>)}
                       <div class="wrap_swap-text">
-                        <div class="text-swap">
-                          <div class="heading-style-h1">КИШИНЁВЕ</div>
-                        </div>
-                        <div class="text-swap">
-                          <div class="heading-style-h1">ЧОКАНЕ</div>
-                        </div>
-                        <div class="text-swap">
-                          <div class="heading-style-h1">БОТАНИКЕ</div>
-                        </div>
-                        <div class="text-swap">
-                          <div class="heading-style-h1">РЫШКАНОВКЕ</div>
-                        </div>
-                        <div class="text-swap">
-                          <div class="heading-style-h1">КИШИНЁВЕ</div>
-                        </div>
+                        {cities.map((c: string) => (
+                          <div class="text-swap">
+                            <div class="heading-style-h1">{c}</div>
+                          </div>
+                        ))}
                       </div>
                     </h1>
                   </div>
                   <div class="button-group_left">
                     <a
-                      href="/book-cleaning"
+                      href={primaryHref}
                       button=""
                       data-wf--cta-primary--variant="primary"
                       class="cta_primary w-inline-block"
@@ -135,12 +129,12 @@
                           </div>
                         </div>
                         <div button-text="" class="text-button">
-                          Записаться на уборку
+                          {primaryText}
                         </div>
                       </div>
                       <div button-bg="" class="btn-bg"></div></a
                     ><a
-                      href="/pricing"
+                      href={secondaryHref}
                       button=""
                       data-wf--cta-primary--variant="secondary"
                       class="cta_primary w-variant-1ff8d96e-78cc-eac8-de90-206ecdaded5f w-inline-block"
@@ -167,7 +161,7 @@
                           </div>
                         </div>
                         <div button-text="" class="text-button">
-                          Смотреть цены
+                          {secondaryText}
                         </div>
                       </div>
                       <div
