@@ -10,6 +10,13 @@ export interface Calculator {
   enabled: boolean;
 }
 
+export async function getCalculators(): Promise<Calculator[]> {
+  const q = `${SUPABASE_URL}/rest/v1/calculators?select=slug,name,config,enabled&project=eq.${PROJECT}&enabled=eq.true`;
+  const r = await fetch(q, { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } });
+  if (!r.ok) return [];
+  return (await r.json()) as Calculator[];
+}
+
 export async function getCalculator(slug: string): Promise<Calculator | null> {
   const q = `${SUPABASE_URL}/rest/v1/calculators?select=slug,name,config,enabled&project=eq.${PROJECT}&slug=eq.${encodeURIComponent(slug)}&enabled=eq.true&limit=1`;
   const r = await fetch(q, { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } });

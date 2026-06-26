@@ -1,7 +1,7 @@
 ---
 import { SUPABASE_URL, SUPABASE_KEY } from '../lib/supabasePublic';
-interface Props { calc: any; locale: 'ru' | 'ro'; embedded?: boolean; }
-const { calc, locale, embedded = false } = Astro.props;
+interface Props { calc: any; locale: 'ru' | 'ro'; embedded?: boolean; uid?: string; hidden?: boolean; }
+const { calc, locale, embedded = false, uid = 'calc', hidden = false } = Astro.props;
 const cfg = calc.config || {};
 const L = locale;
 const name = (calc.name && calc.name[L]) || (locale === 'ru' ? 'Калькулятор' : 'Calculator');
@@ -45,17 +45,17 @@ const totalSteps = steps.length + 1;
 const icons = ['🧽', '🛠️', '✨', '🧹', '🪣'];
 const tileIco: Record<string, string> = { surfaces: '🧴', kitchen: '🍳', bath: '🚿', ironing: '👔', curtains: '🪟', dishes: '🍽️', ac: '❄️' };
 ---
-<section class={embedded ? 'section_faq calc-embedded' : 'section_hero-faq'} id={embedded ? 'calc-section' : undefined}>
+<section class={embedded ? 'section_faq calc-embedded' : 'section_hero-faq'} id={embedded ? (uid + '-section') : undefined}>
     <div class="padding-global">
       <div class="w-layout-blockcontainer container-large w-container">
         <div class="calc-head">{embedded ? <h2>{name}</h2> : <h1>{name}</h1>}</div>
 
         <div class="calc-layout">
           <!-- LEFT: quiz container -->
-          <div class="calc-wizard" id="calc">
+          <div class="calc-wizard" id={uid}>
             <div class="calc-top">
-              <div class="calc-stepno"><span id="calc-stepno">1</span> / {totalSteps}</div>
-              <div class="calc-progress"><div class="calc-progress-bar" id="calc-bar"></div></div>
+              <div class="calc-stepno"><span id={uid + '-stepno'}>1</span> / {totalSteps}</div>
+              <div class="calc-progress"><div class="calc-progress-bar" id={uid + '-bar'}></div></div>
             </div>
 
             <div class="calc-body">
@@ -130,23 +130,23 @@ const tileIco: Record<string, string> = { surfaces: '🧴', kitchen: '🍳', bat
               <div class="calc-step" data-step={detailsStep} style="display:none">
                 <h3 class="calc-step-title">{t.details}</h3>
                 <label class="calc-q calc-lbl">{t.comments}
-                  <textarea id="calc-comment" class="calc-input calc-area" placeholder={t.commentsPh}></textarea>
+                  <textarea id={uid + '-comment'} class="calc-input calc-area" placeholder={t.commentsPh}></textarea>
                 </label>
                 <div class="calc-q calc-lbl">{t.photos} <span class="calc-hint">{t.photosHint}</span>
-                  <div class="calc-photos" id="calc-photos"></div>
-                  <button type="button" class="calc-add-photo" id="calc-add-photo">＋ {t.addPhoto}</button>
-                  <input type="file" id="calc-file" accept="image/*" multiple hidden />
+                  <div class="calc-photos" id={uid + '-photos'}></div>
+                  <button type="button" class="calc-add-photo" id={uid + '-add-photo'}>＋ {t.addPhoto}</button>
+                  <input type="file" id={uid + '-file'} accept="image/*" multiple hidden />
                 </div>
               </div>
             </div>
 
             <div class="calc-nav">
-              <button type="button" class="calc-back" id="calc-back" style="visibility:hidden">← {t.back}</button>
-              <button type="button" class="calc-next" id="calc-next">{t.next} →</button>
+              <button type="button" class="calc-back" id={uid + '-back'} style="visibility:hidden">← {t.back}</button>
+              <button type="button" class="calc-next" id={uid + '-next'}>{t.next} →</button>
             </div>
 
             <!-- parameter popup for extra services -->
-            <div class="calc-modal" id="calc-modal" hidden>
+            <div class="calc-modal" id={uid + '-modal'} hidden>
               <div class="calc-modal-card">
                 <div class="calc-modal-title"></div>
                 <div class="calc-modal-opts"></div>
@@ -159,14 +159,14 @@ const tileIco: Record<string, string> = { surfaces: '🧴', kitchen: '🍳', bat
           <aside class="calc-side">
             <div class="calc-side-card">
               <div class="calc-side-label">{t.est}</div>
-              <div class="calc-side-price"><span id="calc-price">0</span> <span class="calc-cur">MDL</span></div>
+              <div class="calc-side-price"><span id={uid + '-price'}>0</span> <span class="calc-cur">MDL</span></div>
               <p class="calc-side-note">{t.note}</p>
               <div class="calc-side-form">
-                <input id="calc-name" class="calc-input" placeholder={t.name} />
-                <input id="calc-phone" class="calc-input" placeholder="+373 XX XXX XXX" inputmode="tel" />
-                <label class="calc-consent"><input type="checkbox" id="calc-consent" /><span>{t.consent} <a href={t.privacyUrl} target="_blank" rel="noopener">{t.privacy}</a></span></label>
-                <button type="button" id="calc-submit" class="calc-cta">{t.submit}</button>
-                <p id="calc-msg" class="calc-msg"></p>
+                <input id={uid + '-name'} class="calc-input" placeholder={t.name} />
+                <input id={uid + '-phone'} class="calc-input" placeholder="+373 XX XXX XXX" inputmode="tel" />
+                <label class="calc-consent"><input type="checkbox" id={uid + '-consent'} /><span>{t.consent} <a href={t.privacyUrl} target="_blank" rel="noopener">{t.privacy}</a></span></label>
+                <button type="button" id={uid + '-submit'} class="calc-cta">{t.submit}</button>
+                <p id={uid + '-msg'} class="calc-msg"></p>
               </div>
             </div>
           </aside>
@@ -175,11 +175,11 @@ const tileIco: Record<string, string> = { surfaces: '🧴', kitchen: '🍳', bat
     </div>
   </section>
 
-<script type="application/json" id="calc-cfg" set:html={JSON.stringify(cfg)} is:inline />
-<script define:vars={{ SUPABASE_URL, SUPABASE_KEY, PROJECT_ID, locale, slug: calc.slug, t, totalSteps }}>
+<script type="application/json" id={uid + '-cfg'} set:html={JSON.stringify(cfg)} is:inline />
+<script define:vars={{ SUPABASE_URL, SUPABASE_KEY, PROJECT_ID, locale, slug: calc.slug, t, totalSteps, uid }}>
   (function () {
-    var cfg = JSON.parse(document.getElementById('calc-cfg').textContent);
-    var root = document.getElementById('calc');
+    var cfg = JSON.parse(document.getElementById(uid + '-cfg').textContent);
+    var root = document.getElementById(uid);
     var state = {}, lift = 'yes', photos = [], step = 0;
     cfg.fields.forEach(function (f) {
       if (f.type === 'select') state[f.key] = (f.options && f.options[0] && f.options[0].value) || null;
@@ -201,7 +201,7 @@ const tileIco: Record<string, string> = { surfaces: '🧴', kitchen: '🍳', bat
     }
     function fmt(n) { return n.toLocaleString('ru-RU'); }
     function priceText() { var low = compute(); if (cfg.showRange) { var high = Math.round(low * (cfg.rangeUpRatio || 1.25) / 10) * 10; return t.from + ' ' + fmt(low) + '–' + fmt(high); } return fmt(low); }
-    function render() { document.getElementById('calc-price').textContent = priceText(); }
+    function render() { document.getElementById(uid + '-price').textContent = priceText(); }
 
     // standard fields (type cards, area, floor, windows, lift)
     root.querySelectorAll('.calc-field').forEach(function (fl) {
@@ -213,7 +213,7 @@ const tileIco: Record<string, string> = { surfaces: '🧴', kitchen: '🍳', bat
     });
 
     // extra-service tiles + parameter popup
-    var modal = document.getElementById('calc-modal');
+    var modal = document.getElementById(uid + '-modal');
     function closeModal() { modal.setAttribute('hidden', ''); }
     function updateTile(key) {
       var f = fieldByKey(key); var tile = root.querySelector('.calc-tile[data-key="' + key + '"]'); if (!f || !tile) return;
@@ -246,17 +246,17 @@ const tileIco: Record<string, string> = { surfaces: '🧴', kitchen: '🍳', bat
     function showStep(n) {
       step = Math.max(0, Math.min(totalSteps - 1, n));
       root.querySelectorAll('.calc-step').forEach(function (el) { el.style.display = Number(el.dataset.step) === step ? '' : 'none'; });
-      document.getElementById('calc-stepno').textContent = step + 1;
-      document.getElementById('calc-bar').style.width = ((step + 1) / totalSteps * 100) + '%';
-      document.getElementById('calc-back').style.visibility = step === 0 ? 'hidden' : 'visible';
-      document.getElementById('calc-next').style.display = step === totalSteps - 1 ? 'none' : '';
+      document.getElementById(uid + '-stepno').textContent = step + 1;
+      document.getElementById(uid + '-bar').style.width = ((step + 1) / totalSteps * 100) + '%';
+      document.getElementById(uid + '-back').style.visibility = step === 0 ? 'hidden' : 'visible';
+      document.getElementById(uid + '-next').style.display = step === totalSteps - 1 ? 'none' : '';
       root.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
-    document.getElementById('calc-next').addEventListener('click', function () { showStep(step + 1); });
-    document.getElementById('calc-back').addEventListener('click', function () { showStep(step - 1); });
+    document.getElementById(uid + '-next').addEventListener('click', function () { showStep(step + 1); });
+    document.getElementById(uid + '-back').addEventListener('click', function () { showStep(step - 1); });
 
-    var fileInput = document.getElementById('calc-file'), photosBox = document.getElementById('calc-photos');
-    document.getElementById('calc-add-photo').addEventListener('click', function () { if (photos.length >= 6) return; fileInput.click(); });
+    var fileInput = document.getElementById(uid + '-file'), photosBox = document.getElementById(uid + '-photos');
+    document.getElementById(uid + '-add-photo').addEventListener('click', function () { if (photos.length >= 6) return; fileInput.click(); });
     fileInput.addEventListener('change', function () {
       [].slice.call(fileInput.files).forEach(function (f) {
         if (photos.length >= 6 || !/^image\//.test(f.type)) return;
@@ -273,17 +273,17 @@ const tileIco: Record<string, string> = { surfaces: '🧴', kitchen: '🍳', bat
     });
 
     // phone mask: +373 XX XXX XXX (Moldova)
-    var phEl = document.getElementById('calc-phone');
+    var phEl = document.getElementById(uid + '-phone');
     function maskPhone() { var d = phEl.value.replace(/\D/g, ''); if (d.indexOf('373') === 0) d = d.slice(3); d = d.slice(0, 8); var out = '+373'; if (d.length) out += ' ' + d.slice(0, 2); if (d.length > 2) out += ' ' + d.slice(2, 5); if (d.length > 5) out += ' ' + d.slice(5, 8); phEl.value = out; }
     phEl.addEventListener('focus', function () { if (!phEl.value.trim()) phEl.value = '+373 '; });
     phEl.addEventListener('input', maskPhone);
 
-    document.getElementById('calc-submit').addEventListener('click', function () {
-      var nm = document.getElementById('calc-name').value.trim(), msg = document.getElementById('calc-msg');
+    document.getElementById(uid + '-submit').addEventListener('click', function () {
+      var nm = document.getElementById(uid + '-name').value.trim(), msg = document.getElementById(uid + '-msg');
       var phDigits = phEl.value.replace(/\D/g, '');
       if (!nm) { msg.textContent = t.need; msg.className = 'calc-msg err'; return; }
       if (phDigits.length !== 11) { msg.textContent = t.phoneBad; msg.className = 'calc-msg err'; return; }
-      if (!document.getElementById('calc-consent').checked) { msg.textContent = t.consentNeed; msg.className = 'calc-msg err'; return; }
+      if (!document.getElementById(uid + '-consent').checked) { msg.textContent = t.consentNeed; msg.className = 'calc-msg err'; return; }
       msg.textContent = '…'; msg.className = 'calc-msg';
       var sel = {};
       cfg.fields.forEach(function (f) { var v = state[f.key];
@@ -291,7 +291,7 @@ const tileIco: Record<string, string> = { surfaces: '🧴', kitchen: '🍳', bat
         else if (f.type === 'select') { var o = (f.options || []).find(function (x) { return x.value === v; }); if (o) sel[f.label[locale] || f.key] = o.label[locale] || v; }
         else sel[f.label[locale] || f.key] = v; });
       sel[t.lift] = lift === 'yes' ? t.liftYes : t.liftNo;
-      var cm = document.getElementById('calc-comment'); var comment = cm ? cm.value.trim() : '';
+      var cm = document.getElementById(uid + '-comment'); var comment = cm ? cm.value.trim() : '';
       fetch(SUPABASE_URL + '/rest/v1/site_leads', {
         method: 'POST', headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
         body: JSON.stringify({ project_id: PROJECT_ID, name: nm, phone: phEl.value, service: 'Калькулятор: ' + slug, notes: JSON.stringify({ selections: sel, estimate: compute() + ' MDL', comment: comment, photos: photos }), locale: locale, source_url: location.href }),

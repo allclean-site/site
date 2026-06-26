@@ -1,0 +1,96 @@
+---
+// Homepage "pricing" block replaced by a calculator picker:
+// heading + chips for every calculator; the selected calculator renders below.
+// Default selected = apartments (Уборка квартир).
+import Calculator from './Calculator.astro';
+import { getCalculators } from '../lib/calculators';
+
+interface Props { locale?: 'ru' | 'ro'; }
+const { locale = 'ru' } = Astro.props;
+const L = locale;
+
+const heading = locale === 'ru' ? 'РАССЧИТАЙТЕ СТОИМОСТЬ ПОД ВАШ СЛУЧАЙ' : 'CALCULAȚI PREȚUL PENTRU CAZUL DVS.';
+const label = locale === 'ru' ? 'Калькулятор' : 'Calculator';
+
+// short chip labels per slug (calculator names are too long for chips)
+const CHIP: Record<string, { ru: string; ro: string }> = {
+  apartments: { ru: 'Уборка квартир', ro: 'Curățenie apartamente' },
+  office: { ru: 'Уборка офисов', ro: 'Curățenie birouri' },
+  'post-construction': { ru: 'После ремонта', ro: 'După renovare' },
+  windows: { ru: 'Мойка окон', ro: 'Spălare geamuri' },
+  carpet: { ru: 'Чистка ковров', ro: 'Curățare covoare' },
+  upholstery: { ru: 'Мягкая мебель', ro: 'Mobilă tapițată' },
+  warehouse: { ru: 'Склады', ro: 'Depozite' },
+  retail: { ru: 'Магазины', ro: 'Magazine' },
+  'floor-restoration': { ru: 'Реставрация полов', ro: 'Restaurare pardoseli' },
+  disinfection: { ru: 'Дезинфекция', ro: 'Dezinfecție' },
+};
+const ORDER = ['apartments', 'office', 'post-construction', 'windows', 'carpet', 'upholstery', 'warehouse', 'retail', 'floor-restoration', 'disinfection'];
+
+const all = await getCalculators();
+const calcs = ORDER.map((s) => all.find((c) => c.slug === s)).filter(Boolean) as any[];
+// any enabled calc not in ORDER → append
+all.forEach((c) => { if (!ORDER.includes(c.slug)) calcs.push(c); });
+const activeSlug = calcs.some((c) => c.slug === 'apartments') ? 'apartments' : (calcs[0]?.slug || '');
+---
+<section class="section_faq calc-picker">
+  <div class="padding-global">
+    <div class="w-layout-blockcontainer container-large w-container">
+      <div class="master_faq">
+        <div class="headline_faq cp-head">
+          <div class="master_label"><div class="label-large">{label}</div></div>
+          <h2><strong>{heading}</strong></h2>
+        </div>
+
+        <div class="cp-chips" role="tablist">
+          {calcs.map((c) => (
+            <button
+              type="button"
+              class={'cp-chip' + (c.slug === activeSlug ? ' on' : '')}
+              data-slug={c.slug}
+            >{(CHIP[c.slug] && CHIP[c.slug][L]) || (c.name && c.name[L]) || c.slug}</button>
+          ))}
+        </div>
+
+        <div class="cp-panels">
+          {calcs.map((c) => (
+            <div class="cp-panel" data-slug={c.slug} style={c.slug === activeSlug ? '' : 'display:none'}>
+              <Calculator calc={c} locale={locale} embedded={true} uid={'cp-' + c.slug} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .calc-picker .cp-head { margin-bottom: 28px; }
+  .cp-chips { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 0 auto 8px; max-width: 920px; }
+  .cp-chip {
+    border: 1px solid #cdddfb; background: #fff; color: #0c2959;
+    padding: 11px 18px; border-radius: 999px; font-size: .95rem; font-weight: 600;
+    cursor: pointer; transition: all .15s ease; line-height: 1;
+  }
+  .cp-chip:hover { border-color: #0c2959; }
+  .cp-chip.on { background: #0c2959; border-color: #0c2959; color: #fff; box-shadow: 0 6px 18px rgba(12, 41, 89, .22); }
+  /* panels reuse the embedded calculator, but the picker provides the heading — hide the per-calc title and trim padding */
+  .cp-panel :global(.calc-embedded) { padding-top: 8px !important; padding-bottom: 0 !important; }
+  .cp-panel :global(.calc-embedded .calc-head) { display: none; }
+  .cp-panel :global(.calc-embedded .padding-global) { padding-left: 0; padding-right: 0; }
+</style>
+<script>
+  document.querySelectorAll('.calc-picker').forEach((root) => {
+    const chips = root.querySelectorAll('.cp-chip');
+    const panels = root.querySelectorAll('.cp-panel');
+    chips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const slug = chip.getAttribute('data-slug');
+        chips.forEach((c) => c.classList.toggle('on', c === chip));
+        panels.forEach((p) => {
+          (p as HTMLElement).style.display = p.getAttribute('data-slug') === slug ? '' : 'none';
+        });
+      });
+    });
+  });
+</script>

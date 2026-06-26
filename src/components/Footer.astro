@@ -15,13 +15,13 @@ const tt = (ru: string, ro: string) => (lang === 'ro' ? ro : ru);
                 >
                   <div class="footer-left-list">
                     <div class="footer_text-tile">
-                      <div class="label-small tone-medium">Address</div>
+                      <div class="label-small tone-medium">Адрес</div>
                       <div class="text-size-large text_body-bold">
                         All Clean <br />ул. Месаджер, 7 <br />Кишинёв, MD-2069
                       </div>
                     </div>
                     <div class="footer_text-tile">
-                      <div class="label-small tone-medium">Phone</div>
+                      <div class="label-small tone-medium">Телефон</div>
                       <a
                         href="tel:(212)555-0198"
                         class="link_underline-animated w-inline-block"
@@ -35,7 +35,7 @@ const tt = (ru: string, ro: string) => (lang === 'ro' ? ro : ru);
                       ></a>
                     </div>
                     <div class="footer_text-tile">
-                      <div class="label-small tone-medium">Email</div>
+                      <div class="label-small tone-medium">E-mail</div>
                       <a
                         href="mailto:info@allclean.md"
                         class="link_underline-animated w-inline-block"
@@ -94,9 +94,9 @@ const tt = (ru: string, ro: string) => (lang === 'ro' ? ro : ru);
                               class="link-underline_fill-line"
                             ></div></div></a
                         ><a
-                          href={base + "/blog/nyc-apartment-cleaning-checklist-room-by-room-guide"}
+                          href={base + "/blog"}
                           class="link_underline-animated w-inline-block"
-                          ><div href="#" class="link-footer">Blog Article</div>
+                          ><div href="#" class="link-footer">{tt("Все статьи", "Toate articolele")}</div>
                           <div class="link-underline_bottom-line small">
                             <div
                               class="link-underline_fill-line"
@@ -104,7 +104,7 @@ const tt = (ru: string, ro: string) => (lang === 'ro' ? ro : ru);
                         ><a
                           href={base + "/book-cleaning"}
                           class="link_underline-animated w-inline-block"
-                          ><div href="#" class="link-footer">Book Cleaning</div>
+                          ><div href="#" class="link-footer">Записаться</div>
                           <div class="link-underline_bottom-line small">
                             <div
                               class="link-underline_fill-line"
@@ -239,31 +239,13 @@ const tt = (ru: string, ro: string) => (lang === 'ro' ? ro : ru);
                 /></a>
                 <div class="footer_bottom-halves">
                   <div class="footer_legal">
-                    <a href={base + "/template/changelog"} class="link_footer-legal"
-                      >Changelog</a
-                    ><a href={base + "/template/licenses"} class="link_footer-legal"
-                      >Licenses</a
-                    ><a href={base + "/template/style-guide"} class="link_footer-legal"
-                      >Style Guide</a
-                    ><a href={base + "/404"} class="link_footer-legal">404</a
-                    ><a href={base + "/401"} class="link_footer-legal">Password</a>
+                    <a href={base + "/privacy"} class="link_footer-legal"
+                      >{tt("Политика конфиденциальности", "Politica de confidențialitate")}</a
+                    >
                   </div>
                   <div class="footer_bottom-right">
                     <div class="text-size-small tone-medium">
-                      ©
-                      <a
-                        href="https://www.byq.supply/"
-                        target="_blank"
-                        class="tone-medium"
-                        >BYQ Supply</a
-                      >
-                      powered by
-                      <a
-                        href="https://www.webflow.com/"
-                        target="_blank"
-                        class="tone-medium"
-                        >Webflow</a
-                      >
+                      © All Clean
                     </div>
                     <div class="footer_socials">
                       <a
