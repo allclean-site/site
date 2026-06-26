@@ -49,25 +49,29 @@ export async function POST({ request, locals }: any) {
 
   const text = L.join('\n');
   const api = `https://api.telegram.org/bot${TOKEN}`;
+  const chats = String(CHAT).split(',').map((c) => c.trim()).filter(Boolean);
+  const media = photos.length
+    ? photos.slice(0, 10).map((url, i) => ({ type: 'photo', media: url, ...(i === 0 ? { caption: '📷 ' + (b.name || 'заявка') } : {}) }))
+    : null;
 
   try {
-    const r = await fetch(`${api}/sendMessage`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ chat_id: CHAT, text, disable_web_page_preview: true }),
-    });
-    if (!r.ok) return json({ ok: false, error: 'tg ' + r.status + ' ' + (await r.text()).slice(0, 200) }, 502);
-
-    // photos as an album (best-effort)
-    if (photos.length) {
-      const media = photos.slice(0, 10).map((url, i) => ({ type: 'photo', media: url, ...(i === 0 ? { caption: '📷 ' + (b.name || 'заявка') } : {}) }));
-      await fetch(`${api}/sendMediaGroup`, {
+    let sent = 0;
+    for (const chat_id of chats) {
+      const r = await fetch(`${api}/sendMessage`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ chat_id: CHAT, media }),
-      }).catch(() => {});
+        body: JSON.stringify({ chat_id, text, disable_web_page_preview: true }),
+      });
+      if (r.ok) sent++;
+      if (media) {
+        await fetch(`${api}/sendMediaGroup`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ chat_id, media }),
+        }).catch(() => {});
+      }
     }
-    return json({ ok: true });
+    return json({ ok: sent > 0, sent });
   } catch (e: any) {
     return json({ ok: false, error: e.message }, 502);
   }
