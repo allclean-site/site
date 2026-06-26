@@ -295,7 +295,12 @@ const tileIco: Record<string, string> = { surfaces: '🧴', kitchen: '🍳', bat
       fetch(SUPABASE_URL + '/rest/v1/site_leads', {
         method: 'POST', headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
         body: JSON.stringify({ project_id: PROJECT_ID, name: nm, phone: phEl.value, service: 'Калькулятор: ' + slug, notes: JSON.stringify({ selections: sel, estimate: compute() + ' MDL', comment: comment, photos: photos }), locale: locale, source_url: location.href }),
-      }).then(function (r) { if (r.ok) { msg.textContent = t.ok; msg.className = 'calc-msg ok'; } else { msg.textContent = t.err; msg.className = 'calc-msg err'; } })
+      }).then(function (r) {
+        if (r.ok) {
+          msg.textContent = t.ok; msg.className = 'calc-msg ok';
+          fetch('/api/notify-lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: nm, phone: phEl.value, service: 'Калькулятор: ' + slug, estimate: compute() + ' MDL', selections: sel, comment: comment, photos: photos, locale: locale, source_url: location.href }) }).catch(function () {});
+        } else { msg.textContent = t.err; msg.className = 'calc-msg err'; }
+      })
         .catch(function () { msg.textContent = t.err; msg.className = 'calc-msg err'; });
     });
 

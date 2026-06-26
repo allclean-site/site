@@ -10,3 +10,6 @@ pages_build_output_dir = "./dist"
 # (Secrets — EDIT_KEY, SUPABASE_SERVICE_ROLE_KEY — are added in the dashboard, not here.)
 [vars]
 CF_DEPLOY_HOOK = "https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/8d4b58e6-910a-4065-a1cf-b3145e610119"
+# Telegram lead bot (@allcleanleadsBot) chat id (non-secret). The TOKEN is added as a
+# Cloudflare *secret* (dashboard → Environment variables), like EDIT_KEY — never committed.
+TELEGRAM_CHAT_ID = "1148282945"

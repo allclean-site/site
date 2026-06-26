@@ -92,6 +92,15 @@ if (form) {
           body: JSON.stringify(body),
         });
         if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
+        // notify Telegram bot (server-side endpoint holds the token) — best-effort
+        fetch('/api/notify-lead', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: body.name, phone: body.phone, service: body.service,
+            bedrooms: body.bedrooms, notes: body.notes, locale: body.locale, source_url: body.source_url,
+          }),
+        }).catch(() => {});
         form.style.display = 'none';
         if (done) done.style.display = 'block';
       } catch (err) {
