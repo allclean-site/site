@@ -1,5 +1,9 @@
 ---
 // BookContent
+const { lang = 'ru' } = Astro.props;
+const t = lang === 'ro'
+  ? { consent: 'Sunt de acord cu prelucrarea datelor cu caracter personal conform', privacy: 'politicii de confidențialitate', privacyUrl: '/ro/privacy' }
+  : { consent: 'Я согласен(-на) на обработку персональных данных согласно', privacy: 'политике конфиденциальности', privacyUrl: '/privacy' };
 ---
       <main class="main-wrapper">
         <section class="section_hero-book">
@@ -141,9 +145,10 @@
                               maxlength="256"
                               name="Phone"
                               data-name="Phone"
-                              placeholder="+1 23 456 789"
+                              placeholder="+373 XX XXX XXX"
                               type="tel"
                               id="Phone"
+                              inputmode="tel"
                               required=""
                             />
                           </div>
@@ -244,6 +249,11 @@
                           Мы подтверждаем каждую заявку по телефону или в сообщении. Никаких скрытых платежей.
                         </p>
                       </div>
+                      <label class="book-consent">
+                        <input type="checkbox" id="book-consent" name="consent" />
+                        <span>{t.consent} <a href={t.privacyUrl} target="_blank" rel="noopener">{t.privacy}</a></span>
+                      </label>
+                      <div id="book-msg" class="book-msg" role="alert"></div>
                       <div button="" class="button_submit-static">
                         <input
                           type="submit"
@@ -1372,6 +1382,14 @@
           </div>
         </div>
       </section>
+
+<style>
+  .book-consent { display: flex; align-items: flex-start; gap: 9px; font-size: .8rem; line-height: 1.4; cursor: pointer; margin-top: .5rem; }
+  .book-consent input { width: 17px; height: 17px; flex: none; margin-top: 1px; accent-color: #0c2959; }
+  .book-consent a { color: #0c2959; text-decoration: underline; }
+  .book-msg { font-size: .82rem; color: #c0392b; min-height: 1px; margin-top: .35rem; }
+  .book-msg.ok { color: #1e7e34; }
+</style>
 
 <script>
   import "../scripts/leads.ts";
