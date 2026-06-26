@@ -15,6 +15,8 @@ const t = locale === 'ru'
       name: 'Ваше имя', phone: 'Телефон', submit: 'Отправить заявку', lift: 'Лифт', liftYes: 'Есть', liftNo: 'Нет', choose: 'Выберите параметры',
       note: 'Это предварительная оценка. Точную цену подтвердит менеджер.', ok: 'Заявка отправлена! Менеджер свяжется с вами.',
       err: 'Не удалось отправить. Позвоните: +373 79 955 044', need: 'Заполните имя и телефон.', from: 'от',
+      consent: 'Я согласен(-на) на обработку персональных данных согласно', privacy: 'политике конфиденциальности', privacyUrl: '/privacy',
+      consentNeed: 'Подтвердите согласие на обработку данных.', phoneBad: 'Введите корректный номер: +373 XX XXX XXX.',
       s_type: 'Тип уборки', s_area: 'Площадь', s_floor: 'Этаж и лифт', s_win: 'Окна', s_extra: 'Дополнительные услуги', tap: 'нажмите, чтобы выбрать' }
   : { back: 'Înapoi', next: 'Înainte', est: 'Cost aproximativ', done: 'Gata',
       comments: 'Comentariu (ce e important să știm)', commentsPh: 'De exemplu: murdărie puternică, animale, o anumită zi…',
@@ -22,6 +24,8 @@ const t = locale === 'ru'
       name: 'Numele dvs.', phone: 'Telefon', submit: 'Trimite cererea', lift: 'Lift', liftYes: 'Da', liftNo: 'Nu', choose: 'Alegeți parametrii',
       note: 'Aceasta este o estimare. Prețul exact va fi confirmat de manager.', ok: 'Cererea a fost trimisă! Managerul vă va contacta.',
       err: 'Nu s-a putut trimite. Sunați: +373 79 955 044', need: 'Completați numele și telefonul.', from: 'de la',
+      consent: 'Sunt de acord cu prelucrarea datelor cu caracter personal conform', privacy: 'politicii de confidențialitate', privacyUrl: '/ro/privacy',
+      consentNeed: 'Confirmați acordul privind prelucrarea datelor.', phoneBad: 'Introduceți un număr valid: +373 XX XXX XXX.',
       s_type: 'Tipul curățeniei', s_area: 'Suprafața', s_floor: 'Etaj și lift', s_win: 'Geamuri', s_extra: 'Servicii suplimentare', tap: 'apăsați pentru a alege' };
 
 const used = new Set<string>();
@@ -160,7 +164,8 @@ const tileIco: Record<string, string> = { surfaces: '🧴', kitchen: '🍳', bat
               <p class="calc-side-note">{t.note}</p>
               <div class="calc-side-form">
                 <input id="calc-name" class="calc-input" placeholder={t.name} />
-                <input id="calc-phone" class="calc-input" placeholder={t.phone} inputmode="tel" />
+                <input id="calc-phone" class="calc-input" placeholder="+373 XX XXX XXX" inputmode="tel" />
+                <label class="calc-consent"><input type="checkbox" id="calc-consent" /><span>{t.consent} <a href={t.privacyUrl} target="_blank" rel="noopener">{t.privacy}</a></span></label>
                 <button type="button" id="calc-submit" class="calc-cta">{t.submit}</button>
                 <p id="calc-msg" class="calc-msg"></p>
               </div>
@@ -269,9 +274,18 @@ const tileIco: Record<string, string> = { surfaces: '🧴', kitchen: '🍳', bat
       fileInput.value = '';
     });
 
+    // phone mask: +373 XX XXX XXX (Moldova)
+    var phEl = document.getElementById('calc-phone');
+    function maskPhone() { var d = phEl.value.replace(/\D/g, ''); if (d.indexOf('373') === 0) d = d.slice(3); d = d.slice(0, 8); var out = '+373'; if (d.length) out += ' ' + d.slice(0, 2); if (d.length > 2) out += ' ' + d.slice(2, 5); if (d.length > 5) out += ' ' + d.slice(5, 8); phEl.value = out; }
+    phEl.addEventListener('focus', function () { if (!phEl.value.trim()) phEl.value = '+373 '; });
+    phEl.addEventListener('input', maskPhone);
+
     document.getElementById('calc-submit').addEventListener('click', function () {
-      var nm = document.getElementById('calc-name').value.trim(), pho = document.getElementById('calc-phone').value.trim(), msg = document.getElementById('calc-msg');
-      if (!nm || !pho) { msg.textContent = t.need; msg.className = 'calc-msg err'; return; }
+      var nm = document.getElementById('calc-name').value.trim(), msg = document.getElementById('calc-msg');
+      var phDigits = phEl.value.replace(/\D/g, '');
+      if (!nm) { msg.textContent = t.need; msg.className = 'calc-msg err'; return; }
+      if (phDigits.length !== 11) { msg.textContent = t.phoneBad; msg.className = 'calc-msg err'; return; }
+      if (!document.getElementById('calc-consent').checked) { msg.textContent = t.consentNeed; msg.className = 'calc-msg err'; return; }
       msg.textContent = '…'; msg.className = 'calc-msg';
       var sel = {};
       cfg.fields.forEach(function (f) { var v = state[f.key];
@@ -282,7 +296,7 @@ const tileIco: Record<string, string> = { surfaces: '🧴', kitchen: '🍳', bat
       var cm = document.getElementById('calc-comment'); var comment = cm ? cm.value.trim() : '';
       fetch(SUPABASE_URL + '/rest/v1/site_leads', {
         method: 'POST', headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
-        body: JSON.stringify({ project_id: PROJECT_ID, name: nm, phone: pho, service: 'Калькулятор: ' + slug, notes: JSON.stringify({ selections: sel, estimate: compute() + ' MDL', comment: comment, photos: photos }), locale: locale, source_url: location.href }),
+        body: JSON.stringify({ project_id: PROJECT_ID, name: nm, phone: phEl.value, service: 'Калькулятор: ' + slug, notes: JSON.stringify({ selections: sel, estimate: compute() + ' MDL', comment: comment, photos: photos }), locale: locale, source_url: location.href }),
       }).then(function (r) { if (r.ok) { msg.textContent = t.ok; msg.className = 'calc-msg ok'; } else { msg.textContent = t.err; msg.className = 'calc-msg err'; } })
         .catch(function () { msg.textContent = t.err; msg.className = 'calc-msg err'; });
     });
@@ -361,6 +375,9 @@ const tileIco: Record<string, string> = { surfaces: '🧴', kitchen: '🍳', bat
   .calc-side-form { margin-top: auto; display: flex; flex-direction: column; gap: 11px; padding-top: 22px; }
   .calc-input { width: 100%; padding: 13px 15px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .25); background: rgba(255, 255, 255, .1); color: #fff; font-size: 1rem; }
   .calc-input::placeholder { color: rgba(255, 255, 255, .6); }
+  .calc-consent { display: flex; align-items: flex-start; gap: 9px; font-size: .8rem; color: rgba(255, 255, 255, .85); line-height: 1.4; cursor: pointer; }
+  .calc-consent input { width: 17px; height: 17px; flex: none; margin-top: 1px; accent-color: #b6cbf9; }
+  .calc-consent a { color: #b6cbf9; text-decoration: underline; }
   .calc-cta { width: 100%; padding: 16px; border: 0; border-radius: 14px; background: #b6cbf9; color: #0c2959; font-weight: 800; cursor: pointer; font-size: 1.05rem; }
   .calc-cta:hover { filter: brightness(1.06); }
   .calc-msg { font-size: .9rem; margin: 2px 0 0; min-height: 1.2em; } .calc-msg.ok { color: #86efac; } .calc-msg.err { color: #fca5a5; }

@@ -1,0 +1,54 @@
+---
+// Privacy policy — TEMPLATE text. The client should have it reviewed by a lawyer.
+// Moldova: Law 133/2011 (and Law 195/2024 from 2026-08-23). Legal basis for the forms = consent.
+interface Props { lang: 'ru' | 'ro'; }
+const { lang } = Astro.props;
+const ru = {
+  title: 'Политика конфиденциальности',
+  updated: 'Обновлено: 2026',
+  blocks: [
+    ['Оператор данных', 'Сайт принадлежит компании «All Clean» (Кишинёв, ул. Месаджер 7, MD-2069). Контакты: +373 79 955 044, info@allclean.md.'],
+    ['Какие данные мы собираем', 'Через формы на сайте (запись на уборку, калькулятор) мы собираем: имя, номер телефона, выбранные параметры услуги и сумму предварительной оценки, ваш комментарий и при желании фотографии помещения.'],
+    ['Цель обработки', 'Данные используются исключительно для обработки вашей заявки: связи с вами, уточнения деталей и расчёта стоимости уборки.'],
+    ['Правовая основа', 'Обработка осуществляется на основании вашего согласия, которое вы даёте, отмечая соответствующий чекбокс при отправке формы (Закон Республики Молдова № 133/2011 о защите персональных данных).'],
+    ['Передача третьим лицам', 'Мы не продаём и не передаём ваши данные третьим лицам, кроме поставщиков технической инфраструктуры (хостинг, хранение заявок), которые обрабатывают данные по нашему поручению.'],
+    ['Хранение', 'Данные хранятся столько, сколько необходимо для обработки заявки и связи с вами, после чего удаляются.'],
+    ['Ваши права', 'Вы вправе запросить доступ к своим данным, их исправление или удаление, а также отозвать согласие в любой момент, написав на info@allclean.md. Вы также можете обратиться в Национальный центр по защите персональных данных Республики Молдова.'],
+  ],
+};
+const ro = {
+  title: 'Politica de confidențialitate',
+  updated: 'Actualizat: 2026',
+  blocks: [
+    ['Operatorul de date', 'Site-ul aparține companiei „All Clean” (Chișinău, str. Mesager 7, MD-2069). Contacte: +373 79 955 044, info@allclean.md.'],
+    ['Ce date colectăm', 'Prin formularele de pe site (programare, calculator) colectăm: numele, numărul de telefon, parametrii selectați ai serviciului și suma estimării preliminare, comentariul dvs. și, opțional, fotografii ale spațiului.'],
+    ['Scopul prelucrării', 'Datele sunt folosite exclusiv pentru procesarea cererii dvs.: contactarea, precizarea detaliilor și calcularea costului curățeniei.'],
+    ['Temeiul legal', 'Prelucrarea se face în baza consimțământului dvs., exprimat prin bifarea căsuței la trimiterea formularului (Legea Republicii Moldova nr. 133/2011 privind protecția datelor cu caracter personal).'],
+    ['Transmiterea către terți', 'Nu vindem și nu transmitem datele dvs. terților, cu excepția furnizorilor de infrastructură tehnică (găzduire, stocarea cererilor) care prelucrează datele la solicitarea noastră.'],
+    ['Stocarea', 'Datele sunt păstrate atât timp cât este necesar pentru procesarea cererii și contactarea dvs., apoi sunt șterse.'],
+    ['Drepturile dvs.', 'Aveți dreptul să solicitați accesul la date, corectarea sau ștergerea lor și să vă retrageți consimțământul oricând, scriind la info@allclean.md. De asemenea, vă puteți adresa Centrului Național pentru Protecția Datelor cu Caracter Personal al Republicii Moldova.'],
+  ],
+};
+const d = lang === 'ru' ? ru : ro;
+---
+<main class="main-wrapper">
+  <section class="section_hero-faq">
+    <div class="padding-global">
+      <div class="w-layout-blockcontainer container-large w-container">
+        <div class="privacy">
+          <h1>{d.title}</h1>
+          <p class="privacy-upd">{d.updated}</p>
+          {d.blocks.map(([h, p]) => (<div class="privacy-block"><h2>{h}</h2><p>{p}</p></div>))}
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<style>
+  .privacy { max-width: 760px; margin: 0 auto; padding: 20px 0 60px; color: #2f3e5c; }
+  .privacy h1 { color: #0c2959; font-size: clamp(1.8rem, 4vw, 2.6rem); margin: 0 0 6px; }
+  .privacy-upd { color: #8a99b5; margin: 0 0 30px; }
+  .privacy-block { margin-bottom: 24px; }
+  .privacy-block h2 { color: #0c2959; font-size: 1.2rem; margin: 0 0 8px; }
+  .privacy-block p { line-height: 1.7; margin: 0; }
+</style>
