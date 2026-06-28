@@ -49,17 +49,19 @@ function applyPayload($, p) {
       el.attr('style', (el.attr('style') || '') + `;background-image:${bg};background-size:cover;background-position:center;`);
     } catch {}
   });
-  (p.styles || []).forEach((c) => {
-    if (!c.selector || !c.styles) return;
-    try {
-      $(c.selector).each((_, el) => {
-        const $el = $(el);
-        let st = $el.attr('style') || '';
-        for (const k of Object.keys(c.styles)) st += `;${k}:${c.styles[k]} !important;`;
-        $el.attr('style', st);
-      });
-    } catch {}
-  });
+  // styles overrides → baked into a <style> block (base rules + @media mobile) appended last in <head>.
+  // Inline !important can never be overridden by a media query, so per-breakpoint requires CSS rules.
+  {
+    const styles = (p.styles || []).filter((c) => c && c.selector && c.styles && Object.keys(c.styles).length);
+    if (styles.length) {
+      const rule = (c) => `${c.selector}{${Object.keys(c.styles).map((k) => `${k}:${c.styles[k]} !important`).join(';')}}`;
+      const base = styles.filter((c) => c.mq !== 'm').map(rule).join('\n');
+      const mob = styles.filter((c) => c.mq === 'm').map(rule).join('\n');
+      let css = base;
+      if (mob) css += `\n@media (max-width:767px){\n${mob}\n}`;
+      if (css.trim()) { try { $('head').append(`<style id="lg-overrides">\n${css}\n</style>`); } catch {} }
+    }
+  }
   (p.videos || []).forEach((c) => {
     if (!c.selector || !c.mp4) return;
     try {

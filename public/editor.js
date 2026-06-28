@@ -11,6 +11,9 @@
   var LANG = document.documentElement.lang && document.documentElement.lang.indexOf('ro') === 0 ? 'ro' : 'ru';
   var PROJECT = 'allclean';
   var PAGE = (location.pathname.replace(/\/+$/, '') || '/');
+  // Breakpoint being edited: 'base' (all widths, the desktop view) or 'm' (mobile ≤767px, set when the
+  // editor runs inside the 📱 mobile iframe via ?bp=m). Style edits are recorded into the matching bucket.
+  var BP = /[?&]bp=m\b/.test(location.search) ? 'm' : 'base';
   var CH = { texts: [], textsel: [], links: [], images: [], backgrounds: [], styles: [], removed: [], videos: [], blocks: { order: [], hidden: [] }, added: [] };
   var KEY = sessionStorage.getItem('ac_edit_key') || '';
   var SEL = null, delMode = false;
@@ -182,10 +185,17 @@
   var STYLE_PROPS = ['display', 'width', 'max-width', 'line-height', 'font-size', 'padding-top', 'padding-bottom', 'padding-left', 'padding-right', 'text-align', 'color', 'background-color', 'border-radius'];
   function recStyle(el) {
     if (typeof insideAdded === 'function' && insideAdded(el)) { syncAdded(el); return; }
-    var sel = cssPath(el), s = {};
-    STYLE_PROPS.forEach(function (p) { var v = el.style.getPropertyValue(p); if (v) s[p] = v; });
-    CH.styles = CH.styles.filter(function (c) { return c.selector !== sel; });
-    if (Object.keys(s).length) CH.styles.push({ selector: sel, styles: s });
+    var sel = cssPath(el), cur = {};
+    STYLE_PROPS.forEach(function (p) { var v = el.style.getPropertyValue(p); if (v) cur[p] = v; });
+    var isM = BP === 'm', s = cur;
+    if (isM) {
+      // store only the props that DIFFER from base, so editing the base size later still cascades to mobile
+      var baseEntry = CH.styles.filter(function (c) { return c.selector === sel && !c.mq; })[0];
+      var base = baseEntry ? baseEntry.styles : {};
+      s = {}; Object.keys(cur).forEach(function (k) { if (cur[k] !== base[k]) s[k] = cur[k]; });
+    }
+    CH.styles = CH.styles.filter(function (c) { return !(c.selector === sel && (!!c.mq) === isM); });
+    if (Object.keys(s).length) CH.styles.push(isM ? { selector: sel, styles: s, mq: 'm' } : { selector: sel, styles: s });
     scheduleSave();
   }
 
@@ -536,7 +546,7 @@
     ov.innerHTML = '<div class="eedmob-frame"><div class="eedmob-bar"><span>📱 Мобильный режим — редактируемый (390px)</span><button type="button">✕ закрыть</button></div><iframe></iframe></div>';
     document.body.appendChild(ov);
     var fr = ov.querySelector('iframe');
-    fr.src = location.href.indexOf('lgedit') >= 0 ? location.href : (location.pathname + (location.search ? location.search + '&' : '?') + 'lgedit');
+    fr.src = location.pathname + '?lgedit&bp=m';  // inner editor runs in mobile-breakpoint mode at 390px
     ov.querySelector('.eedmob-bar button').addEventListener('click', function () { toggleMobile(btn); });
     ov.addEventListener('click', function (e) { if (e.target === ov) toggleMobile(btn); });
     mobOverlay = ov; mobEdited = true; btn.classList.add('on');
@@ -555,7 +565,7 @@
   // ---------- toolbar ----------
   var bar = document.createElement('div'); bar.id = 'eed';
   bar.innerHTML =
-    '<b>✏️ Редактор (' + LANG.toUpperCase() + ')</b>' +
+    '<b>✏️ Редактор (' + LANG.toUpperCase() + (BP === 'm' ? ' · 📱 МОБ' : '') + ')</b>' +
     '<span style="opacity:.7;font-size:12px">2× клик — текст (Ж/К/Ч, списки, ссылка) · 1 клик — блок (отступы/выравнивание/цвет) · наведи: 📷 ✦ 🔗</span>' +
     '<span class="grp off" id="eedw">Ширина <button data-w="-1">−</button><button data-w="1">+</button></span>' +
     '<span class="grp off" id="eedl">Интервал <button data-l="-1">−</button><button data-l="1">+</button></span>' +
@@ -628,7 +638,9 @@
     (p.links || []).forEach(function (c) { var el = c.selector && document.querySelector(c.selector); if (el) el.setAttribute('href', c.href); });
     (p.images || []).forEach(function (c) { if (c.url) document.querySelectorAll('img[data-slot="' + (c.slot || '').replace(/"/g, '\\"') + '"]').forEach(function (im) { im.src = c.url; im.removeAttribute('srcset'); }); var e2 = c.slot && safeQ(c.slot); if (e2 && e2.tagName === 'IMG') { e2.src = c.url; e2.removeAttribute('srcset'); } });
     (p.backgrounds || []).forEach(function (c) { var el = c.selector && safeQ(c.selector); if (el && c.url) { el.style.setProperty('background-image', (c.css ? c.css.replace('__URL__', c.url) : 'url("' + c.url + '")'), 'important'); el.style.setProperty('background-size', 'cover', 'important'); el.style.setProperty('background-position', 'center', 'important'); } });
-    (p.styles || []).forEach(function (c) { if (c.selector && c.styles) safeAll(c.selector).forEach(function (el) { Object.keys(c.styles).forEach(function (k) { el.style.setProperty(k, c.styles[k], 'important'); }); }); });
+    var applyStyleEntry = function (c) { if (c.selector && c.styles) safeAll(c.selector).forEach(function (el) { Object.keys(c.styles).forEach(function (k) { el.style.setProperty(k, c.styles[k], 'important'); }); }); };
+    (p.styles || []).filter(function (c) { return !c.mq; }).forEach(applyStyleEntry);          // base: all widths
+    if (BP === 'm') (p.styles || []).filter(function (c) { return c.mq === 'm'; }).forEach(applyStyleEntry); // mobile overrides (only inside the 390px frame)
     (p.removed || []).forEach(function (sel) { safeAll(sel).forEach(function (el) { el.style.setProperty('display', 'none', 'important'); }); });
   }
   function safeQ(s) { try { return document.querySelector(s); } catch (e) { return null; } }
