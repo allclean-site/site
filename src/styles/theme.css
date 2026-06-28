@@ -42,3 +42,31 @@
 .expandable-single { background-color: #eef3fd; border: 1px solid #dbe6fb; }
 .faq_animated-box { background-color: #ffffff; border: 1px solid #cdddfb; }
 .faq-horizontal, .faq-vertical { background-color: #0c2959; }
+
+/* ---- Cyrillic for the design fonts ----
+   The design uses "Decalotype Fix" (headings/buttons) and "Bricolagegrotesque" (body),
+   but neither has Cyrillic glyphs → Russian text fell back to a system font.
+   We supplement the SAME family names with Onest (geometric grotesque, closest free
+   Cyrillic match, self-hosted) restricted to the Cyrillic unicode-range. Result:
+   Latin keeps Decalotype/Bricolage; Cyrillic renders in Onest — automatically on both
+   RU and RO, no per-element overrides. Onest cyrillic woff2 is variable (weights 400–900). */
+@font-face {
+  font-family: "Decalotype Fix"; font-style: normal; font-weight: 400 900; font-display: swap;
+  src: url("/fonts/onest/onest-cyrillic.woff2") format("woff2");
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: "Decalotype Fix"; font-style: normal; font-weight: 400 900; font-display: swap;
+  src: url("/fonts/onest/onest-cyrillic-ext.woff2") format("woff2");
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: "Bricolagegrotesque"; font-style: normal; font-weight: 400 900; font-display: swap;
+  src: url("/fonts/onest/onest-cyrillic.woff2") format("woff2");
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: "Bricolagegrotesque"; font-style: normal; font-weight: 400 900; font-display: swap;
+  src: url("/fonts/onest/onest-cyrillic-ext.woff2") format("woff2");
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
