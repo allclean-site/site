@@ -78,6 +78,23 @@ function applyPayload($, p) {
     } catch {}
   });
   (p.removed || []).forEach((sel) => { try { $(sel).remove(); } catch {} });
+  // block-level: reorder / hide whole sections of the main wrapper (Tilda-style editor)
+  if (p.blocks && ((p.blocks.order && p.blocks.order.length) || (p.blocks.hidden && p.blocks.hidden.length))) {
+    try {
+      const main = $('main.main-wrapper').first();
+      if (main.length) {
+        main.children('section').each((i, el) => $(el).attr('data-lgid', String(i)));
+        (p.blocks.hidden || []).forEach((id) => {
+          const s = main.children('section[data-lgid="' + id + '"]');
+          if (s.length) s.attr('style', (s.attr('style') || '') + ';display:none !important;');
+        });
+        (p.blocks.order || []).forEach((id) => {
+          const s = main.children('section[data-lgid="' + id + '"]');
+          if (s.length) main.append(s); // re-append in saved order
+        });
+      }
+    } catch {}
+  }
 }
 
 async function main() {
