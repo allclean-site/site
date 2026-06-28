@@ -78,20 +78,21 @@ function applyPayload($, p) {
     } catch {}
   });
   (p.removed || []).forEach((sel) => { try { $(sel).remove(); } catch {} });
-  // block-level: reorder / hide whole sections of the main wrapper (Tilda-style editor)
-  if (p.blocks && ((p.blocks.order && p.blocks.order.length) || (p.blocks.hidden && p.blocks.hidden.length))) {
+  // block-level (Tilda-style editor): add / reorder / hide whole sections of the main wrapper
+  const hasBlocks = (p.added && p.added.length) || (p.blocks && ((p.blocks.order && p.blocks.order.length) || (p.blocks.hidden && p.blocks.hidden.length)));
+  if (hasBlocks) {
     try {
       const main = $('main.main-wrapper').first();
       if (main.length) {
-        main.children('section').each((i, el) => $(el).attr('data-lgid', String(i)));
-        (p.blocks.hidden || []).forEach((id) => {
-          const s = main.children('section[data-lgid="' + id + '"]');
-          if (s.length) s.attr('style', (s.attr('style') || '') + ';display:none !important;');
-        });
-        (p.blocks.order || []).forEach((id) => {
-          const s = main.children('section[data-lgid="' + id + '"]');
-          if (s.length) main.append(s); // re-append in saved order
-        });
+        // 1) append user-added blocks (each html is a <section data-lgadd="ID">…)
+        (p.added || []).forEach((a) => { if (a && a.html && !main.children('section[data-lgadd="' + a.id + '"]').length) main.append(a.html); });
+        // 2) assign stable lgid to ORIGINAL (non-added) sections by current order
+        let i = 0; main.children('section').each((_, el) => { if (!$(el).attr('data-lgadd')) $(el).attr('data-lgid', String(i++)); });
+        const sel = (id) => id && id.indexOf('add:') === 0 ? 'section[data-lgadd="' + id.slice(4) + '"]' : 'section[data-lgid="' + id + '"]';
+        // 3) hide
+        (p.blocks && p.blocks.hidden || []).forEach((id) => { const s = main.children(sel(id)); if (s.length) s.attr('style', (s.attr('style') || '') + ';display:none !important;'); });
+        // 4) reorder (re-append in saved order)
+        (p.blocks && p.blocks.order || []).forEach((id) => { const s = main.children(sel(id)); if (s.length) main.append(s); });
       }
     } catch {}
   }

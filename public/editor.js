@@ -11,14 +11,14 @@
   var LANG = document.documentElement.lang && document.documentElement.lang.indexOf('ro') === 0 ? 'ro' : 'ru';
   var PROJECT = 'allclean';
   var PAGE = (location.pathname.replace(/\/+$/, '') || '/');
-  var CH = { texts: [], textsel: [], links: [], images: [], backgrounds: [], styles: [], removed: [], videos: [], blocks: { order: [], hidden: [] } };
+  var CH = { texts: [], textsel: [], links: [], images: [], backgrounds: [], styles: [], removed: [], videos: [], blocks: { order: [], hidden: [] }, added: [] };
   var KEY = sessionStorage.getItem('ac_edit_key') || '';
   var SEL = null, delMode = false;
 
   var setStatus = function () {};
   var refreshPw = function () {};
   function focusPw() { var i = document.getElementById('eedpw'); if (i) { i.focus(); i.select(); } }
-  function payload() { return { texts: CH.texts, textsel: CH.textsel, links: CH.links, images: CH.images, backgrounds: CH.backgrounds, styles: CH.styles, removed: CH.removed, videos: CH.videos, blocks: CH.blocks }; }
+  function payload() { return { texts: CH.texts, textsel: CH.textsel, links: CH.links, images: CH.images, backgrounds: CH.backgrounds, styles: CH.styles, removed: CH.removed, videos: CH.videos, blocks: CH.blocks, added: CH.added }; }
 
   // ---------- save / publish ----------
   var saveT = null;
@@ -113,7 +113,15 @@
     'body.eed-blkmode main.main-wrapper>section{outline:2px dashed rgba(124,58,237,.5);outline-offset:-2px}' +
     '#eed-blk{position:absolute;z-index:1000002;display:none;gap:5px;padding:5px;border-radius:12px;background:linear-gradient(135deg,rgba(139,92,246,.5),rgba(24,14,46,.7));-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border:1px solid rgba(184,160,255,.45);box-shadow:0 10px 28px rgba(76,29,149,.5)}' +
     '#eed-blk button{background:rgba(255,255,255,.16);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:8px;width:34px;height:30px;font-size:15px;cursor:pointer}' +
-    '#eed-blk button:hover{background:rgba(255,255,255,.32)}';
+    '#eed-blk button:hover{background:rgba(255,255,255,.32)}' +
+    /* add-block picker */
+    '#eed-pick{position:fixed;inset:0;z-index:1000003;background:rgba(8,5,20,.6);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center}' +
+    '.eed-pick-card{background:#16151f;border:1px solid #2b2740;border-radius:18px;padding:22px;width:min(520px,92vw);box-shadow:0 30px 80px rgba(0,0,0,.6)}' +
+    '.eed-pick-h{color:#fff;font:800 18px Inter,system-ui,sans-serif;margin-bottom:14px}' +
+    '.eed-pick-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}' +
+    '.eed-pick-grid button{background:#211f2b;color:#fff;border:1px solid #322d44;border-radius:12px;padding:14px 12px;font:600 14px Inter,system-ui,sans-serif;cursor:pointer;text-align:left}' +
+    '.eed-pick-grid button:hover{border-color:#7c3aed;background:#262333}' +
+    '.eed-pick-x{margin-top:14px;background:transparent;color:#a0a0ad;border:1px solid #322d44;border-radius:10px;padding:8px 14px;cursor:pointer;font:600 13px Inter,system-ui,sans-serif}';
   document.head.appendChild(S);
 
   // ---------- selector ----------
@@ -133,6 +141,7 @@
   }
   var STYLE_PROPS = ['width', 'max-width', 'line-height', 'font-size', 'padding-top', 'padding-bottom', 'padding-left', 'padding-right', 'text-align', 'color', 'background-color', 'border-radius'];
   function recStyle(el) {
+    if (typeof insideAdded === 'function' && insideAdded(el)) { syncAdded(el); return; }
     var sel = cssPath(el), s = {};
     STYLE_PROPS.forEach(function (p) { var v = el.style.getPropertyValue(p); if (v) s[p] = v; });
     CH.styles = CH.styles.filter(function (c) { return c.selector !== sel; });
@@ -160,6 +169,7 @@
   document.addEventListener('blur', function (e) {
     var el = e.target; if (!el || !el.hasAttribute || !el.hasAttribute('data-eedit')) return;
     el.removeAttribute('contenteditable'); hideRTB();
+    if (insideAdded(el)) { el.dataset.eorig = (el.textContent || '').trim(); syncAdded(el); return; }
     var nw = (el.textContent || '').trim(), old = el.dataset.eorig || '';
     if (!nw || nw === old) return;
     if (el.children.length) { var sel = cssPath(el); CH.textsel = CH.textsel.filter(function (c) { return c.selector !== sel; }); CH.textsel.push({ selector: sel, html: el.innerHTML }); }
@@ -211,6 +221,7 @@
   function replaceImage(img) {
     pickFile(function (url) {
       img.removeAttribute('srcset'); img.removeAttribute('sizes'); img.src = url;
+      if (insideAdded(img)) { syncAdded(img); setStatus('✓ фото заменено'); return; }
       var slot = img.getAttribute('data-slot') || cssPath(img); if (!img.getAttribute('data-slot')) img.setAttribute('data-slot', slot);
       CH.images = CH.images.filter(function (c) { return c.slot !== slot; }); CH.images.push({ slot: slot, url: url }); setStatus('✓ фото заменено');
     });
@@ -220,6 +231,7 @@
     pickFile(function (url) {
       var im = document.createElement('img'); im.src = url; im.alt = ''; im.style.cssText = 'width:100%;height:100%;object-fit:contain';
       svg.replaceWith(im);
+      if (insideAdded(parent)) { syncAdded(parent); setStatus('✓ иконка заменена'); return; }
       var sel = cssPath(parent); CH.textsel = CH.textsel.filter(function (c) { return c.selector !== sel; }); CH.textsel.push({ selector: sel, html: parent.innerHTML }); setStatus('✓ иконка заменена');
     });
   }
@@ -227,6 +239,7 @@
     var bgTmpl = getComputedStyle(el).backgroundImage.replace(BG_LAST_URL, 'url("__URL__")');
     pickFile(function (url) {
       el.style.backgroundImage = bgTmpl.replace('__URL__', url); el.style.backgroundSize = 'cover'; el.style.backgroundPosition = 'center';
+      if (insideAdded(el)) { syncAdded(el); setStatus('✓ фон заменён'); return; }
       var sel = cssPath(el); CH.backgrounds = CH.backgrounds.filter(function (c) { return c.selector !== sel; }); CH.backgrounds.push({ selector: sel, css: bgTmpl, url: url }); setStatus('✓ фон заменён');
     });
   }
@@ -261,6 +274,7 @@
     var cur = el.getAttribute('href') || '';
     var val = window.prompt('Ссылка (URL). Оставьте пустым, чтобы убрать:', cur);
     if (val == null) return; val = val.trim();
+    if (insideAdded(el)) { if (isLinkEl) el.setAttribute('href', val); else { var o = el.querySelector('a'); if (o) o.setAttribute('href', val); } syncAdded(el); setStatus('✓ ссылка обновлена'); return; }
     if (isLinkEl) {
       el.setAttribute('href', val);
       var sel = cssPath(el); CH.links = CH.links.filter(function (c) { return c.selector !== sel; }); CH.links.push({ selector: sel, href: val });
@@ -323,26 +337,80 @@
   function topSections() { var m = mainWrap(); return m ? [].slice.call(m.children).filter(function (n) { return n.tagName === 'SECTION'; }) : []; }
   function ensureLgids() { topSections().forEach(function (s, i) { if (!s.hasAttribute('data-lgid')) s.setAttribute('data-lgid', String(i)); }); }
   function topSectionOf(el) { var m = mainWrap(); if (!m || !el.closest) return null; var s = el.closest('section'); while (s && s.parentElement !== m) s = s.parentElement && s.parentElement.closest ? s.parentElement.closest('section') : null; return (s && s.parentElement === m) ? s : null; }
-  function saveOrder() { CH.blocks.order = topSections().map(function (s) { return s.getAttribute('data-lgid'); }); scheduleSave(); }
+  function blockId(s) { return s.dataset.lgadd ? 'add:' + s.dataset.lgadd : s.getAttribute('data-lgid'); }
+  function findSec(id) { var m = mainWrap(); if (!m) return null; return id && id.indexOf('add:') === 0 ? m.querySelector(':scope > section[data-lgadd="' + id.slice(4) + '"]') : m.querySelector(':scope > section[data-lgid="' + id + '"]'); }
+  function saveOrder() { ensureLgids(); CH.blocks.order = topSections().map(blockId); scheduleSave(); }
   function applyBlocksLocal() {
-    ensureLgids();
     var m = mainWrap(); if (!m) return;
-    (CH.blocks.order || []).forEach(function (id) { var s = m.querySelector(':scope > section[data-lgid="' + id + '"]'); if (s) m.appendChild(s); });
-    topSections().forEach(function (s) { if ((CH.blocks.hidden || []).indexOf(s.getAttribute('data-lgid')) >= 0) s.style.setProperty('display', 'none', 'important'); });
+    // re-insert previously added blocks
+    (CH.added || []).forEach(function (a) { if (!m.querySelector(':scope > section[data-lgadd="' + a.id + '"]')) { var tmp = document.createElement('div'); tmp.innerHTML = a.html; var sec = tmp.firstElementChild; if (sec) { m.appendChild(sec); } } });
+    ensureLgids();
+    (CH.blocks.order || []).forEach(function (id) { var s = findSec(id); if (s) m.appendChild(s); });
+    topSections().forEach(function (s) { if ((CH.blocks.hidden || []).indexOf(blockId(s)) >= 0) s.style.setProperty('display', 'none', 'important'); });
+    markEditable();
+  }
+  // serialize an added block back into CH.added after it's edited
+  function syncAdded(el) {
+    var sec = el && el.closest && el.closest('section[data-lgadd]'); if (!sec) return false;
+    var clone = sec.cloneNode(true);
+    clone.querySelectorAll('[contenteditable]').forEach(function (n) { n.removeAttribute('contenteditable'); });
+    clone.querySelectorAll('.eed-sel').forEach(function (n) { n.classList.remove('eed-sel'); });
+    clone.style.removeProperty('opacity');
+    var id = sec.dataset.lgadd, e = (CH.added || []).filter(function (a) { return a.id === id; })[0];
+    if (e) { e.html = clone.outerHTML; scheduleSave(); }
+    return true;
   }
   var blkMode = false, blkSec = null;
   var blkBar = document.createElement('div'); blkBar.id = 'eed-blk'; blkBar.style.display = 'none';
-  blkBar.innerHTML = '<button data-blk="up" title="выше">↑</button><button data-blk="down" title="ниже">↓</button><button data-blk="hide" title="скрыть / показать">🚫</button>';
+  blkBar.innerHTML = '<button data-blk="up" title="выше">↑</button><button data-blk="down" title="ниже">↓</button><button data-blk="add" title="добавить блок ниже">➕</button><button data-blk="hide" title="скрыть / удалить">🚫</button>';
   document.body.appendChild(blkBar);
-  function isHidden(s) { return (CH.blocks.hidden || []).indexOf(s.getAttribute('data-lgid')) >= 0; }
-  function placeBlk() { if (!blkSec) { blkBar.style.display = 'none'; return; } var r = blkSec.getBoundingClientRect(); blkBar.style.top = (window.scrollY + Math.max(r.top, 4) + 6) + 'px'; blkBar.style.left = (window.scrollX + r.right - 132) + 'px'; blkBar.querySelector('[data-blk="hide"]').textContent = isHidden(blkSec) ? '👁' : '🚫'; blkBar.style.display = 'flex'; }
+  function isHidden(s) { return (CH.blocks.hidden || []).indexOf(blockId(s)) >= 0; }
+  function placeBlk() { if (!blkSec) { blkBar.style.display = 'none'; return; } var r = blkSec.getBoundingClientRect(); blkBar.style.top = (window.scrollY + Math.max(r.top, 4) + 6) + 'px'; blkBar.style.left = (window.scrollX + r.right - 168) + 'px'; blkBar.querySelector('[data-blk="hide"]').textContent = blkSec.dataset.lgadd ? '🗑' : (isHidden(blkSec) ? '👁' : '🚫'); blkBar.style.display = 'flex'; }
   blkBar.addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b || !blkSec) return; var m = mainWrap(); var act = b.dataset.blk;
     function sib(dir) { var n = dir === 'up' ? blkSec.previousElementSibling : blkSec.nextElementSibling; while (n && n.tagName !== 'SECTION') n = dir === 'up' ? n.previousElementSibling : n.nextElementSibling; return n; }
     if (act === 'up') { var p = sib('up'); if (p) { m.insertBefore(blkSec, p); saveOrder(); placeBlk(); } }
     else if (act === 'down') { var nx = sib('down'); if (nx) { m.insertBefore(nx, blkSec); saveOrder(); placeBlk(); } }
-    else if (act === 'hide') { var id = blkSec.getAttribute('data-lgid'); var h = CH.blocks.hidden || (CH.blocks.hidden = []); var i = h.indexOf(id); if (i >= 0) { h.splice(i, 1); blkSec.style.removeProperty('display'); blkSec.style.opacity = '.4'; } else { h.push(id); blkSec.style.opacity = '.4'; } placeBlk(); scheduleSave(); }
+    else if (act === 'add') { openAddPicker(blkSec); }
+    else if (act === 'hide') {
+      if (blkSec.dataset.lgadd) { // added block → delete entirely
+        var aid = blkSec.dataset.lgadd; CH.added = (CH.added || []).filter(function (a) { return a.id !== aid; }); var id2 = 'add:' + aid; CH.blocks.order = (CH.blocks.order || []).filter(function (x) { return x !== id2; }); CH.blocks.hidden = (CH.blocks.hidden || []).filter(function (x) { return x !== id2; }); blkSec.remove(); blkSec = null; blkBar.style.display = 'none'; scheduleSave();
+      } else { // original section → reversible hide
+        var id = blockId(blkSec); var h = CH.blocks.hidden || (CH.blocks.hidden = []); var i = h.indexOf(id); if (i >= 0) { h.splice(i, 1); blkSec.style.removeProperty('display'); blkSec.style.opacity = '.4'; } else { h.push(id); blkSec.style.opacity = '.4'; } placeBlk(); scheduleSave();
+      }
+    }
   });
+  // strip editor-only attributes before storing/serializing an added block
+  function cleanClone(sec) { var c = sec.cloneNode(true); c.querySelectorAll('[contenteditable]').forEach(function (n) { n.removeAttribute('contenteditable'); }); c.querySelectorAll('[data-eedit]').forEach(function (n) { n.removeAttribute('data-eedit'); n.removeAttribute('data-eorig'); }); c.querySelectorAll('.eed-sel').forEach(function (n) { n.classList.remove('eed-sel'); }); c.style.removeProperty('opacity'); return c; }
+  function insideAdded(el) { return el && el.closest && el.closest('section[data-lgadd]'); }
+
+  // library of insertable blocks (native Sparkles classes; editable after insert)
+  var BLOCKS = {
+    heading: { name: '📝 Заголовок + текст', html: '<div class="padding-global"><div class="w-layout-blockcontainer container-large w-container" style="padding-top:64px;padding-bottom:64px"><div class="heading-style-h2">Новый заголовок</div><p class="text-size-large" style="margin-top:14px;max-width:760px">Текст раздела. Дважды кликните, чтобы отредактировать.</p></div></div>' },
+    cta: { name: '🎯 Призыв к действию', html: '<div class="padding-global"><div class="w-layout-blockcontainer container-large w-container" style="padding-top:56px;padding-bottom:56px;text-align:center"><div class="heading-style-h2">Готовы заказать уборку?</div><p class="text-size-large" style="margin:14px auto 0;max-width:620px">Оставьте заявку — мы перезвоним и согласуем время.</p><a href="/book-cleaning" style="display:inline-block;margin-top:22px;background:#0c2959;color:#fff;padding:14px 28px;border-radius:12px;text-decoration:none;font-weight:700">Записаться</a></div></div>' },
+    two: { name: '🧱 Две колонки', html: '<div class="padding-global"><div class="w-layout-blockcontainer container-large w-container" style="padding-top:56px;padding-bottom:56px;display:grid;grid-template-columns:1fr 1fr;gap:32px"><div><div class="heading-style-h4">Колонка 1</div><p class="text-size-large" style="margin-top:10px">Текст первой колонки.</p></div><div><div class="heading-style-h4">Колонка 2</div><p class="text-size-large" style="margin-top:10px">Текст второй колонки.</p></div></div></div>' },
+    image_text: { name: '🖼 Картинка + текст', html: '<div class="padding-global"><div class="w-layout-blockcontainer container-large w-container" style="padding-top:56px;padding-bottom:56px;display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:center"><img src="https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cac6/6937d9a66b88a8c458db6362_book-about.avif" alt="" style="width:100%;border-radius:18px"/><div><div class="heading-style-h3">Заголовок</div><p class="text-size-large" style="margin-top:12px">Описание услуги или преимущества.</p></div></div></div>' },
+    spacer: { name: '↕ Отступ (пустой)', html: '<div style="height:80px"></div>' }
+  };
+  function uid4() { var s = ''; for (var i = 0; i < 6; i++) s += 'abcdefghijklmnopqrstuvwxyz0123456789'[Math.floor((Date.now() + i * 7 + performance.now()) % 36)]; return s + (Date.now() % 1000); }
+  function insertBlock(key, afterSec) {
+    var tpl = BLOCKS[key]; if (!tpl) return;
+    var id = uid4(); var m = mainWrap(); if (!m) return;
+    var sec = document.createElement('section'); sec.className = 'lg-added'; sec.setAttribute('data-lgadd', id); sec.innerHTML = tpl.html;
+    if (afterSec && afterSec.parentElement === m) m.insertBefore(sec, afterSec.nextSibling); else m.appendChild(sec);
+    markEditable();
+    CH.added.push({ id: id, html: cleanClone(sec).outerHTML });
+    saveOrder(); setStatus('✓ блок добавлен'); blkSec = sec; placeBlk();
+  }
+  function openAddPicker(afterSec) {
+    var ov = document.createElement('div'); ov.id = 'eed-pick';
+    var h = '<div class="eed-pick-card"><div class="eed-pick-h">Добавить блок</div><div class="eed-pick-grid">';
+    Object.keys(BLOCKS).forEach(function (k) { h += '<button data-tpl="' + k + '">' + BLOCKS[k].name + '</button>'; });
+    h += '</div><button class="eed-pick-x">Отмена</button></div>';
+    ov.innerHTML = h; document.body.appendChild(ov);
+    ov.addEventListener('click', function (e) { if (e.target === ov || e.target.classList.contains('eed-pick-x')) { ov.remove(); return; } var b = e.target.closest('[data-tpl]'); if (b) { insertBlock(b.dataset.tpl, afterSec); ov.remove(); } });
+  }
+
   function setBlkMode(on) {
     blkMode = on; document.body.classList.toggle('eed-blkmode', on);
     var btn = document.getElementById('eedblk'); if (btn) btn.classList.toggle('on', on);
@@ -358,7 +426,7 @@
   function toggleMobile(btn) {
     if (mobOverlay) { mobOverlay.remove(); mobOverlay = null; btn.classList.remove('on'); return; }
     var clone = document.documentElement.cloneNode(true);
-    clone.querySelectorAll('#eed,#eedmob-ov,#eed-hb,#eed-rtb,#eed-blk,.eed-badge,script').forEach(function (n) { n.remove(); });
+    clone.querySelectorAll('#eed,#eedmob-ov,#eed-hb,#eed-rtb,#eed-blk,#eed-pick,.eed-badge,script').forEach(function (n) { n.remove(); });
     clone.querySelectorAll('[contenteditable]').forEach(function (e) { e.removeAttribute('contenteditable'); });
     clone.querySelectorAll('.eed-sel').forEach(function (e) { e.classList.remove('eed-sel'); });
     var ov = document.createElement('div'); ov.id = 'eedmob-ov';
@@ -446,6 +514,7 @@
       CH.texts = p.texts || []; CH.textsel = p.textsel || []; CH.links = p.links || [];
       CH.images = p.images || []; CH.backgrounds = p.backgrounds || []; CH.styles = p.styles || []; CH.removed = p.removed || [];
       CH.videos = p.videos || []; CH.blocks = p.blocks && (p.blocks.order || p.blocks.hidden) ? { order: p.blocks.order || [], hidden: p.blocks.hidden || [] } : { order: [], hidden: [] };
+      CH.added = p.added || [];
       applyOverrides(p);
       applyBlocksLocal();
       document.querySelectorAll('[data-eedit]').forEach(function (el) { el.dataset.eorig = (el.textContent || '').trim(); });
