@@ -629,6 +629,8 @@
       if (gt) { // SEL is inside a grid column — resize that column's track instead (plain width is capped by the track)
         var cur = parseFloat(gt.cols[gt.track]) || Math.round(gt.item.getBoundingClientRect().width);
         gt.cols[gt.track] = Math.max(80, cur + step) + 'px';
+        // 2-column grid → move the divider: shrink the other column by the same amount so it never overflows
+        if (gt.cols.length === 2) { var o = 1 - gt.track, oc = parseFloat(gt.cols[o]); if (!isNaN(oc)) gt.cols[o] = Math.max(80, oc - step) + 'px'; }
         gt.grid.style.setProperty('grid-template-columns', gt.cols.join(' '), 'important');
         recStyle(gt.grid); setStatus('↔ ширина колонки: ' + gt.cols[gt.track]);
       } else {
