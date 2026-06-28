@@ -17,7 +17,7 @@ const t = locale === 'ru'
       err: 'Не удалось отправить. Позвоните: +373 79 955 044', need: 'Заполните имя и телефон.', from: 'от',
       consent: 'Я согласен(-на) на обработку персональных данных согласно', privacy: 'политике конфиденциальности', privacyUrl: '/privacy',
       consentNeed: 'Подтвердите согласие на обработку данных.', phoneBad: 'Введите корректный номер: +373 XX XXX XXX.',
-      s_type: 'Тип уборки', s_area: 'Площадь', s_floor: 'Этаж и лифт', s_win: 'Окна', s_extra: 'Дополнительные услуги', tap: 'нажмите, чтобы выбрать' }
+      s_type: 'Тип уборки', s_area: 'Площадь', s_floor: 'Этаж', s_win: 'Окна', s_extra: 'Дополнительные услуги', tap: 'нажмите, чтобы выбрать' }
   : { back: 'Înapoi', next: 'Înainte', est: 'Cost aproximativ', done: 'Gata',
       comments: 'Comentariu (ce e important să știm)', commentsPh: 'De exemplu: murdărie puternică, animale, o anumită zi…',
       photos: 'Fotografii (opțional)', photosHint: 'Ajută la o estimare mai exactă. Până la 6 foto.', addPhoto: 'Adaugă foto', details: 'Comentariu și foto',
@@ -26,18 +26,20 @@ const t = locale === 'ru'
       err: 'Nu s-a putut trimite. Sunați: +373 79 955 044', need: 'Completați numele și telefonul.', from: 'de la',
       consent: 'Sunt de acord cu prelucrarea datelor cu caracter personal conform', privacy: 'politicii de confidențialitate', privacyUrl: '/ro/privacy',
       consentNeed: 'Confirmați acordul privind prelucrarea datelor.', phoneBad: 'Introduceți un număr valid: +373 XX XXX XXX.',
-      s_type: 'Tipul curățeniei', s_area: 'Suprafața', s_floor: 'Etaj și lift', s_win: 'Geamuri', s_extra: 'Servicii suplimentare', tap: 'apăsați pentru a alege' };
+      s_type: 'Tipul curățeniei', s_area: 'Suprafața', s_floor: 'Etajul', s_win: 'Geamuri', s_extra: 'Servicii suplimentare', tap: 'apăsați pentru a alege' };
 
 const used = new Set<string>();
 const steps: any[] = [];
-const typeFields = fields.filter((f: any) => f.affects === 'rate');
+const typeFields = fields.filter((f: any) => f.affects === 'rate' && !f.showIf);
 if (typeFields.length) { steps.push({ title: t.s_type, fields: typeFields, cards: true }); typeFields.forEach((f: any) => used.add(f.key)); }
+// conditional rate sub-selects (e.g. "с мебелью" for post-reno) — own step right after type
+fields.filter((f: any) => f.affects === 'rate' && f.showIf && !used.has(f.key)).forEach((f: any) => { steps.push({ title: f.label?.[L] || f.key, fields: [f] }); used.add(f.key); });
 const areaF = fields.find((f: any) => f.type === 'number' && f.perUnitFrom === 'rate');
 if (areaF) { steps.push({ title: t.s_area, fields: [areaF] }); used.add(areaF.key); }
 const floorF = fields.find((f: any) => f.key === 'floor');
-if (floorF) { steps.push({ title: t.s_floor, fields: [floorF], lift: true }); used.add('floor'); }
 const winFields = fields.filter((f: any) => f.key.indexOf('win') === 0 && !used.has(f.key));
 if (winFields.length) { steps.push({ title: t.s_win, fields: winFields }); winFields.forEach((f: any) => used.add(f.key)); }
+if (floorF) { steps.push({ title: t.s_floor, fields: [floorF], lift: floorF.showLift === true }); used.add('floor'); }
 const rest = fields.filter((f: any) => !used.has(f.key));
 if (rest.length) steps.push({ title: t.s_extra, fields: rest, tiles: true });
 const detailsStep = steps.length;
@@ -176,7 +178,7 @@ const tileIco: Record<string, string> = { surfaces: '🧴', kitchen: '🍳', bat
   </section>
 
 <script type="application/json" id={uid + '-cfg'} set:html={JSON.stringify(cfg)} is:inline />
-<script define:vars={{ SUPABASE_URL, SUPABASE_KEY, PROJECT_ID, locale, slug: calc.slug, t, totalSteps, uid }}>
+<script define:vars={{ SUPABASE_URL, SUPABASE_KEY, PROJECT_ID, locale, slug: calc.slug, t, totalSteps, detailsStep, uid }}>
   (function () {
     var cfg = JSON.parse(document.getElementById(uid + '-cfg').textContent);
     var root = document.getElementById(uid);
@@ -187,11 +189,14 @@ const tileIco: Record<string, string> = { surfaces: '🧴', kitchen: '🍳', bat
       else if (f.type === 'multi') state[f.key] = [];
     });
     function fieldByKey(k) { return cfg.fields.find(function (f) { return f.key === k; }); }
+    // conditional visibility: a field shows/counts only if its showIf condition holds
+    function visible(f) { return !f || !f.showIf || (f.showIf.in || []).indexOf(state[f.showIf.field]) >= 0; }
 
     function compute() {
       var total = cfg.base || 0, mult = 1, rates = {};
-      cfg.fields.forEach(function (f) { if (f.type === 'select' && f.affects) { var o = (f.options || []).find(function (x) { return x.value === state[f.key]; }); if (o && o.rate != null) rates[f.affects] = o.rate; } });
+      cfg.fields.forEach(function (f) { if (visible(f) && f.type === 'select' && f.affects) { var o = (f.options || []).find(function (x) { return x.value === state[f.key]; }); if (o && o.rate != null) rates[f.affects] = o.rate; } });
       cfg.fields.forEach(function (f) {
+        if (!visible(f)) return;
         if (f.type === 'select') { var o = (f.options || []).find(function (x) { return x.value === state[f.key]; }); if (!o) return; if (o.add) total += o.add; if (o.mult != null) mult *= o.mult; }
         else if (f.type === 'number') { var per = f.perUnit != null ? f.perUnit : (f.perUnitFrom ? (rates[f.perUnitFrom] || 0) : 0); var c = (Number(state[f.key]) || 0) * per; if (f.doubleIf && (f.doubleIf.in || []).indexOf(state[f.doubleIf.field]) >= 0) c *= 2; total += c; }
         else if (f.type === 'multi') { (state[f.key] || []).forEach(function (v) { var o = (f.options || []).find(function (x) { return x.value === v; }); if (o && o.add) total += o.add; }); }
@@ -249,17 +254,39 @@ const tileIco: Record<string, string> = { surfaces: '🧴', kitchen: '🍳', bat
     modal.querySelector('.calc-modal-done').addEventListener('click', closeModal);
     modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
 
-    function showStep(n) {
-      step = Math.max(0, Math.min(totalSteps - 1, n));
-      root.querySelectorAll('.calc-step').forEach(function (el) { el.style.display = Number(el.dataset.step) === step ? '' : 'none'; });
-      document.getElementById(uid + '-stepno').textContent = step + 1;
-      document.getElementById(uid + '-bar').style.width = ((step + 1) / totalSteps * 100) + '%';
-      document.getElementById(uid + '-back').style.visibility = step === 0 ? 'hidden' : 'visible';
-      document.getElementById(uid + '-next').style.display = step === totalSteps - 1 ? 'none' : '';
+    // dynamic steps: skip steps whose fields are all hidden by showIf; hide hidden fields
+    var stepEls = [].slice.call(root.querySelectorAll('.calc-step'));
+    function stepActive(el) {
+      if (Number(el.dataset.step) === detailsStep) return true;
+      var any = false;
+      el.querySelectorAll('.calc-field,.calc-tile').forEach(function (n) {
+        var f = fieldByKey(n.dataset.key);
+        if (f ? visible(f) : true) any = true;
+      });
+      return any;
+    }
+    function applyFieldVisibility() {
+      root.querySelectorAll('.calc-field,.calc-tile').forEach(function (n) {
+        var f = fieldByKey(n.dataset.key);
+        n.style.display = (f && !visible(f)) ? 'none' : '';
+      });
+    }
+    function order() { return stepEls.filter(stepActive).map(function (el) { return Number(el.dataset.step); }); }
+    var pos = 0;
+    function showStep(p) {
+      applyFieldVisibility();
+      var ord = order();
+      pos = Math.max(0, Math.min(ord.length - 1, p));
+      var actual = ord[pos];
+      stepEls.forEach(function (el) { el.style.display = Number(el.dataset.step) === actual ? '' : 'none'; });
+      document.getElementById(uid + '-stepno').textContent = pos + 1;
+      document.getElementById(uid + '-bar').style.width = ((pos + 1) / ord.length * 100) + '%';
+      document.getElementById(uid + '-back').style.visibility = pos === 0 ? 'hidden' : 'visible';
+      document.getElementById(uid + '-next').style.display = pos === ord.length - 1 ? 'none' : '';
       root.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
-    document.getElementById(uid + '-next').addEventListener('click', function () { showStep(step + 1); });
-    document.getElementById(uid + '-back').addEventListener('click', function () { showStep(step - 1); });
+    document.getElementById(uid + '-next').addEventListener('click', function () { showStep(pos + 1); });
+    document.getElementById(uid + '-back').addEventListener('click', function () { showStep(pos - 1); });
 
     var fileInput = document.getElementById(uid + '-file'), photosBox = document.getElementById(uid + '-photos');
     document.getElementById(uid + '-add-photo').addEventListener('click', function () { if (photos.length >= 6) return; fileInput.click(); });
