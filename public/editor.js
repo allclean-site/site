@@ -179,7 +179,7 @@
     }
     return parts.join(' > ');
   }
-  var STYLE_PROPS = ['width', 'max-width', 'line-height', 'font-size', 'padding-top', 'padding-bottom', 'padding-left', 'padding-right', 'text-align', 'color', 'background-color', 'border-radius'];
+  var STYLE_PROPS = ['display', 'width', 'max-width', 'line-height', 'font-size', 'padding-top', 'padding-bottom', 'padding-left', 'padding-right', 'text-align', 'color', 'background-color', 'border-radius'];
   function recStyle(el) {
     if (typeof insideAdded === 'function' && insideAdded(el)) { syncAdded(el); return; }
     var sel = cssPath(el), s = {};
@@ -193,18 +193,25 @@
   var TAGS = 'h1,h2,h3,h4,h5,h6,p,a,span,div,li,button,strong,em,blockquote';
   var INLINE = { B: 1, I: 1, EM: 1, STRONG: 1, SPAN: 1, A: 1, BR: 1, SMALL: 1, SUP: 1, SUB: 1, U: 1, MARK: 1, CODE: 1 };
   var INLINE_LEAF = { A: 1, SPAN: 1, STRONG: 1, EM: 1, B: 1, SMALL: 1, U: 1, MARK: 1 };
+  // does el hold a non-whitespace text node directly (not only inside child elements)?
+  function hasDirectText(el) { for (var n = el.firstChild; n; n = n.nextSibling) if (n.nodeType === 3 && (n.nodeValue || '').trim()) return true; return false; }
+  // a DIV/P that only wraps text/inline — the Webflow "second line" split pattern (<h2>text<div>text</div></h2>)
+  function isTextLeafBlock(ch) { if (ch.tagName !== 'DIV' && ch.tagName !== 'P') return false; for (var i = 0; i < ch.children.length; i++) { var g = ch.children[i]; if (INLINE[g.tagName] || isTextLeafBlock(g)) continue; return false; } return true; }
   function markEditable() {
     document.querySelectorAll(TAGS).forEach(function (el) {
       if (el.closest('#eed') || el.hasAttribute('data-eedit')) return;
       if (el.parentElement && el.parentElement.closest('[data-eedit]')) { if (!(el.children.length === 0 && INLINE_LEAF[el.tagName])) return; }
       var t = (el.textContent || '').trim(); if (!t) return;
-      for (var i = 0; i < el.children.length; i++) if (!INLINE[el.children[i].tagName]) return;
+      // Allow block children ONLY when the element itself directly holds text and the child is a text-only
+      // line wrapper (split heading/paragraph). Pure layout containers have no direct text → stay excluded.
+      var dt = hasDirectText(el);
+      for (var i = 0; i < el.children.length; i++) { var ch = el.children[i]; if (INLINE[ch.tagName]) continue; if (dt && isTextLeafBlock(ch)) continue; return; }
       el.setAttribute('data-eedit', ''); el.dataset.eorig = t;
     });
   }
   function showSel() { document.querySelectorAll('.eed-sel').forEach(function (e) { e.classList.remove('eed-sel'); }); if (SEL) SEL.classList.add('eed-sel'); }
   function select(el) { SEL = el; showSel(); updateBar(); }
-  document.addEventListener('dblclick', function (e) { if (blkMode) return; var el = e.target.closest('[data-eedit]'); if (!el) return; e.preventDefault(); e.stopPropagation(); el.setAttribute('contenteditable', 'true'); el.focus(); select(el); showRTB(el); }, true);
+  document.addEventListener('dblclick', function (e) { if (blkMode) return; var el = e.target.closest('[data-eedit]'); if (!el) return; e.preventDefault(); e.stopPropagation(); try { document.execCommand('defaultParagraphSeparator', false, 'br'); } catch (er) {} el.setAttribute('contenteditable', 'true'); el.focus(); select(el); showRTB(el); }, true);
   document.addEventListener('click', function (e) { if (delMode || blkMode) return; var el = e.target.closest && e.target.closest('[data-eedit]'); if (el && el.getAttribute('contenteditable') !== 'true') { e.preventDefault(); select(el); } }, false);
   document.addEventListener('blur', function (e) {
     var el = e.target; if (!el || !el.hasAttribute || !el.hasAttribute('data-eedit')) return;
@@ -536,9 +543,9 @@
     if (t.id === 'eedblk') { setBlkMode(!blkMode); return; }
     if (t.id === 'eedup' && SEL && SEL.parentElement && SEL.parentElement !== document.body) { SEL = SEL.parentElement; showSel(); updateBar(); return; }
     if (t.id === 'eeddel') { setDelMode(!delMode); return; }
-    if (t.dataset && t.dataset.p !== undefined && SEL) { var cp = parseInt(SEL.style.paddingTop) || 0; var npd = Math.max(0, cp + (t.dataset.p === '1' ? 8 : -8)); SEL.style.setProperty('padding-top', npd + 'px', 'important'); SEL.style.setProperty('padding-bottom', npd + 'px', 'important'); recStyle(SEL); }
+    if (t.dataset && t.dataset.p !== undefined && SEL) { if (getComputedStyle(SEL).display === 'inline') SEL.style.setProperty('display', 'inline-block', 'important'); var cp = parseInt(SEL.style.paddingTop) || 0; var npd = Math.max(0, cp + (t.dataset.p === '1' ? 8 : -8)); SEL.style.setProperty('padding-top', npd + 'px', 'important'); SEL.style.setProperty('padding-bottom', npd + 'px', 'important'); recStyle(SEL); }
     if (t.dataset && t.dataset.a !== undefined && SEL) { SEL.style.setProperty('text-align', t.dataset.a, 'important'); recStyle(SEL); }
-    if (t.dataset && t.dataset.w !== undefined && SEL) { var cw = parseInt(SEL.style.width) || Math.round(SEL.getBoundingClientRect().width); var nw = Math.max(80, cw + (t.dataset.w === '1' ? 40 : -40)); SEL.style.setProperty('width', nw + 'px', 'important'); SEL.style.setProperty('max-width', nw + 'px', 'important'); recStyle(SEL); }
+    if (t.dataset && t.dataset.w !== undefined && SEL) { if (getComputedStyle(SEL).display === 'inline') SEL.style.setProperty('display', 'inline-block', 'important'); var cw = parseInt(SEL.style.width) || Math.round(SEL.getBoundingClientRect().width); var nw = Math.max(80, cw + (t.dataset.w === '1' ? 40 : -40)); SEL.style.setProperty('width', nw + 'px', 'important'); SEL.style.setProperty('max-width', nw + 'px', 'important'); recStyle(SEL); }
     if (t.dataset && t.dataset.l !== undefined && SEL) { var cl = parseFloat(SEL.style.lineHeight) || parseFloat(getComputedStyle(SEL).lineHeight) || 24; SEL.style.lineHeight = Math.max(10, cl + (t.dataset.l === '1' ? 2 : -2)) + 'px'; recStyle(SEL); }
     if (t.dataset && t.dataset.f !== undefined && SEL) { var cf = parseFloat(SEL.style.fontSize) || parseFloat(getComputedStyle(SEL).fontSize) || 16; var nf = Math.max(8, Math.round((cf + (t.dataset.f === '1' ? 2 : -2)) * 10) / 10); SEL.style.setProperty('font-size', nf + 'px', 'important'); SEL.querySelectorAll('*').forEach(function (c) { if (!c.children.length) c.style.setProperty('font-size', 'inherit', 'important'); }); recStyle(SEL); }
   });
