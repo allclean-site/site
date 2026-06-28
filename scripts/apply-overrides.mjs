@@ -79,7 +79,10 @@ function applyPayload($, p) {
       }
     } catch {}
   });
-  (p.removed || []).forEach((sel) => { try { $(sel).remove(); } catch {} });
+  // Hide (don't physically remove) — mirrors the editor exactly. Physically removing elements shifts the
+  // :nth-of-type index of later siblings, which corrupts other nth-of-type selectors (further `removed`
+  // entries AND the runtime style rules), making the published page diverge from the editor.
+  (p.removed || []).forEach((sel) => { try { $(sel).each((_, el) => { const $el = $(el); $el.attr('style', ($el.attr('style') || '') + ';display:none !important;'); }); } catch {} });
   // block-level (Tilda-style editor): add / reorder / hide whole sections of the main wrapper
   const hasBlocks = (p.added && p.added.length) || (p.blocks && ((p.blocks.order && p.blocks.order.length) || (p.blocks.hidden && p.blocks.hidden.length)));
   if (hasBlocks) {
