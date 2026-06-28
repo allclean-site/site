@@ -182,7 +182,27 @@
     }
     return parts.join(' > ');
   }
-  var STYLE_PROPS = ['display', 'width', 'max-width', 'line-height', 'font-size', 'padding-top', 'padding-bottom', 'padding-left', 'padding-right', 'text-align', 'color', 'background-color', 'border-radius'];
+  var STYLE_PROPS = ['display', 'width', 'max-width', 'line-height', 'font-size', 'padding-top', 'padding-bottom', 'padding-left', 'padding-right', 'text-align', 'color', 'background-color', 'border-radius', 'grid-template-columns'];
+  // If the selected element (or a close ancestor) sits inside a multi-column CSS grid, its width is fixed
+  // by the grid track — plain width can't change it. Return the {grid, item, track} so Ширина resizes the track.
+  function gridTrackTarget(el) {
+    var n = 0;
+    while (el && el !== document.body && n < 6) {
+      var p = el.parentElement;
+      if (p) {
+        var pcs = getComputedStyle(p);
+        if (pcs.display.indexOf('grid') >= 0) {
+          var cols = (pcs.gridTemplateColumns || '').trim().split(/\s+/);
+          if (cols.length > 1 && cols[0] !== 'none') {
+            var idx = Array.prototype.indexOf.call(p.children, el);
+            if (idx >= 0) return { grid: p, item: el, cols: cols, track: idx % cols.length };
+          }
+        }
+      }
+      el = p; n++;
+    }
+    return null;
+  }
   function recStyle(el) {
     if (typeof insideAdded === 'function' && insideAdded(el)) { syncAdded(el); return; }
     var sel = cssPath(el), cur = {};
@@ -603,7 +623,20 @@
     if (t.id === 'eeddel') { setDelMode(!delMode); return; }
     if (t.dataset && t.dataset.p !== undefined && SEL) { if (getComputedStyle(SEL).display === 'inline') SEL.style.setProperty('display', 'inline-block', 'important'); var cp = parseInt(SEL.style.paddingTop) || 0; var npd = Math.max(0, cp + (t.dataset.p === '1' ? 8 : -8)); SEL.style.setProperty('padding-top', npd + 'px', 'important'); SEL.style.setProperty('padding-bottom', npd + 'px', 'important'); recStyle(SEL); }
     if (t.dataset && t.dataset.a !== undefined && SEL) { SEL.style.setProperty('text-align', t.dataset.a, 'important'); recStyle(SEL); }
-    if (t.dataset && t.dataset.w !== undefined && SEL) { if (getComputedStyle(SEL).display === 'inline') SEL.style.setProperty('display', 'inline-block', 'important'); var cw = parseInt(SEL.style.width) || Math.round(SEL.getBoundingClientRect().width); var nw = Math.max(80, cw + (t.dataset.w === '1' ? 40 : -40)); SEL.style.setProperty('width', nw + 'px', 'important'); SEL.style.setProperty('max-width', nw + 'px', 'important'); recStyle(SEL); }
+    if (t.dataset && t.dataset.w !== undefined && SEL) {
+      var step = t.dataset.w === '1' ? 40 : -40;
+      var gt = gridTrackTarget(SEL);
+      if (gt) { // SEL is inside a grid column — resize that column's track instead (plain width is capped by the track)
+        var cur = parseFloat(gt.cols[gt.track]) || Math.round(gt.item.getBoundingClientRect().width);
+        gt.cols[gt.track] = Math.max(80, cur + step) + 'px';
+        gt.grid.style.setProperty('grid-template-columns', gt.cols.join(' '), 'important');
+        recStyle(gt.grid); setStatus('↔ ширина колонки: ' + gt.cols[gt.track]);
+      } else {
+        if (getComputedStyle(SEL).display === 'inline') SEL.style.setProperty('display', 'inline-block', 'important');
+        var cw = parseInt(SEL.style.width) || Math.round(SEL.getBoundingClientRect().width); var nw = Math.max(80, cw + step);
+        SEL.style.setProperty('width', nw + 'px', 'important'); SEL.style.setProperty('max-width', nw + 'px', 'important'); recStyle(SEL);
+      }
+    }
     if (t.dataset && t.dataset.l !== undefined && SEL) { var cl = parseFloat(SEL.style.lineHeight) || parseFloat(getComputedStyle(SEL).lineHeight) || 24; SEL.style.lineHeight = Math.max(10, cl + (t.dataset.l === '1' ? 2 : -2)) + 'px'; recStyle(SEL); }
     if (t.dataset && t.dataset.f !== undefined && SEL) { var cf = parseFloat(SEL.style.fontSize) || parseFloat(getComputedStyle(SEL).fontSize) || 16; var nf = Math.max(8, Math.round((cf + (t.dataset.f === '1' ? 2 : -2)) * 10) / 10); SEL.style.setProperty('font-size', nf + 'px', 'important'); SEL.querySelectorAll('*').forEach(function (c) { if (!c.children.length) c.style.setProperty('font-size', 'inherit', 'important'); }); recStyle(SEL); }
   });
