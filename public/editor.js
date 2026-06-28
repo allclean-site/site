@@ -15,6 +15,12 @@
   var KEY = sessionStorage.getItem('ac_edit_key') || '';
   var SEL = null, delMode = false;
 
+  // ---------- undo/redo: pristine baseline + snapshots of CH ----------
+  // Captured BEFORE any edits/overrides are applied — the page-wrapper holds header+main+footer.
+  var BASE_HTML = '';
+  try { var _pw = document.querySelector('.page-wrapper'); BASE_HTML = _pw ? _pw.outerHTML : ''; } catch (e) {}
+  var hist = [], hi = -1, restoring = false;
+
   var setStatus = function () {};
   var refreshPw = function () {};
   function focusPw() { var i = document.getElementById('eedpw'); if (i) { i.focus(); i.select(); } }
@@ -34,8 +40,41 @@
       }).catch(function () { setStatus('✗ ошибка сети'); });
   }
   function doSave() { if (!KEY) { setStatus('✗ введите пароль'); refreshPw(); focusPw(); return; } setStatus('сохраняю…'); postJSON(null, function () { setStatus('✓ сохранено (черновик)'); }); }
-  function scheduleSave() { clearTimeout(saveT); saveT = setTimeout(doSave, 700); }
+  function scheduleSave() { pushHist(); clearTimeout(saveT); saveT = setTimeout(doSave, 700); }
   function doPublish() { if (!KEY) { setStatus('✗ введите пароль'); refreshPw(); focusPw(); return; } clearTimeout(saveT); setStatus('публикую…'); postJSON({ publish: true }, function () { setStatus('✓ опубликовано — сайт пересобирается (~1–2 мин)'); }); }
+
+  // ---------- undo / redo ----------
+  function snapState() { return JSON.stringify(payload()); }
+  function pushHist() {
+    if (restoring) return;
+    var s = snapState();
+    if (hist.length && hist[hi] === s) return; // change didn't alter saved state
+    hist = hist.slice(0, hi + 1); hist.push(s);
+    if (hist.length > 80) { hist.shift(); }
+    hi = hist.length - 1; updateUndoUI();
+  }
+  function updateUndoUI() { var u = document.getElementById('eedundo'), r = document.getElementById('eedredo'); if (u) u.disabled = hi <= 0; if (r) r.disabled = hi >= hist.length - 1; }
+  function resetBase() { var cur = document.querySelector('.page-wrapper'); if (!cur || !BASE_HTML) return; var tpl = document.createElement('template'); tpl.innerHTML = BASE_HTML; var fresh = tpl.content.firstElementChild; if (fresh) cur.replaceWith(fresh); }
+  function restoreState(s) {
+    restoring = true;
+    try {
+      var p = JSON.parse(s);
+      CH = { texts: p.texts || [], textsel: p.textsel || [], links: p.links || [], images: p.images || [], backgrounds: p.backgrounds || [], styles: p.styles || [], removed: p.removed || [], videos: p.videos || [], blocks: (p.blocks && (p.blocks.order || p.blocks.hidden)) ? { order: p.blocks.order || [], hidden: p.blocks.hidden || [] } : { order: [], hidden: [] }, added: p.added || [] };
+      resetBase();                       // back to pristine, then re-apply this snapshot
+      applyOverrides(payload());
+      (CH.videos || []).forEach(function (c) { var el = safeQ(c.selector); if (!el) return; var v = el.querySelector('video'); if (v) { v.querySelectorAll('source').forEach(function (x) { x.remove(); }); var src = document.createElement('source'); src.src = c.mp4; v.appendChild(src); if (c.poster) v.setAttribute('poster', c.poster); try { v.load(); } catch (e) {} } el.setAttribute('data-video-urls', c.mp4); if (c.poster) el.setAttribute('data-poster-url', c.poster); });
+      var m = mainWrap();                 // drop baked added-blocks that this snapshot no longer has
+      if (m) [].slice.call(m.querySelectorAll(':scope > section[data-lgadd]')).forEach(function (sec) { var id = sec.getAttribute('data-lgadd'); if (!(CH.added || []).some(function (a) { return a.id === id; })) sec.remove(); });
+      applyBlocksLocal();                 // re-inserts added blocks, reorders, hides, re-marks editable
+      document.querySelectorAll('[data-eedit]').forEach(function (el) { el.dataset.eorig = (el.textContent || '').trim(); });
+      try { if (window.Webflow) { window.Webflow.destroy(); window.Webflow.ready(); var ix = window.Webflow.require && window.Webflow.require('ix2'); if (ix && ix.init) ix.init(); } } catch (e) {}
+      SEL = null; if (typeof showSel === 'function') showSel(); if (typeof updateBar === 'function') updateBar();
+    } catch (e) {}
+    restoring = false; updateUndoUI();
+    if (KEY) { clearTimeout(saveT); postJSON(null, function () {}); } // persist restored draft silently
+  }
+  function doUndo() { if (hi > 0) { hi--; restoreState(hist[hi]); setStatus('↶ отменено'); } }
+  function doRedo() { if (hi < hist.length - 1) { hi++; restoreState(hist[hi]); setStatus('↷ возвращено'); } }
 
   // ---------- image downscale + upload ----------
   function downscaleImage(file, cb) {
@@ -95,6 +134,7 @@
     '#eed button{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.22);border-radius:12px;padding:7px 12px;font-weight:600;cursor:pointer;transition:.15s;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}' +
     '#eed button:hover{background:rgba(255,255,255,.28);border-color:rgba(255,255,255,.35)}' +
     '#eed .alt{background:rgba(255,255,255,.09)}' +
+    '#eed button:disabled{opacity:.3;pointer-events:none}' +
     '#eed #eedpub{background:linear-gradient(135deg,#b07cff,#7c3aed);border:1px solid rgba(255,255,255,.28);box-shadow:0 6px 18px rgba(124,58,237,.55)}' +
     '#eed .on{background:linear-gradient(135deg,rgba(134,239,172,.5),rgba(34,197,94,.5));border-color:rgba(134,239,172,.55)}' +
     '#eed .grp{display:flex;gap:5px;align-items:center;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:4px 9px;font-size:13px}' +
@@ -469,6 +509,8 @@
     '<span class="grp off" id="eeda">Текст <button data-a="left">⬅</button><button data-a="center">⬍</button><button data-a="right">➡</button></span>' +
     '<span class="grp off" id="eedc">Цвет <input type="color" data-col="text" title="цвет текста"/><input type="color" data-col="bg" title="цвет фона"/></span>' +
     '<button class="alt off" id="eedup" title="выбрать родительский блок (чтобы менять ширину контейнера)">⬆ блок</button>' +
+    '<button class="alt" id="eedundo" title="Отменить (Ctrl+Z)">↶ Назад</button>' +
+    '<button class="alt" id="eedredo" title="Вернуть (Ctrl+Shift+Z / Ctrl+Y)">↷ Вперёд</button>' +
     '<button class="alt" id="eedblk" title="режим блоков: перемещение/скрытие секций">🧩 Блоки</button>' +
     '<button class="alt" id="eedmob" title="мобильный вид">📱 Моб.</button>' +
     '<button class="alt" id="eeddel" title="режим удаления">🗑</button>' +
@@ -488,6 +530,8 @@
   });
   bar.addEventListener('click', function (e) {
     var t = e.target;
+    if (t.id === 'eedundo') { doUndo(); return; }
+    if (t.id === 'eedredo') { doRedo(); return; }
     if (t.id === 'eedmob') { toggleMobile(t); return; }
     if (t.id === 'eedblk') { setBlkMode(!blkMode); return; }
     if (t.id === 'eedup' && SEL && SEL.parentElement && SEL.parentElement !== document.body) { SEL = SEL.parentElement; showSel(); updateBar(); return; }
@@ -510,6 +554,16 @@
   document.getElementById('eedpub').addEventListener('click', doPublish);
   refreshPw();
   if (!KEY) setStatus('введите пароль для публикации');
+
+  // Ctrl+Z undo / Ctrl+Shift+Z (or Ctrl+Y) redo — but let the browser handle undo while typing in a field
+  document.addEventListener('keydown', function (e) {
+    if (!(e.ctrlKey || e.metaKey)) return;
+    var ae = document.activeElement;
+    if (ae && ((ae.getAttribute && ae.getAttribute('contenteditable') === 'true') || ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) return;
+    var k = (e.key || '').toLowerCase();
+    if (k === 'z' && !e.shiftKey) { e.preventDefault(); doUndo(); }
+    else if (k === 'y' || (k === 'z' && e.shiftKey)) { e.preventDefault(); doRedo(); }
+  }, true);
 
   // ---------- apply published overrides (edit-mode preview), then seed CH ----------
   function applyOverrides(p) {
@@ -537,5 +591,6 @@
       applyOverrides(p);
       applyBlocksLocal();
       document.querySelectorAll('[data-eedit]').forEach(function (el) { el.dataset.eorig = (el.textContent || '').trim(); });
-    }).catch(function () { ensureLgids(); });
+      hist = [snapState()]; hi = 0; updateUndoUI();
+    }).catch(function () { ensureLgids(); hist = [snapState()]; hi = 0; updateUndoUI(); });
 })();
