@@ -16,7 +16,7 @@ const t = locale === 'ru'
       note: 'Это предварительная оценка. Точную цену подтвердит менеджер.', ok: 'Заявка отправлена! Менеджер свяжется с вами.',
       err: 'Не удалось отправить. Позвоните: +373 79 955 044', need: 'Заполните имя и телефон.', from: 'от',
       consent: 'Я согласен(-на) на обработку персональных данных согласно', privacy: 'политике конфиденциальности', privacyUrl: '/privacy',
-      consentNeed: 'Подтвердите согласие на обработку данных.', phoneBad: 'Введите корректный номер: +373 XX XXX XXX.',
+      consentNeed: 'Подтвердите согласие на обработку данных.', phoneBad: 'Введите корректный номер: +373 XX XXX XXX.', photoNeed: 'Для этого варианта добавьте хотя бы одно фото.',
       s_type: 'Тип уборки', s_area: 'Площадь', s_floor: 'Этаж', s_win: 'Окна', s_extra: 'Дополнительные услуги', tap: 'нажмите, чтобы выбрать' }
   : { back: 'Înapoi', next: 'Înainte', est: 'Cost aproximativ', done: 'Gata',
       comments: 'Comentariu (ce e important să știm)', commentsPh: 'De exemplu: murdărie puternică, animale, o anumită zi…',
@@ -25,13 +25,13 @@ const t = locale === 'ru'
       note: 'Aceasta este o estimare. Prețul exact va fi confirmat de manager.', ok: 'Cererea a fost trimisă! Managerul vă va contacta.',
       err: 'Nu s-a putut trimite. Sunați: +373 79 955 044', need: 'Completați numele și telefonul.', from: 'de la',
       consent: 'Sunt de acord cu prelucrarea datelor cu caracter personal conform', privacy: 'politicii de confidențialitate', privacyUrl: '/ro/privacy',
-      consentNeed: 'Confirmați acordul privind prelucrarea datelor.', phoneBad: 'Introduceți un număr valid: +373 XX XXX XXX.',
+      consentNeed: 'Confirmați acordul privind prelucrarea datelor.', phoneBad: 'Introduceți un număr valid: +373 XX XXX XXX.', photoNeed: 'Pentru această opțiune adăugați cel puțin o fotografie.',
       s_type: 'Tipul curățeniei', s_area: 'Suprafața', s_floor: 'Etajul', s_win: 'Geamuri', s_extra: 'Servicii suplimentare', tap: 'apăsați pentru a alege' };
 
 const used = new Set<string>();
 const steps: any[] = [];
 const typeFields = fields.filter((f: any) => f.affects === 'rate' && !f.showIf);
-if (typeFields.length) { steps.push({ title: t.s_type, fields: typeFields, cards: true }); typeFields.forEach((f: any) => used.add(f.key)); }
+if (typeFields.length) { steps.push({ title: typeFields[0].label?.[L] || t.s_type, fields: typeFields, cards: true }); typeFields.forEach((f: any) => used.add(f.key)); }
 // conditional rate sub-selects (e.g. "с мебелью" for post-reno) — own step right after type
 fields.filter((f: any) => f.affects === 'rate' && f.showIf && !used.has(f.key)).forEach((f: any) => { steps.push({ title: f.label?.[L] || f.key, fields: [f] }); used.add(f.key); });
 const areaF = fields.find((f: any) => f.type === 'number' && f.perUnitFrom === 'rate');
@@ -321,6 +321,9 @@ const tileIco: Record<string, string> = { surfaces: '🧴', kitchen: '🍳', bat
       if (!nm) { msg.textContent = t.need; msg.className = 'calc-msg err'; return; }
       if (phDigits.length !== 11) { msg.textContent = t.phoneBad; msg.className = 'calc-msg err'; return; }
       if (!document.getElementById(uid + '-consent').checked) { msg.textContent = t.consentNeed; msg.className = 'calc-msg err'; return; }
+      // some options (e.g. facade washing) require a photo
+      var needPhoto = cfg.fields.some(function (f) { if (!visible(f) || f.type !== 'select') return false; var o = (f.options || []).find(function (x) { return x.value === state[f.key]; }); return o && o.requirePhoto; });
+      if (needPhoto && !photos.length) { msg.textContent = t.photoNeed; msg.className = 'calc-msg err'; return; }
       msg.textContent = '…'; msg.className = 'calc-msg';
       submitting = true; submitBtn.disabled = true;
       var sel = {};
