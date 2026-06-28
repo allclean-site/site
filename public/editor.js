@@ -144,7 +144,7 @@
     '#eed input::placeholder{color:rgba(255,255,255,.62)}' +
     '#eed input[type=color]{width:30px;height:26px;padding:1px;cursor:pointer}' +
     /* rich-text formatting toolbar (shown while editing text) */
-    '#eed-rtb{position:absolute;z-index:1000002;display:none;gap:4px;padding:5px;border-radius:12px;' +
+    '#eed-rtb{position:absolute;z-index:1000002;display:none;gap:4px;padding:5px;border-radius:12px;flex-wrap:wrap;max-width:min(94vw,470px);' +
       'background:linear-gradient(135deg,rgba(139,92,246,.42),rgba(24,14,46,.66));-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);' +
       'border:1px solid rgba(184,160,255,.4);box-shadow:0 10px 30px rgba(76,29,149,.5)}' +
     '.eed-rtbtn{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.22);border-radius:8px;min-width:30px;height:28px;padding:0 8px;font:600 13px Inter,system-ui,sans-serif;cursor:pointer}' +
@@ -225,17 +225,56 @@
   }, true);
 
   // ---------- rich-text formatting toolbar (Tilda-style) ----------
+  // Per-SELECTION typography: bold/italic/underline, font size, weight and family — applied by
+  // wrapping the highlighted range in a styled <span>, so different fonts/sizes can live inside one
+  // section. Persisted via the textsel (innerHTML) path so it bakes into the published static page.
+  var RTB_FONTS = [
+    { label: 'Авто', css: '' },
+    { label: 'Заголовочный', css: '"Decalotype Fix", Onest, sans-serif' },
+    { label: 'Текстовый', css: 'Bricolagegrotesque, Onest, sans-serif' },
+    { label: 'Сериф', css: 'Georgia, "Times New Roman", serif' },
+    { label: 'Моно', css: '"DejaVu Sans Mono", Consolas, monospace' }
+  ];
+  var RTB_WEIGHTS = ['300', '400', '500', '600', '700', '800'];
+  var rtbFontIdx = 0, rtbWeightIdx = 1;
   var rtb = document.createElement('div'); rtb.id = 'eed-rtb'; document.body.appendChild(rtb);
-  [['bold', '<b>Ж</b>'], ['italic', '<i>К</i>'], ['underline', '<u>Ч</u>'], ['ul', '• список'], ['link', '🔗'], ['clear', '✕ формат']].forEach(function (it) {
-    var b = document.createElement('button'); b.className = 'eed-rtbtn'; b.dataset.cmd = it[0]; b.innerHTML = it[1]; rtb.appendChild(b);
+  [['bold', '<b>Ж</b>', 'жирный'], ['italic', '<i>К</i>', 'курсив'], ['underline', '<u>Ч</u>', 'подчёркнутый'],
+   ['fsdown', 'A−', 'меньше шрифт'], ['fsup', 'A＋', 'больше шрифт'],
+   ['weight', 'Вес', 'толщина (начертание)'], ['font', 'Шрифт', 'гарнитура'],
+   ['ul', '•', 'список'], ['link', '🔗', 'ссылка'], ['clear', '✕', 'очистить формат']
+  ].forEach(function (it) {
+    var b = document.createElement('button'); b.className = 'eed-rtbtn'; b.dataset.cmd = it[0]; b.innerHTML = it[1]; b.title = it[2]; rtb.appendChild(b);
   });
+  function rtbHost() { return document.querySelector('[data-eedit][contenteditable="true"]'); }
+  function rtbEnsureSel(host) { var s = window.getSelection(); if (!s.rangeCount || s.isCollapsed || !host.contains(s.anchorNode)) { var r = document.createRange(); r.selectNodeContents(host); s.removeAllRanges(); s.addRange(r); } return s; }
+  function rtbSelStyle(prop) { var s = window.getSelection(); if (!s.rangeCount) return ''; var n = s.anchorNode, el = n && n.nodeType === 3 ? n.parentElement : n; return el ? getComputedStyle(el).getPropertyValue(prop) : ''; }
+  // record the edited element's innerHTML (spans included) so it persists + bakes
+  function rtbRecord(host) {
+    if (insideAdded(host)) { syncAdded(host); return; }
+    var sel = cssPath(host); CH.textsel = CH.textsel.filter(function (c) { return c.selector !== sel; }); CH.textsel.push({ selector: sel, html: host.innerHTML });
+    host.dataset.eorig = (host.textContent || '').trim(); scheduleSave();
+  }
+  // wrap current selection (or whole element if nothing highlighted) in a span carrying these styles
+  function rtbApply(styles) {
+    var host = rtbHost(); if (!host) return;
+    var s = rtbEnsureSel(host); if (!s.rangeCount) return; var r = s.getRangeAt(0); if (r.collapsed) return;
+    var span = document.createElement('span'); Object.keys(styles).forEach(function (k) { span.style.setProperty(k, styles[k], 'important'); });
+    try { r.surroundContents(span); } catch (e) { var f = r.extractContents(); span.appendChild(f); r.insertNode(span); }
+    var nr = document.createRange(); nr.selectNodeContents(span); s.removeAllRanges(); s.addRange(nr);
+    rtbRecord(host);
+  }
   rtb.addEventListener('mousedown', function (e) {
-    var b = e.target.closest('.eed-rtbtn'); if (!b) return; e.preventDefault(); // keep caret in the editable
-    var c = b.dataset.cmd;
-    if (c === 'bold' || c === 'italic' || c === 'underline') document.execCommand(c, false);
-    else if (c === 'ul') document.execCommand('insertUnorderedList', false);
-    else if (c === 'link') { var u = prompt('Ссылка (URL):', 'https://'); if (u) document.execCommand('createLink', false, u); }
-    else if (c === 'clear') { document.execCommand('removeFormat', false); document.execCommand('unlink', false); }
+    var b = e.target.closest('.eed-rtbtn'); if (!b) return; e.preventDefault(); // keep the selection alive
+    var c = b.dataset.cmd, host = rtbHost(); if (!host) return;
+    if (c === 'bold') { var w = parseInt(rtbSelStyle('font-weight')) || 400; rtbApply({ 'font-weight': w >= 600 ? '400' : '700' }); }
+    else if (c === 'italic') { rtbApply({ 'font-style': /italic|oblique/.test(rtbSelStyle('font-style')) ? 'normal' : 'italic' }); }
+    else if (c === 'underline') { rtbApply({ 'text-decoration': /underline/.test(rtbSelStyle('text-decoration')) ? 'none' : 'underline' }); }
+    else if (c === 'fsup' || c === 'fsdown') { var cur = parseFloat(rtbSelStyle('font-size')) || 16; rtbApply({ 'font-size': Math.max(8, Math.round(cur + (c === 'fsup' ? 2 : -2))) + 'px' }); }
+    else if (c === 'weight') { rtbWeightIdx = (rtbWeightIdx + 1) % RTB_WEIGHTS.length; rtbApply({ 'font-weight': RTB_WEIGHTS[rtbWeightIdx] }); setStatus('толщина ' + RTB_WEIGHTS[rtbWeightIdx]); }
+    else if (c === 'font') { rtbFontIdx = (rtbFontIdx + 1) % RTB_FONTS.length; var f = RTB_FONTS[rtbFontIdx]; rtbApply({ 'font-family': f.css || 'inherit' }); setStatus('шрифт: ' + f.label); }
+    else if (c === 'ul') { document.execCommand('insertUnorderedList', false); rtbRecord(host); }
+    else if (c === 'link') { var u = prompt('Ссылка (URL):', 'https://'); if (u) { rtbEnsureSel(host); document.execCommand('createLink', false, u); rtbRecord(host); } }
+    else if (c === 'clear') { rtbEnsureSel(host); document.execCommand('removeFormat', false); document.execCommand('unlink', false); rtbRecord(host); }
   });
   function showRTB(el) { var r = el.getBoundingClientRect(); rtb.style.top = Math.max(8, window.scrollY + r.top - 44) + 'px'; rtb.style.left = (window.scrollX + r.left) + 'px'; rtb.style.display = 'flex'; }
   function hideRTB() { rtb.style.display = 'none'; }
@@ -487,21 +526,30 @@
   document.addEventListener('pointerover', function (e) { if (!blkMode) return; if (e.target.closest('#eed,#eed-blk')) return; var s = topSectionOf(e.target); if (s && s !== blkSec) { blkSec = s; placeBlk(); } }, true);
   window.addEventListener('scroll', function () { if (blkMode) placeBlk(); }, true);
 
-  // ---------- mobile preview (true 390px viewport via iframe, shows current edits) ----------
-  var mobOverlay = null;
-  function toggleMobile(btn) {
-    if (mobOverlay) { mobOverlay.remove(); mobOverlay = null; btn.classList.remove('on'); return; }
-    var clone = document.documentElement.cloneNode(true);
-    clone.querySelectorAll('#eed,#eedmob-ov,#eed-hb,#eed-rtb,#eed-blk,#eed-pick,.eed-badge,script').forEach(function (n) { n.remove(); });
-    clone.querySelectorAll('[contenteditable]').forEach(function (e) { e.removeAttribute('contenteditable'); });
-    clone.querySelectorAll('.eed-sel').forEach(function (e) { e.classList.remove('eed-sel'); });
+  // ---------- mobile mode (true 390px viewport, FULLY EDITABLE) ----------
+  // Loads the live ?lgedit page inside a phone-width iframe: the editor runs inside it at a real
+  // mobile viewport (so mobile @media rules apply) and every tool works there too. sessionStorage
+  // (the edit key) is shared same-origin, so the inner editor is already authenticated.
+  var mobOverlay = null, mobEdited = false;
+  function openMobileFrame(btn) {
     var ov = document.createElement('div'); ov.id = 'eedmob-ov';
-    ov.innerHTML = '<div class="eedmob-frame"><div class="eedmob-bar"><span>📱 Мобильный предпросмотр (390px)</span><button type="button">✕ закрыть</button></div><iframe></iframe></div>';
+    ov.innerHTML = '<div class="eedmob-frame"><div class="eedmob-bar"><span>📱 Мобильный режим — редактируемый (390px)</span><button type="button">✕ закрыть</button></div><iframe></iframe></div>';
     document.body.appendChild(ov);
-    ov.querySelector('iframe').srcdoc = '<!doctype html>' + clone.outerHTML;
+    var fr = ov.querySelector('iframe');
+    fr.src = location.href.indexOf('lgedit') >= 0 ? location.href : (location.pathname + (location.search ? location.search + '&' : '?') + 'lgedit');
     ov.querySelector('.eedmob-bar button').addEventListener('click', function () { toggleMobile(btn); });
     ov.addEventListener('click', function (e) { if (e.target === ov) toggleMobile(btn); });
-    mobOverlay = ov; btn.classList.add('on');
+    mobOverlay = ov; mobEdited = true; btn.classList.add('on');
+    setStatus('📱 мобильный режим: правки сохраняются; после закрытия обновите для синхронизации');
+  }
+  function toggleMobile(btn) {
+    if (mobOverlay) {
+      mobOverlay.remove(); mobOverlay = null; btn.classList.remove('on');
+      if (mobEdited) { mobEdited = false; setStatus('✓ выйти из моб. режима — обновите (Ctrl+R), чтобы увидеть правки на десктопе'); }
+      return;
+    }
+    if (KEY) { clearTimeout(saveT); postJSON(null, function () {}); } // best-effort flush so the frame loads the latest draft
+    openMobileFrame(btn);
   }
 
   // ---------- toolbar ----------
