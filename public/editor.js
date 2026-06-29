@@ -635,7 +635,16 @@
         // 2-column grid → move the divider: shrink the other column by the same amount so it never overflows
         if (gt.cols.length === 2) { var o = 1 - gt.track, oc = parseFloat(gt.cols[o]); if (!isNaN(oc)) gt.cols[o] = Math.max(80, oc - step) + 'px'; }
         gt.grid.style.setProperty('grid-template-columns', gt.cols.join(' '), 'important');
-        recStyle(gt.grid); setStatus('↔ ширина колонки: ' + gt.cols[gt.track]);
+        recStyle(gt.grid);
+        // Lift fixed-width caps on the containers between the selection and the grid item, so the TEXT
+        // fills the widened column instead of only the coloured backing (e.g. hero-home_top-tile width:528px).
+        var e2 = SEL;
+        while (e2 && e2 !== gt.item && e2 !== document.body) {
+          var ecs = getComputedStyle(e2);
+          if (ecs.maxWidth !== 'none' || /px/.test(ecs.width)) { e2.style.setProperty('width', 'auto', 'important'); e2.style.setProperty('max-width', 'none', 'important'); recStyle(e2); }
+          e2 = e2.parentElement;
+        }
+        setStatus('↔ ширина колонки: ' + gt.cols[gt.track]);
       } else {
         if (getComputedStyle(SEL).display === 'inline') SEL.style.setProperty('display', 'inline-block', 'important');
         var cw = parseInt(SEL.style.width) || Math.round(SEL.getBoundingClientRect().width); var nw = Math.max(80, cw + step);
