@@ -223,8 +223,11 @@
   var TAGS = 'h1,h2,h3,h4,h5,h6,p,a,span,div,li,button,strong,em,blockquote';
   var INLINE = { B: 1, I: 1, EM: 1, STRONG: 1, SPAN: 1, A: 1, BR: 1, SMALL: 1, SUP: 1, SUB: 1, U: 1, MARK: 1, CODE: 1 };
   var INLINE_LEAF = { A: 1, SPAN: 1, STRONG: 1, EM: 1, B: 1, SMALL: 1, U: 1, MARK: 1 };
-  // does el hold a non-whitespace text node directly (not only inside child elements)?
-  function hasDirectText(el) { for (var n = el.firstChild; n; n = n.nextSibling) if (n.nodeType === 3 && (n.nodeValue || '').trim()) return true; return false; }
+  // Does el carry its OWN text — a direct text node OR an inline child (span/strong/…) holding text?
+  // Used to allow text-only block children (split lines) while still excluding pure layout containers
+  // (whose text lives only inside nested BLOCK descendants). Formatted headings (text wrapped in a
+  // <span> by the format bar) count as having own text, so they stay editable.
+  function hasDirectText(el) { for (var n = el.firstChild; n; n = n.nextSibling) { if (n.nodeType === 3 && (n.nodeValue || '').trim()) return true; if (n.nodeType === 1 && INLINE[n.tagName] && (n.textContent || '').trim()) return true; } return false; }
   // a DIV/P that only wraps text/inline — the Webflow "second line" split pattern (<h2>text<div>text</div></h2>)
   function isTextLeafBlock(ch) { if (ch.tagName !== 'DIV' && ch.tagName !== 'P') return false; for (var i = 0; i < ch.children.length; i++) { var g = ch.children[i]; if (INLINE[g.tagName] || isTextLeafBlock(g)) continue; return false; } return true; }
   function markEditable() {
