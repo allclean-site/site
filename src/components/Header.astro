@@ -7,9 +7,9 @@ const tt = (ru: string, ro: string) => (lang === 'ro' ? ro : ru);
       <div class="master_navigation">
         <div class="wrap_banner">
           <div class="banner">
-            <div class="text-size-small">4 свободных слота на этой неделе</div>
+            <div class="text-size-small">{tt("4 свободных слота на этой неделе", "4 locuri libere săptămâna aceasta")}</div>
             <a href={base + "/book-cleaning"} class="link-banner"
-              >Успейте записаться</a
+              >{tt("Успейте записаться", "Programați-vă acum")}</a
             >
           </div>
         </div>
@@ -73,7 +73,7 @@ const tt = (ru: string, ro: string) => (lang === 'ro' ? ro : ru);
                               data-wf--tag--variant="depth"
                               class="master_label w-variant-9a59c277-b838-5a8e-f25e-39f9204dca4d"
                             >
-                              <div class="label-large">услуги</div>
+                              <div class="label-large">{tt("услуги", "servicii")}</div>
                             </div>
                             <div class="nav-services w-dyn-list">
                               <div
@@ -90,7 +90,7 @@ const tt = (ru: string, ro: string) => (lang === 'ro' ? ro : ru);
                                     ><div
                                       class="text-size-large text_body-bold"
                                     >
-                                      Уборка квартир и домов
+                                      {tt("Уборка квартир и домов", "Curățenie apartamente și case")}
                                     </div></a
                                   >
                                 </div>
@@ -104,7 +104,7 @@ const tt = (ru: string, ro: string) => (lang === 'ro' ? ro : ru);
                                     ><div
                                       class="text-size-large text_body-bold"
                                     >
-                                      Генеральная уборка
+                                      {tt("Генеральная уборка", "Curățenie generală")}
                                     </div></a
                                   >
                                 </div>
@@ -118,7 +118,7 @@ const tt = (ru: string, ro: string) => (lang === 'ro' ? ro : ru);
                                     ><div
                                       class="text-size-large text_body-bold"
                                     >
-                                      Мойка окон и фасадов
+                                      {tt("Мойка окон и фасадов", "Spălarea geamurilor și fațadelor")}
                                     </div></a
                                   >
                                 </div>
@@ -132,7 +132,7 @@ const tt = (ru: string, ro: string) => (lang === 'ro' ? ro : ru);
                                     ><div
                                       class="text-size-large text_body-bold"
                                     >
-                                      Уборка после ремонта
+                                      {tt("Уборка после ремонта", "Curățenie după renovare")}
                                     </div></a
                                   >
                                 </div>
@@ -146,7 +146,7 @@ const tt = (ru: string, ro: string) => (lang === 'ro' ? ro : ru);
                                     ><div
                                       class="text-size-large text_body-bold"
                                     >
-                                      Чистка ковров и ковролина
+                                      {tt("Чистка ковров и ковролина", "Curățare covoare și mochetă")}
                                     </div></a
                                   >
                                 </div>
@@ -160,7 +160,7 @@ const tt = (ru: string, ro: string) => (lang === 'ro' ? ro : ru);
                                     ><div
                                       class="text-size-large text_body-bold"
                                     >
-                                      Чистка мягкой мебели
+                                      {tt("Чистка мягкой мебели", "Curățare mobilă tapițată")}
                                     </div></a
                                   >
                                 </div>
@@ -174,7 +174,7 @@ const tt = (ru: string, ro: string) => (lang === 'ro' ? ro : ru);
                                     ><div
                                       class="text-size-large text_body-bold"
                                     >
-                                      Уборка офисов и помещений
+                                      {tt("Уборка офисов и помещений", "Curățenie birouri și spații")}
                                     </div></a
                                   >
                                 </div>
@@ -234,7 +234,7 @@ const tt = (ru: string, ro: string) => (lang === 'ro' ? ro : ru);
                                 </div>
                                 <div class="content_nav-service">
                                   <div class="heading-style-h4">
-                                    Уборка квартир и домов
+                                    {tt("Уборка квартир и домов", "Curățenie apartamente și case")}
                                   </div>
                                 </div></a
                               >
@@ -261,7 +261,7 @@ const tt = (ru: string, ro: string) => (lang === 'ro' ? ro : ru);
                                 </div>
                                 <div class="content_nav-service">
                                   <div class="heading-style-h4">
-                                    Генеральная уборка
+                                    {tt("Генеральная уборка", "Curățenie generală")}
                                   </div>
                                 </div></a
                               >
@@ -288,7 +288,7 @@ const tt = (ru: string, ro: string) => (lang === 'ro' ? ro : ru);
                                 </div>
                                 <div class="content_nav-service">
                                   <div class="heading-style-h4">
-                                    Мойка окон и фасадов
+                                    {tt("Мойка окон и фасадов", "Spălarea geamurilor și fațadelor")}
                                   </div>
                                 </div></a
                               >

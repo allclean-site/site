@@ -598,8 +598,8 @@ export function buildServiceJsonLd(service: Service, locale: 'ru' | 'ro', site: 
           email: 'info@allclean.md',
           address: {
             '@type': 'PostalAddress',
-            streetAddress: 'ул. Месаджер 7',
-            addressLocality: 'Кишинёв',
+            streetAddress: locale === 'ru' ? 'ул. Месаджер 7' : 'str. Mesager 7',
+            addressLocality: locale === 'ru' ? 'Кишинёв' : 'Chișinău',
             postalCode: 'MD-2069',
             addressCountry: 'MD',
           },

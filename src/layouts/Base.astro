@@ -27,18 +27,21 @@ const orgSchema = {
   '@context': 'https://schema.org',
   '@type': 'LocalBusiness',
   name: 'All Clean',
-  description: 'Профессиональная клининговая служба в Кишинёве: уборка квартир, домов, офисов и коммерческих помещений.',
+  description:
+    lang === 'ru'
+      ? 'Профессиональная клининговая служба в Кишинёве: уборка квартир, домов, офисов и коммерческих помещений.'
+      : 'Servicii profesionale de curățenie în Chișinău: curățenie apartamente, case, birouri și spații comerciale.',
   url: site.href,
   telephone: '+37379955044',
   email: 'info@allclean.md',
   address: {
     '@type': 'PostalAddress',
-    streetAddress: 'ул. Месаджер, 7',
-    addressLocality: 'Кишинёв',
+    streetAddress: lang === 'ru' ? 'ул. Месаджер, 7' : 'str. Mesager 7',
+    addressLocality: lang === 'ru' ? 'Кишинёв' : 'Chișinău',
     postalCode: 'MD-2069',
     addressCountry: 'MD',
   },
-  areaServed: 'Кишинёв',
+  areaServed: lang === 'ru' ? 'Кишинёв' : 'Chișinău',
   priceRange: '$$',
   openingHours: 'Mo-Su 08:00-21:00',
 };

@@ -173,6 +173,9 @@ const MAP = {
   'Уборка для аренды посуточно: свежее бельё, вынос мусора, пополнение базовых принадлежностей и готовность к гостям.': 'Curățenie pentru închiriere în regim zilnic: lenjerie proaspătă, evacuarea gunoiului, completarea consumabilelor de bază și pregătire pentru oaspeți.',
   'Для небольших офисов, студий и коворкингов. Столы, кухни, санузлы и общие зоны — чисто и готово к рабочей неделе.': 'Pentru birouri mici, studiouri și coworking-uri. Birouri, bucătării, băi și zone comune — curate și gata pentru săptămâna de lucru.',
   'Кишинёв': 'Chișinău',
+  'ул. Месаджер, 7': 'str. Mesager 7',
+  'Кишинёв, MD-2069': 'Chișinău, MD-2069',
+  'Сколько длится уборка?': 'Cât durează curățenia?',
 };
 
 async function walk(dir) {
@@ -185,6 +188,20 @@ async function walk(dir) {
   return out;
 }
 
+// Collect every text node under `node`, recursing through element children
+// (not just pure-text leaves) so text broken up by inline tags like <br/> is caught too.
+function collectTextNodes($, node, out) {
+  $(node)
+    .contents()
+    .each((_, child) => {
+      if (child.type === 'text') {
+        out.push(child);
+      } else if (child.type === 'tag' && child.tagName !== 'script' && child.tagName !== 'style') {
+        collectTextNodes($, child, out);
+      }
+    });
+}
+
 async function main() {
   let files = [];
   try { files = await walk('dist/ro'); } catch { console.log('[translate-ro] no dist/ro'); return; }
@@ -195,16 +212,19 @@ async function main() {
       const html = await readFile(file, 'utf8');
       const $ = cheerio.load(html, { decodeEntities: false });
       let n = 0;
-      $('body *').each((_, el) => {
-        if (el.tagName === 'script' || el.tagName === 'style') return;
-        const $el = $(el);
-        if ($el.children().length !== 0) return;
-        const raw = $el.text();
-        if (!raw || !/[А-Яа-яЁё]/.test(raw)) return;
+      const textNodes = [];
+      collectTextNodes($, 'body', textNodes);
+      for (const node of textNodes) {
+        const raw = node.data;
+        if (!raw || !/[А-Яа-яЁё]/.test(raw)) continue;
         const key = norm(raw);
-        if (MAP[key]) { $el.text(MAP[key]); n++; }
-        else missed.add(key);
-      });
+        if (MAP[key]) {
+          const lead = raw.match(/^\s*/)[0];
+          const trail = raw.match(/\s*$/)[0];
+          node.data = lead + MAP[key] + trail;
+          n++;
+        } else missed.add(key);
+      }
       if (n) { await writeFile(file, $.html()); pages++; total += n; }
     } catch (e) { console.log('[translate-ro] failed', file, e.message); }
   }
