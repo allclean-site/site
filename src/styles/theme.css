@@ -111,3 +111,6 @@ p, .text-size-large, .faq-paragraph { text-wrap: pretty; }
   main .w-layout-grid > * { min-width: 0; }
   main img.image_cover { max-width: 100%; height: auto; }
 }
+/* Reading comfort: long-form paragraphs get the recommended 1.5 leading
+   (template ships 1.4; headings/buttons keep their own tighter values). */
+p.text-size-large, .faq-paragraph, .card_testimonial-marquee .text-size-large { line-height: 1.5; }

@@ -16,23 +16,40 @@ import * as cheerio from 'cheerio';
 const DIST = '.vercel/output/static';
 const NBSP = ' ';
 
-// Short function words that must never hang at the end of a line.
-const RU_WORDS = ['и', 'а', 'но', 'да', 'в', 'во', 'не', 'ни', 'на', 'у', 'к', 'ко', 'с', 'со', 'о', 'об', 'обо', 'от', 'ото', 'до', 'по', 'из', 'изо', 'за', 'над', 'под', 'при', 'про', 'для', 'без', 'же', 'ли', 'бы', 'б', 'уж', 'то', 'что', 'как', 'все', 'мы', 'вы', 'он', 'её', 'его', 'их', 'это'];
+// Short function words that must never hang at the end of a line (glued FORWARD, to the
+// word they govern). Particles are NOT here — per Kovodstvo/Kontur they attach BACKWARD.
+const RU_WORDS = ['и', 'а', 'но', 'да', 'в', 'во', 'не', 'ни', 'на', 'у', 'к', 'ко', 'с', 'со', 'о', 'об', 'обо', 'от', 'ото', 'до', 'по', 'из', 'изо', 'за', 'над', 'под', 'при', 'про', 'для', 'без', 'то', 'что', 'как', 'все', 'мы', 'вы', 'он', 'её', 'его', 'их', 'это'];
 const RO_WORDS = ['a', 'ai', 'al', 'ale', 'cu', 'ce', 'cel', 'cea', 'cei', 'de', 'din', 'e', 'în', 'la', 'le', 'nu', 'ne', 'o', 'un', 'pe', 'sa', 'să', 'se', 'și', 'si', 'sau', 'sub', 'mai', 'va', 'vă', 'voi', 'spre', 'prin', 'dar', 'iar', 'fără', 'către', 'este', 'sunt'];
+// Particles attach to the PREVIOUS word: «тот же», «Проверяете ли», «хотелось бы».
+const RU_PARTICLES = ['же', 'ж', 'ли', 'ль', 'бы', 'б', 'уж'];
 
 const UNITS = '(?:м²|м2|кв\\.?\\s?м|MDL|лей|лея|леев|lei|%|мин|час(?:а|ов)?|ore|oră|min)';
 
-function makeRules(words) {
+function makeRules(words, opts = {}) {
   // after an opening boundary (start/space/bracket/quote), a listed word, then a plain space
   const alt = words.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
   // Glue only when the NEXT word is reasonably short (≤9 chars): gluing «И» to
   // «СПОКОЙНОМУ» creates an unbreakable run wider than a phone screen in display
   // headings, and a long word starting its own line looks fine anyway.
   const re = new RegExp(`(^|[\\s(«„"'>\\u00A0])(${alt}) (?=\\S{1,9}(?:\\s|$))`, 'gi');
+  const partRe = opts.particles
+    ? new RegExp(`(\\S) (${opts.particles.join('|')})(?=[\\s.,!?…»)]|$)`, 'gi')
+    : null;
   return (s) => {
     let out = s;
+    // ---- quotes: «ёлочки» in Russian, „lower-upper” in Romanian (never English curly/straight)
+    if (opts.quotes === 'ru') out = out.replace(/[“"]/g, (m, off) => (m === '“' ? '«' : /\S/.test(out[off - 1] || '') ? '»' : '«')).replace(/”/g, '»');
+    else if (opts.quotes === 'ro') out = out.replace(/[“"]/g, (m, off) => (m === '“' ? '„' : /\S/.test(out[off - 1] || '') ? '”' : '„')).replace(/”/g, '”');
+    // ---- decimal comma (RU/RO standard): 4.8 → 4,8 — digits on both sides only,
+    //      so domains (999.md) and version-ish tokens are untouched
+    out = out.replace(/(\d)\.(\d)/g, '$1,$2');
+    // ---- a spaced hyphen used as a dash → proper em dash glued to the previous word
+    out = out.replace(/(\S) - (?=\S)/g, `$1${NBSP}— `);
+    // ---- forward glue: prepositions/conjunctions stick to the next word
     // run twice so chains collapse too («и в о доме» → all glued)
     for (let i = 0; i < 2; i++) out = out.replace(re, (_, pre, w) => `${pre}${w}${NBSP}`);
+    // ---- backward glue: particles stick to the previous word
+    if (partRe) out = out.replace(partRe, (_, prev, w) => `${prev}${NBSP}${w}`);
     // em dash keeps its left neighbour
     out = out.replace(/ —/g, `${NBSP}—`);
     // number + unit
@@ -40,8 +57,8 @@ function makeRules(words) {
     return out;
   };
 }
-const fixRu = makeRules(RU_WORDS);
-const fixRo = makeRules(RO_WORDS);
+const fixRu = makeRules(RU_WORDS, { particles: RU_PARTICLES, quotes: 'ru' });
+const fixRo = makeRules(RO_WORDS, { quotes: 'ro' });
 
 const SKIP = new Set(['script', 'style', 'noscript', 'code', 'pre', 'textarea', 'svg']);
 
