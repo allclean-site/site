@@ -689,8 +689,9 @@
     (p.links || []).forEach(function (c) { var el = c.selector && document.querySelector(c.selector); if (el) el.setAttribute('href', c.href); });
     (p.images || []).forEach(function (c) { if (c.url) document.querySelectorAll('img[data-slot="' + (c.slot || '').replace(/"/g, '\\"') + '"]').forEach(function (im) { im.src = c.url; im.removeAttribute('srcset'); }); var e2 = c.slot && safeQ(c.slot); if (e2 && e2.tagName === 'IMG') { e2.src = c.url; e2.removeAttribute('srcset'); } });
     (p.backgrounds || []).forEach(function (c) { var el = c.selector && safeQ(c.selector); if (el && c.url) { el.style.setProperty('background-image', (c.css ? c.css.replace('__URL__', c.url) : 'url("' + c.url + '")'), 'important'); el.style.setProperty('background-size', 'cover', 'important'); el.style.setProperty('background-position', 'center', 'important'); } });
-    var applyStyleEntry = function (c) { if (c.selector && c.styles) safeAll(c.selector).forEach(function (el) { Object.keys(c.styles).forEach(function (k) { el.style.setProperty(k, c.styles[k], 'important'); }); }); };
-    (p.styles || []).filter(function (c) { return !c.mq; }).forEach(applyStyleEntry);          // base: all widths
+    var DIM_PROPS = { 'width': 1, 'max-width': 1, 'grid-template-columns': 1, 'font-size': 1, 'line-height': 1 };
+    var applyStyleEntry = function (c, skipDims) { if (c.selector && c.styles) safeAll(c.selector).forEach(function (el) { Object.keys(c.styles).forEach(function (k) { if (skipDims && DIM_PROPS[k]) return; el.style.setProperty(k, c.styles[k], 'important'); }); }); };
+    (p.styles || []).filter(function (c) { return !c.mq; }).forEach(function (c) { applyStyleEntry(c, BP === 'm'); }); // base (desktop dims skipped in mobile frame)
     if (BP === 'm') (p.styles || []).filter(function (c) { return c.mq === 'm'; }).forEach(applyStyleEntry); // mobile overrides (only inside the 390px frame)
     (p.removed || []).forEach(function (sel) { safeAll(sel).forEach(function (el) { el.style.setProperty('display', 'none', 'important'); }); });
   }

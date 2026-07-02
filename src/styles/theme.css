@@ -89,3 +89,25 @@ p, .text-size-large, .faq-paragraph { text-wrap: pretty; }
 .master_services { max-width: 1240px; }
 .master_faqs { max-width: 1060px; }
 .heading_about { max-width: 1000px; }
+/* About hero: 104px uppercase in an 812px column wrapped into 7-8 lines.
+   Scale the display size to the column instead (still the same typeface/colour). */
+.heading_about, .heading_about h1, .headline_about h1 { font-size: clamp(2.5rem, 4.6vw, 4.25rem); line-height: 1.08; }
+/* Mobile heading safety: scale display headings to the phone viewport and allow
+   hyphenation for very long Russian words (ПРОФЕССИОНАЛЬНЫЕ…) that exceed 375px. */
+@media (max-width: 767px) {
+  main h1, main .heading-style-h1 {
+    font-size: clamp(2rem, 11vw, 3.25rem);
+    line-height: 1.12;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+  main .content_cta, main [class^="headline_"] { max-width: 100%; }
+}
+@media (max-width: 767px) {
+  main h2 { font-size: clamp(1.6rem, 9vw, 2.6rem); overflow-wrap: break-word; }
+}
+@media (max-width: 767px) {
+  /* standard grid-blowout guard: a child's intrinsic min-content must not widen the track */
+  main .w-layout-grid > * { min-width: 0; }
+  main img.image_cover { max-width: 100%; height: auto; }
+}

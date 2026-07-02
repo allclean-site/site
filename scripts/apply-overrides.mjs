@@ -62,10 +62,22 @@ function applyPayload($, p) {
   {
     const styles = (p.styles || []).filter((c) => c && c.selector && c.styles && Object.keys(c.styles).length);
     if (styles.length) {
-      const rule = (c) => `${c.selector}{${Object.keys(c.styles).map((k) => `${k}:${c.styles[k]} !important`).join(';')}}`;
-      const base = styles.filter((c) => c.mq !== 'm').map(rule).join('\n');
-      const mob = styles.filter((c) => c.mq === 'm').map(rule).join('\n');
-      let css = base;
+      // Dimension props from the BASE bucket were tuned on a desktop viewport; fixed px widths
+      // break the template's responsive layout on phones. Bake them desktop-only — mobile keeps
+      // the template flow unless explicitly edited in the mobile breakpoint (mq:'m').
+      const DIM = new Set(['width', 'max-width', 'grid-template-columns', 'font-size', 'line-height']);
+      const rule = (c, keys) => `${c.selector}{${keys.map((k) => `${k}:${c.styles[k]} !important`).join(';')}}`;
+      const baseGlobal = [], baseDesk = [];
+      styles.filter((c) => c.mq !== 'm').forEach((c) => {
+        const keys = Object.keys(c.styles);
+        const dim = keys.filter((k) => DIM.has(k));
+        const rest = keys.filter((k) => !DIM.has(k));
+        if (rest.length) baseGlobal.push(rule(c, rest));
+        if (dim.length) baseDesk.push(rule(c, dim));
+      });
+      const mob = styles.filter((c) => c.mq === 'm').map((c) => rule(c, Object.keys(c.styles))).join('\n');
+      let css = baseGlobal.join('\n');
+      if (baseDesk.length) css += `\n@media (min-width:768px){\n${baseDesk.join('\n')}\n}`;
       if (mob) css += `\n@media (max-width:767px){\n${mob}\n}`;
       if (css.trim()) { try { $('head').append(`<style id="lg-overrides">\n${css}\n</style>`); } catch {} }
     }
