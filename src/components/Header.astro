@@ -490,7 +490,14 @@ const tt = (ru: string, ro: string) => (lang === 'ro' ? ro : ru);
 
 <style is:global>
   /* Glass header on scroll: bluish frosted glass + subtle noise (instead of solid white). */
-  .navbar { transition: background-color .3s ease, box-shadow .3s ease, backdrop-filter .3s ease; }
+  /* Webflow's nav.js bakes a static (identity, never animated) GPU-layer transform onto
+     .navbar on init, on every breakpoint. That transform makes .navbar a new containing
+     block for its position:fixed descendants (.dropdown-list), so their backdrop-filter
+     can only sample paint inside .navbar's own layer instead of the real page behind it
+     — the dropdown looks flat/unblurred instead of glass. Neutralizing it restores the
+     dropdown's fixed-to-viewport backdrop sampling; it's a no-op transform so nothing
+     visually moves. */
+  .navbar { transition: background-color .3s ease, box-shadow .3s ease, backdrop-filter .3s ease; transform: none !important; }
   .nav-bg { transition: background-color .3s ease; }
   .master_navigation.is-scrolled .nav-bg { background-color: transparent !important; }
   .master_navigation.is-scrolled .navbar {
