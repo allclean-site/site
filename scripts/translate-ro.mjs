@@ -13,6 +13,7 @@ const norm = (s) => s.replace(/\s+/g, ' ').trim();
 
 // RU (normalized) -> RO
 const MAP = {
+  'Выберите подходящую услугу и планируйте свои дела, не думая о чистоте.': 'Alegeți serviciul potrivit și planificați-vă timpul fără să vă gândiți la curățenie.',
   'Мойка окон и фасадов': 'Spălarea geamurilor și fațadelor',
   'Уборка квартир и домов': 'Curățenie apartamente și case',
   'Генеральная уборка': 'Curățenie generală',

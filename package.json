@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build && node scripts/apply-overrides.mjs && node scripts/translate-ro.mjs",
+    "build": "astro build && node scripts/apply-overrides.mjs && node scripts/translate-ro.mjs && node scripts/typography.mjs",
     "preview": "astro preview",
     "astro": "astro"
   },

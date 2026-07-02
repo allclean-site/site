@@ -70,3 +70,22 @@
   src: url("/fonts/onest/onest-cyrillic-ext.woff2") format("woff2");
   unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
 }
+
+/* ---------- Typography polish (site-wide) ---------- */
+/* Balanced line lengths on headings: the browser evens out the lines instead of
+   leaving one long line + one short word. Safe progressive enhancement. */
+h1, h2, h3, h4,
+.heading-style-h1, .heading-style-h2, .heading-style-h3, .heading-style-h4 {
+  text-wrap: balance;
+}
+/* Paragraphs: avoid single-word orphan lines where supported. */
+p, .text-size-large, .faq-paragraph { text-wrap: pretty; }
+
+/* Sparkles caps hero headline blocks at 680px — sized for short English template
+   headings. Russian/Romanian headings are longer and wrapped into 4–8 lines.
+   Give them a proper measure (container-large is 1376px wide). */
+.headline_services, .headline_pricing, .headline_faq-hero,
+.headline_book, .headline_blog { max-width: 1060px; }
+.master_services { max-width: 1240px; }
+.master_faqs { max-width: 1060px; }
+.heading_about { max-width: 1000px; }

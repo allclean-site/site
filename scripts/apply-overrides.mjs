@@ -29,13 +29,18 @@ async function walk(dir) {
   return out;
 }
 
+// nbsp-insensitive compare: the typography pass bakes non-breaking spaces into the HTML,
+// and editor-saved strings may carry them too — matching must ignore the difference.
+const normSpace = (s) => (s || '').replace(/ /g, ' ').trim();
+
 function applyPayload($, p) {
   // plain text leaves
   (p.texts || []).forEach((c) => {
     if (!c.old || c.old === c.new) return;
+    const want = normSpace(c.old);
     $('h1,h2,h3,h4,h5,h6,p,a,span,div,li,button,strong,em,blockquote').each((_, el) => {
       const $el = $(el);
-      if ($el.children().length === 0 && $el.text().trim() === c.old) $el.text(c.new);
+      if ($el.children().length === 0 && normSpace($el.text()) === want) $el.text(c.new);
     });
   });
   (p.textsel || []).forEach((c) => { if (c.selector && c.html != null) try { $(c.selector).first().html(c.html); } catch {} });

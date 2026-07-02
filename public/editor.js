@@ -14,6 +14,10 @@
   // Breakpoint being edited: 'base' (all widths, the desktop view) or 'm' (mobile ≤767px, set when the
   // editor runs inside the 📱 mobile iframe via ?bp=m). Style edits are recorded into the matching bucket.
   var BP = /[?&]bp=m\b/.test(location.search) ? 'm' : 'base';
+  // nbsp-insensitive text read: the build's typography pass bakes non-breaking spaces
+  // into the page, but saved override strings must keep matching across rebuilds.
+  function txt(el) { return (el.textContent || '').replace(/ /g, ' ').trim(); }
+  function normSp(s) { return (s || '').replace(/ /g, ' ').trim(); }
   var CH = { texts: [], textsel: [], links: [], images: [], backgrounds: [], styles: [], removed: [], videos: [], blocks: { order: [], hidden: [] }, added: [] };
   var KEY = sessionStorage.getItem('ac_edit_key') || '';
   var SEL = null, delMode = false;
@@ -69,7 +73,7 @@
       var m = mainWrap();                 // drop baked added-blocks that this snapshot no longer has
       if (m) [].slice.call(m.querySelectorAll(':scope > section[data-lgadd]')).forEach(function (sec) { var id = sec.getAttribute('data-lgadd'); if (!(CH.added || []).some(function (a) { return a.id === id; })) sec.remove(); });
       applyBlocksLocal();                 // re-inserts added blocks, reorders, hides, re-marks editable
-      document.querySelectorAll('[data-eedit]').forEach(function (el) { el.dataset.eorig = (el.textContent || '').trim(); });
+      document.querySelectorAll('[data-eedit]').forEach(function (el) { el.dataset.eorig = txt(el); });
       try { if (window.Webflow) { window.Webflow.destroy(); window.Webflow.ready(); var ix = window.Webflow.require && window.Webflow.require('ix2'); if (ix && ix.init) ix.init(); } } catch (e) {}
       SEL = null; if (typeof showSel === 'function') showSel(); if (typeof updateBar === 'function') updateBar();
     } catch (e) {}
@@ -234,7 +238,7 @@
     document.querySelectorAll(TAGS).forEach(function (el) {
       if (el.closest('#eed') || el.hasAttribute('data-eedit')) return;
       if (el.parentElement && el.parentElement.closest('[data-eedit]')) { if (!(el.children.length === 0 && INLINE_LEAF[el.tagName])) return; }
-      var t = (el.textContent || '').trim(); if (!t) return;
+      var t = txt(el); if (!t) return;
       // Allow block children ONLY when the element itself directly holds text and the child is a text-only
       // line wrapper (split heading/paragraph). Pure layout containers have no direct text → stay excluded.
       var dt = hasDirectText(el);
@@ -249,8 +253,8 @@
   document.addEventListener('blur', function (e) {
     var el = e.target; if (!el || !el.hasAttribute || !el.hasAttribute('data-eedit')) return;
     el.removeAttribute('contenteditable'); hideRTB();
-    if (insideAdded(el)) { el.dataset.eorig = (el.textContent || '').trim(); syncAdded(el); return; }
-    var nw = (el.textContent || '').trim(), old = el.dataset.eorig || '';
+    if (insideAdded(el)) { el.dataset.eorig = txt(el); syncAdded(el); return; }
+    var nw = txt(el), old = el.dataset.eorig || '';
     if (!nw || nw === old) return;
     if (el.children.length) { var sel = cssPath(el); CH.textsel = CH.textsel.filter(function (c) { return c.selector !== sel; }); CH.textsel.push({ selector: sel, html: el.innerHTML }); }
     else { CH.texts = CH.texts.filter(function (c) { return c.old !== old; }); CH.texts.push({ old: old, 'new': nw }); }
@@ -285,7 +289,7 @@
   function rtbRecord(host) {
     if (insideAdded(host)) { syncAdded(host); return; }
     var sel = cssPath(host); CH.textsel = CH.textsel.filter(function (c) { return c.selector !== sel; }); CH.textsel.push({ selector: sel, html: host.innerHTML });
-    host.dataset.eorig = (host.textContent || '').trim(); scheduleSave();
+    host.dataset.eorig = txt(host); scheduleSave();
   }
   // wrap current selection (or whole element if nothing highlighted) in a span carrying these styles
   function rtbApply(styles) {
@@ -680,7 +684,7 @@
   // ---------- apply published overrides (edit-mode preview), then seed CH ----------
   function applyOverrides(p) {
     p = p || {};
-    (p.texts || []).forEach(function (c) { if (!c.old || c.old === c['new']) return; var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null), n, hits = []; while ((n = w.nextNode())) { if ((n.nodeValue || '').trim() === c.old) hits.push(n); } hits.forEach(function (t) { t.nodeValue = t.nodeValue.replace(c.old, c['new']); }); });
+    (p.texts || []).forEach(function (c) { if (!c.old || c.old === c['new']) return; var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null), n, hits = []; while ((n = w.nextNode())) { if (normSp(n.nodeValue) === normSp(c.old)) hits.push(n); } hits.forEach(function (t) { t.nodeValue = t.nodeValue.replace(/S[sS]*S|S/, c['new']); }); });
     (p.textsel || []).forEach(function (c) { var el = c.selector && document.querySelector(c.selector); if (el) el.innerHTML = c.html; });
     (p.links || []).forEach(function (c) { var el = c.selector && document.querySelector(c.selector); if (el) el.setAttribute('href', c.href); });
     (p.images || []).forEach(function (c) { if (c.url) document.querySelectorAll('img[data-slot="' + (c.slot || '').replace(/"/g, '\\"') + '"]').forEach(function (im) { im.src = c.url; im.removeAttribute('srcset'); }); var e2 = c.slot && safeQ(c.slot); if (e2 && e2.tagName === 'IMG') { e2.src = c.url; e2.removeAttribute('srcset'); } });
@@ -704,7 +708,7 @@
       CH.added = p.added || [];
       applyOverrides(p);
       applyBlocksLocal();
-      document.querySelectorAll('[data-eedit]').forEach(function (el) { el.dataset.eorig = (el.textContent || '').trim(); });
+      document.querySelectorAll('[data-eedit]').forEach(function (el) { el.dataset.eorig = txt(el); });
       hist = [snapState()]; hi = 0; updateUndoUI();
     }).catch(function () { ensureLgids(); hist = [snapState()]; hi = 0; updateUndoUI(); });
 })();

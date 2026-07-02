@@ -13,7 +13,11 @@ function env(locals: any) {
   return {
     EDIT_KEY: e.EDIT_KEY ?? pe.EDIT_KEY ?? (import.meta as any).env?.EDIT_KEY,
     SERVICE_ROLE: e.SUPABASE_SERVICE_ROLE_KEY ?? pe.SUPABASE_SERVICE_ROLE_KEY ?? (import.meta as any).env?.SUPABASE_SERVICE_ROLE_KEY,
-    DEPLOY_HOOK: e.CF_DEPLOY_HOOK ?? pe.CF_DEPLOY_HOOK ?? (import.meta as any).env?.CF_DEPLOY_HOOK,
+    // Host-agnostic: prefer DEPLOY_HOOK (Vercel deploy hook after the migration),
+    // fall back to the legacy Cloudflare name so either env keeps working.
+    DEPLOY_HOOK:
+      e.DEPLOY_HOOK ?? pe.DEPLOY_HOOK ?? (import.meta as any).env?.DEPLOY_HOOK ??
+      e.CF_DEPLOY_HOOK ?? pe.CF_DEPLOY_HOOK ?? (import.meta as any).env?.CF_DEPLOY_HOOK,
   };
 }
 const json = (o: any, status = 200) =>
@@ -70,7 +74,7 @@ export async function POST({ request, locals }: any) {
   if (!up.ok) return json({ ok: false, error: 'save failed: ' + (await up.text()) }, 502);
 
   if (body.publish) {
-    if (!DEPLOY_HOOK) return json({ ok: true, warning: 'saved, but CF_DEPLOY_HOOK is not set — no rebuild triggered' });
+    if (!DEPLOY_HOOK) return json({ ok: true, warning: 'saved, but DEPLOY_HOOK is not set — no rebuild triggered' });
     await fetch(DEPLOY_HOOK, { method: 'POST' }).catch(() => {});
   }
   return json({ ok: true });
