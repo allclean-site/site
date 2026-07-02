@@ -7,12 +7,15 @@ import * as cheerio from 'cheerio';
 
 const SUPABASE_URL = 'https://hbdjboimxqwkzxntidzt.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_HovRZnqMhQiTiM8WC-wjBA_lbTH533G';
-const DIST = 'dist';
+// Vercel's adapter copies the final deployed static HTML into .vercel/output/static
+// (same flat per-route shape the old Cloudflare `dist/` had) — that's what actually
+// ships, so it's what this script must mutate.
+const DIST = '.vercel/output/static';
 const PROJECT = 'allclean';
 
-// dist/index.html -> '/', dist/about/index.html -> '/about', dist/ro/pricing/index.html -> '/ro/pricing'
+// `${DIST}/index.html` -> '/', `${DIST}/about/index.html` -> '/about', `${DIST}/ro/pricing/index.html` -> '/ro/pricing'
 function pathFor(file) {
-  let p = file.replace(/\\/g, '/').replace(/^dist/, '').replace(/\/index\.html$/, '').replace(/\.html$/, '');
+  let p = file.replace(/\\/g, '/').replace(new RegExp(`^${DIST}`), '').replace(/\/index\.html$/, '').replace(/\.html$/, '');
   return p === '' ? '/' : p;
 }
 
@@ -118,7 +121,8 @@ async function main() {
   const byPath = new Map(rows.map((r) => [r.page_path, r.payload || {}]));
 
   let files = [];
-  try { files = await walk(DIST); } catch { console.log('[apply-overrides] no dist'); return; }
+  console.log(`[apply-overrides] DIST=${DIST}`);
+  try { files = await walk(DIST); } catch { console.log(`[apply-overrides] no ${DIST}`); return; }
   let touched = 0;
   for (const file of files) {
     const path = pathFor(file);
