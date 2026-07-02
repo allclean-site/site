@@ -9,10 +9,11 @@ import { SUPABASE_URL, SUPABASE_KEY } from '../../lib/supabasePublic';
 
 function env(locals: any) {
   const e = (locals && locals.runtime && locals.runtime.env) || {};
+  const pe = (typeof process !== 'undefined' && process.env) || {};
   return {
-    EDIT_KEY: e.EDIT_KEY ?? (import.meta as any).env?.EDIT_KEY,
-    SERVICE_ROLE: e.SUPABASE_SERVICE_ROLE_KEY ?? (import.meta as any).env?.SUPABASE_SERVICE_ROLE_KEY,
-    DEPLOY_HOOK: e.CF_DEPLOY_HOOK ?? (import.meta as any).env?.CF_DEPLOY_HOOK,
+    EDIT_KEY: e.EDIT_KEY ?? pe.EDIT_KEY ?? (import.meta as any).env?.EDIT_KEY,
+    SERVICE_ROLE: e.SUPABASE_SERVICE_ROLE_KEY ?? pe.SUPABASE_SERVICE_ROLE_KEY ?? (import.meta as any).env?.SUPABASE_SERVICE_ROLE_KEY,
+    DEPLOY_HOOK: e.CF_DEPLOY_HOOK ?? pe.CF_DEPLOY_HOOK ?? (import.meta as any).env?.CF_DEPLOY_HOOK,
   };
 }
 const json = (o: any, status = 200) =>

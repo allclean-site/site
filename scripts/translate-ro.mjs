@@ -1,8 +1,13 @@
 // Post-build: translate remaining Russian (Cyrillic) leaf text on /ro pages → Romanian.
-// Runs after apply-overrides. Only touches dist/ro/**. Matches by whitespace-normalized leaf text.
+// Runs after apply-overrides. Only touches DIST/ro/**. Matches by whitespace-normalized leaf text.
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import * as cheerio from 'cheerio';
+
+// Vercel's adapter copies the final deployed static HTML into .vercel/output/static
+// (same flat per-route shape the old Cloudflare `dist/` had) — that's what actually
+// ships, so it's what this script must mutate.
+const DIST = '.vercel/output/static';
 
 const norm = (s) => s.replace(/\s+/g, ' ').trim();
 
@@ -204,7 +209,8 @@ function collectTextNodes($, node, out) {
 
 async function main() {
   let files = [];
-  try { files = await walk('dist/ro'); } catch { console.log('[translate-ro] no dist/ro'); return; }
+  console.log(`[translate-ro] DIST=${DIST}`);
+  try { files = await walk(`${DIST}/ro`); } catch { console.log(`[translate-ro] no ${DIST}/ro`); return; }
   let pages = 0, total = 0;
   const missed = new Set();
   for (const file of files) {

@@ -5,9 +5,10 @@ export const prerender = false;
 
 function env(locals: any) {
   const e = (locals && locals.runtime && locals.runtime.env) || {};
+  const pe = (typeof process !== 'undefined' && process.env) || {};
   return {
-    TOKEN: e.TELEGRAM_BOT_TOKEN ?? (import.meta as any).env?.TELEGRAM_BOT_TOKEN,
-    CHAT: e.TELEGRAM_CHAT_ID ?? (import.meta as any).env?.TELEGRAM_CHAT_ID,
+    TOKEN: e.TELEGRAM_BOT_TOKEN ?? pe.TELEGRAM_BOT_TOKEN ?? (import.meta as any).env?.TELEGRAM_BOT_TOKEN,
+    CHAT: e.TELEGRAM_CHAT_ID ?? pe.TELEGRAM_CHAT_ID ?? (import.meta as any).env?.TELEGRAM_CHAT_ID,
   };
 }
 const json = (o: any, status = 200) =>
