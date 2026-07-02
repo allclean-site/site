@@ -5608,7 +5608,7 @@ figcaption {
   --_🎨-color--tokens---input-error--background: var(--_🎨-color--base---lift--dark);
   --_🎨-color--tokens---input-error--text: var(--_🎨-color--base---base--light-100);
   --_🎨-color--tokens---input-error--border: var(--_🎨-color--base---base--light-0);
-  background-image: url("https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cac6/6937dfbdad786b6700518842_blog-inner.avif");
+  background-image: url("/images/content/blog-inner.avif");
   background-position: 50%;
   background-size: cover;
   flex-flow: column;
@@ -5623,7 +5623,7 @@ figcaption {
 
 .image-wrap_halves.second {
   margin-top: var(--spacing--80);
-  background-image: url("https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cac6/6937f38437bd65d14dae6b69_featured-image-right.avif");
+  background-image: url("/images/content/featured-image-right.avif");
   background-position: 50%;
   background-size: cover;
 }

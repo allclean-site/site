@@ -20,7 +20,7 @@ const ruUrl = ruAlternate ?? new URL(basePath, site).href;
 const roUrl = roAlternate ?? new URL('/ro' + (basePath === '/' ? '' : basePath), site).href;
 const canonical = lang === 'ru' ? ruUrl : roUrl;
 const htmlLang = lang === 'ru' ? 'ru-MD' : 'ro-MD';
-const ogImg = ogImage ?? 'https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cac6%2F693817393d800624450974eb_hero%20%281%29_poster.0000000.jpg';
+const ogImg = ogImage ?? new URL('/video/hero-poster.jpg', site).href;
 const ogLocale = lang === 'ru' ? 'ru_MD' : 'ro_MD';
 
 const orgSchema = {
