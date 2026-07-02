@@ -8,7 +8,7 @@ import vercel from '@astrojs/vercel';
 // To later make Romanian primary, this is a one-line config change
 // (swap defaultLocale) + content move — no painful URL migration.
 export default defineConfig({
-  site: 'https://allclean.pages.dev', // update to custom domain when connected
+  site: 'https://allclean-theta.vercel.app', // update to custom domain when connected
   i18n: {
     locales: ['ru', 'ro'],
     defaultLocale: 'ru',
