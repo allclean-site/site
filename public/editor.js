@@ -105,14 +105,25 @@
       img.src = url;
     } catch (e) { cb(file); }
   }
+  // JSON+base64, NOT multipart/form-data: Astro's built-in CSRF check targets form-content-types
+  // and was rejecting every multipart upload on Vercel with a 403 (even same-origin requests).
+  // JSON sidesteps that check entirely — the server still gates every write via x-edit-key.
   function uploadFile(file, cb) {
-    var fd = new FormData(); fd.append('file', file); fd.append('project', PROJECT);
-    fetch('/api/overrides', { method: 'POST', headers: { 'x-edit-key': KEY }, body: fd })
-      .then(function (r) {
+    var reader = new FileReader();
+    reader.onerror = function () { cb(null); };
+    reader.onload = function () {
+      var base64 = String(reader.result).split(',')[1] || '';
+      fetch('/api/overrides', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-edit-key': KEY },
+        body: JSON.stringify({ project: PROJECT, uploadFile: { name: file.name, type: file.type, dataBase64: base64 } }),
+      }).then(function (r) {
         if (r.status === 401) { sessionStorage.removeItem('ac_edit_key'); KEY = ''; refreshPw(); setStatus('✗ неверный пароль'); focusPw(); cb(null); return; }
-        if (r.status === 413) { setStatus('✗ фото слишком большое'); cb(null); return; }
+        if (r.status === 413) { setStatus('✗ файл слишком большой'); cb(null); return; }
         r.json().then(function (d) { cb(d && d.url); }).catch(function () { cb(null); });
       }).catch(function () { cb(null); });
+    };
+    reader.readAsDataURL(file);
   }
 
   // ---------- styles ----------

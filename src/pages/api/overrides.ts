@@ -1,7 +1,14 @@
 // Visual-editor overrides API (Astro SSR endpoint, runs in the Cloudflare worker).
 //   GET  ?project&locale&page         -> { payload }            (public read)
 //   POST {project,locale,page,payload[,publish]}  (x-edit-key)  -> save draft; publish triggers rebuild
-//   POST multipart {file,project}      (x-edit-key)             -> { url } image upload
+//   POST {project,uploadFile:{name,type,dataBase64}} (x-edit-key) -> { url } file upload
+//   POST multipart {file,project}      (x-edit-key)             -> { url } file upload (legacy path)
+// File uploads are JSON+base64, not multipart/form-data: Astro's built-in CSRF origin-check
+// targets form-content-types (multipart/form-data, x-www-form-urlencoded, text/plain) and on
+// this Vercel deployment was rejecting every multipart POST with 403 "Cross-site POST form
+// submissions are forbidden" even for same-origin requests. JSON isn't a form-content-type, so
+// it never hits that check — no change to Astro's security settings needed. The multipart
+// branch below is kept only as a legacy fallback; the editor client no longer sends it.
 // Writes use the Supabase service role; the edit password (EDIT_KEY) gates all writes.
 export const prerender = false;
 
@@ -43,7 +50,7 @@ export async function POST({ request, locals }: any) {
   const ct = request.headers.get('content-type') || '';
   const sb = { apikey: SERVICE_ROLE, Authorization: `Bearer ${SERVICE_ROLE}` };
 
-  // ---- image upload ----
+  // ---- file upload: legacy multipart path (kept for back-compat, client no longer sends this) ----
   if (ct.includes('multipart/form-data')) {
     const form = await request.formData();
     const file = form.get('file') as File | null;
@@ -59,8 +66,26 @@ export async function POST({ request, locals }: any) {
     return json({ ok: true, url: `${SUPABASE_URL}/storage/v1/object/public/article-images/${path}` });
   }
 
-  // ---- save / publish ----
   const body = await request.json().catch(() => ({}));
+
+  // ---- file upload: JSON+base64 path (current client) ----
+  if (body.uploadFile && body.uploadFile.dataBase64) {
+    const { name, type, dataBase64 } = body.uploadFile;
+    const ext = (name?.split('.').pop() || 'jpg').toLowerCase();
+    const path = `allclean/site/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    let bytes: Uint8Array;
+    try { bytes = Uint8Array.from(atob(dataBase64), (c: string) => c.charCodeAt(0)); }
+    catch { return json({ ok: false, error: 'invalid base64' }, 400); }
+    const up = await fetch(`${SUPABASE_URL}/storage/v1/object/article-images/${path}`, {
+      method: 'POST',
+      headers: { ...sb, 'content-type': type || 'application/octet-stream', 'x-upsert': 'true' },
+      body: bytes,
+    });
+    if (!up.ok) return json({ ok: false, error: 'upload failed: ' + (await up.text()) }, 502);
+    return json({ ok: true, url: `${SUPABASE_URL}/storage/v1/object/public/article-images/${path}` });
+  }
+
+  // ---- save / publish ----
   const project = body.project || 'allclean';
   const locale = body.locale === 'ro' ? 'ro' : 'ru';
   const page = norm(body.page || '/');
