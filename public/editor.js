@@ -695,6 +695,11 @@
     '<button id="eedsave" class="alt">💾 Черновик</button>' +
     '<button id="eedpub">🚀 Опубликовать</button>';
   document.body.appendChild(bar);
+  // Inside the 📱 mobile-preview iframe there's ALREADY a full-size toolbar showing on the outer
+  // (top-level) page — a second one rendered inside the iframe just overlaps it. Keep the bar in the
+  // DOM (so every getElementById('eed...') lookup below still finds a real element — nothing null-refs)
+  // but hidden; the single visible control surface stays the outer/top page's own toolbar.
+  if (window !== window.top) bar.style.display = 'none';
 
   function updateBar() { var on = !!SEL; ['eedw', 'eedl', 'eedf', 'eedp', 'eeda', 'eedc'].forEach(function (id) { document.getElementById(id).classList.toggle('off', !on); }); document.getElementById('eedup').classList.toggle('off', !(SEL && SEL.parentElement && SEL.parentElement !== document.body)); }
   bar.addEventListener('input', function (e) {

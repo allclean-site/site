@@ -37,6 +37,12 @@ const list = items.length ? items : DEFAULT_ITEMS;
 const per = Math.ceil(list.length / 3);
 const columns = [list.slice(0, per), list.slice(per, per * 2), list.slice(per * 2)].map((c) => (c.length ? c : list.slice(0, 1)));
 const colSuffix = ['', ' _2nd', ' _3rd'];
+// Mobile: the desktop 3-column animated marquee is hidden outright at ≤767px (sparkles.css
+// `.marquee-thirds{display:none}`) with nothing shown in its place — no reviews at all on phones.
+// Below is a simple flat mobile-only list (shown only via CSS at ≤767px): first 2 reviews visible,
+// the rest revealed by a "Показать ещё" toggle.
+const moreLabel = lang === 'ro' ? 'Arată mai multe' : 'Показать ещё';
+const MOBILE_VISIBLE = 2;
 ---
 <section class="section_home-testimonials">
   <div class="padding-global">
@@ -87,6 +93,53 @@ const colSuffix = ['', ' _2nd', ' _3rd'];
           </div>
         ))}
       </div>
+      <div class="mobile-testimonials">
+        {list.map((text, i) => (
+          <div class={'mt-item' + (i >= MOBILE_VISIBLE ? ' mt-extra' : '')}>
+            <div class="card_testimonial-marquee">
+              <div class="testimonial_top-tile">
+                <div class="testimonial-rating">
+                  {[0, 1, 2, 3, 4].map(() => (
+                    <div class="icon-star w-embed">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 16 16" fill="none">
+                        <path d="M9.69824 5.26074C9.84349 5.5561 10.1255 5.76082 10.4512 5.80859L14.2598 6.36719L11.502 9.06348C11.2674 9.293 11.1606 9.62275 11.2158 9.94629L11.8652 13.752L8.46387 11.957C8.17179 11.8029 7.82233 11.8029 7.53027 11.957L4.12891 13.752L4.7793 9.94629C4.8345 9.62285 4.72764 9.29298 4.49316 9.06348L1.73535 6.36719L5.54395 5.80859C5.86948 5.76081 6.15062 5.55594 6.2959 5.26074L7.99707 1.80078L9.69824 5.26074Z" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path>
+                      </svg>
+                    </div>
+                  ))}
+                </div>
+                <div class="text-size-large">{text}</div>
+              </div>
+              <div class="text_body-bold">{reviewLabel}</div>
+            </div>
+          </div>
+        ))}
+        {list.length > MOBILE_VISIBLE && (
+          <button type="button" class="mt-more">{moreLabel}</button>
+        )}
+      </div>
     </div>
   </div>
 </section>
+<style>
+  .mobile-testimonials { display: none; }
+  @media (max-width: 767px) {
+    .mobile-testimonials { display: flex; flex-direction: column; gap: 16px; margin-top: 24px; }
+    .mobile-testimonials .mt-extra { display: none; }
+    .mobile-testimonials.is-open .mt-extra { display: block; }
+    .mobile-testimonials .card_testimonial-marquee { width: 100%; }
+    .mobile-testimonials .mt-more {
+      margin-top: 4px; padding: 14px; border-radius: 12px; border: 1px solid #cdddfb;
+      background: #eef3fd; color: #0c2959; font-weight: 700; font-size: 15px; cursor: pointer;
+    }
+    .mobile-testimonials .mt-more:hover { background: #dbe6fb; }
+  }
+</style>
+<script>
+  document.querySelectorAll('.mobile-testimonials .mt-more').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const wrap = btn.closest('.mobile-testimonials');
+      wrap?.classList.add('is-open');
+      btn.style.display = 'none';
+    });
+  });
+</script>
