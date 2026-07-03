@@ -14,6 +14,14 @@ const norm = (s) => s.replace(/\s+/g, ' ').trim();
 // RU (normalized) -> RO
 const MAP = {
   'Выберите подходящую услугу и планируйте свои дела, не думая о чистоте.': 'Alegeți serviciul potrivit și planificați-vă timpul fără să vă gândiți la curățenie.',
+  'Уборка складов и помещений': 'Curățenie depozite și spații',
+  'Уборка магазинов и торговых сетей': 'Curățenie magazine și rețele comerciale',
+  'Реставрация и защита полов': 'Restaurare și protecție a pardoselilor',
+  'Мойка и дезинфекция пищевых производств': 'Spălare și dezinfecție producție alimentară',
+  'Склады, цеха и производственные помещения. Уборка пыли, полов и складских зон без остановки процессов.': 'Depozite, ateliere și spații de producție. Curățăm praful, pardoselile și zonele de depozitare fără a opri procesele.',
+  'Магазины, супермаркеты и торговые сети. Чистые полы, витрины и подсобки — до открытия и после закрытия.': 'Magazine, supermarketuri și rețele comerciale. Pardoseli curate, vitrine și spații auxiliare — înainte de deschidere și după închidere.',
+  'Реставрация паркета, ламината и мрамора. Восстанавливаем блеск и защищаем полы от износа.': 'Restaurare parchet, laminat și marmură. Redăm luciul și protejăm pardoselile de uzură.',
+  'Пищевые производства и холодильные камеры. Мойка и дезинфекция по санитарным нормам.': 'Producție alimentară și camere frigorifice. Spălare și dezinfecție conform normelor sanitare.',
   'Мойка окон и фасадов': 'Spălarea geamurilor și fațadelor',
   'Уборка квартир и домов': 'Curățenie apartamente și case',
   'Генеральная уборка': 'Curățenie generală',
