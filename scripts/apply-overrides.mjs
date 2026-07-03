@@ -82,21 +82,38 @@ function applyPayload($, p) {
       if (css.trim()) { try { $('head').append(`<style id="lg-overrides">\n${css}\n</style>`); } catch {} }
     }
   }
+  // Hero media (.video_hero-home etc): either a looping video OR a static photo, keyed by the
+  // same selector + a mode flag. Mirrors editor.js's setHeroImage/setHeroVideo exactly, so the
+  // editor preview and the published bake never diverge.
   (p.videos || []).forEach((c) => {
-    if (!c.selector || !c.mp4) return;
+    if (!c.selector) return;
     try {
       const cont = $(c.selector).first();
       if (!cont.length) return;
+      if (c.mode === 'image' && c.image) {
+        cont.find('video').remove();
+        cont.find('img[data-lg-hero-img]').remove();
+        cont.append(
+          `<img data-lg-hero-img="1" src="${c.image}" alt="" style="position:absolute;inset:-100%;margin:auto;width:100%;height:100%;object-fit:cover;z-index:-100"/>`
+        );
+        cont.removeAttr('data-video-urls');
+        cont.removeAttr('data-poster-url');
+        return;
+      }
+      if (!c.mp4) return;
+      cont.find('img[data-lg-hero-img]').remove();
       const urls = [c.mp4, c.webm].filter(Boolean).join(',');
       if (urls) cont.attr('data-video-urls', urls);
       if (c.poster) cont.attr('data-poster-url', c.poster);
-      const vid = cont.find('video').first();
-      if (vid.length) {
-        vid.find('source').remove();
-        if (c.mp4) vid.append(`<source src="${c.mp4}" data-wf-ignore="true"/>`);
-        if (c.webm) vid.append(`<source src="${c.webm}" data-wf-ignore="true"/>`);
-        if (c.poster) vid.attr('poster', c.poster);
+      let vid = cont.find('video').first();
+      if (!vid.length) {
+        cont.append('<video autoplay="" loop="" muted="" playsinline="" preload="auto" data-object-fit="cover"></video>');
+        vid = cont.find('video').first();
       }
+      vid.find('source').remove();
+      if (c.mp4) vid.append(`<source src="${c.mp4}" data-wf-ignore="true"/>`);
+      if (c.webm) vid.append(`<source src="${c.webm}" data-wf-ignore="true"/>`);
+      if (c.poster) vid.attr('poster', c.poster);
     } catch {}
   });
   // Hide (don't physically remove) — mirrors the editor exactly. Physically removing elements shifts the

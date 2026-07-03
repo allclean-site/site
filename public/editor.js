@@ -366,30 +366,65 @@
       var sel = cssPath(el); CH.backgrounds = CH.backgrounds.filter(function (c) { return c.selector !== sel; }); CH.backgrounds.push({ selector: sel, css: bgTmpl, url: url }); setStatus('✓ фон заменён');
     });
   }
+  // Hero media container (.video_hero-home / .w-background-video) can show EITHER a looping video
+  // OR a static photo. Both modes persist through the same CH.videos[] entry (keyed by selector),
+  // tagged with mode:'video'|'image' so bake (apply-overrides.mjs) and this same client-side apply
+  // (applyOverrides, used to preview the current draft on load) stay in lockstep — never diverge.
+  function makeHeroVideoEl() {
+    var v = document.createElement('video');
+    v.autoplay = true; v.loop = true; v.muted = true; v.setAttribute('playsinline', ''); v.setAttribute('preload', 'auto'); v.setAttribute('data-object-fit', 'cover');
+    return v;
+  }
+  function setHeroVideo(container, mp4, webm, poster) {
+    var img = container.querySelector('img[data-lg-hero-img]'); if (img) img.remove();
+    var v = container.querySelector('video'); if (!v) { v = makeHeroVideoEl(); container.appendChild(v); }
+    v.querySelectorAll('source').forEach(function (s) { s.remove(); });
+    if (mp4) { var s1 = document.createElement('source'); s1.src = mp4; v.appendChild(s1); }
+    if (webm) { var s2 = document.createElement('source'); s2.src = webm; v.appendChild(s2); }
+    if (poster) v.setAttribute('poster', poster);
+    try { v.load(); } catch (e) {}
+    container.setAttribute('data-video-urls', [mp4, webm].filter(Boolean).join(','));
+    if (poster) container.setAttribute('data-poster-url', poster);
+    return v;
+  }
+  function setHeroImage(container, url) {
+    var v = container.querySelector('video'); if (v) v.remove();
+    var img = container.querySelector('img[data-lg-hero-img]');
+    if (!img) { img = document.createElement('img'); img.setAttribute('data-lg-hero-img', ''); img.alt = ''; container.appendChild(img); }
+    img.src = url;
+    // matches the exact fill rule of `.w-background-video > video` (object-fit:cover, edge-to-edge)
+    img.style.cssText = 'position:absolute;inset:-100%;margin:auto;width:100%;height:100%;object-fit:cover;z-index:-100';
+    container.removeAttribute('data-video-urls'); container.removeAttribute('data-poster-url');
+    return img;
+  }
   function replaceVideo(container) {
     if (!KEY) { setStatus('✗ введите пароль'); refreshPw(); focusPw(); return; }
     pickVideo(function (vurl) {
-      var v = container.querySelector('video');
-      if (v) {
-        v.querySelectorAll('source').forEach(function (s) { s.remove(); });
-        var src = document.createElement('source'); src.src = vurl; v.appendChild(src);
-        try { v.load(); } catch (e) {}
-      }
-      container.setAttribute('data-video-urls', vurl);
+      var v = setHeroVideo(container, vurl);
       var sel = cssPath(container);
       CH.videos = CH.videos.filter(function (c) { return c.selector !== sel; });
-      CH.videos.push({ selector: sel, mp4: vurl });
+      CH.videos.push({ selector: sel, mode: 'video', mp4: vurl });
       setStatus('✓ видео заменено'); scheduleSave();
       setTimeout(function () {
         if (confirm('Загрузить постер (картинку-превью, видна пока видео грузится)?')) {
           pickFile(function (purl) {
             var e = CH.videos.filter(function (c) { return c.selector === sel; })[0]; if (e) e.poster = purl;
-            if (v) v.setAttribute('poster', purl);
+            v.setAttribute('poster', purl);
             container.setAttribute('data-poster-url', purl);
             setStatus('✓ постер добавлен'); scheduleSave();
           });
         }
       }, 300);
+    });
+  }
+  function replaceHeroImage(container) {
+    if (!KEY) { setStatus('✗ введите пароль'); refreshPw(); focusPw(); return; }
+    pickFile(function (url) {
+      setHeroImage(container, url);
+      var sel = cssPath(container);
+      CH.videos = CH.videos.filter(function (c) { return c.selector !== sel; });
+      CH.videos.push({ selector: sel, mode: 'image', image: url });
+      setStatus('✓ фото вместо видео'); scheduleSave();
     });
   }
   function setLink(el) {
@@ -421,7 +456,8 @@
     if (!videoCont && t.closest('video')) videoCont = t.closest('video').closest('.video_hero-home, .w-background-video') || t.closest('video');
     if (videoCont) {
       acts.push({ l: '🎬 видео', run: function () { replaceVideo(videoCont); } });
-      return { acts: acts, anchor: videoCont };  // video container: only the video action (skip bg)
+      acts.push({ l: '📷 фото', run: function () { replaceHeroImage(videoCont); } });
+      return { acts: acts, anchor: videoCont };  // hero media container: video OR photo (skip generic bg/img)
     }
     var img = t.closest('img'); var svg = !img && t.closest('svg'); var bg = bgAncestor(t);
     var link = t.closest('a,button'); var txt = t.closest('[data-eedit]');
@@ -694,6 +730,11 @@
     (p.styles || []).filter(function (c) { return !c.mq; }).forEach(function (c) { applyStyleEntry(c, BP === 'm'); }); // base (desktop dims skipped in mobile frame)
     if (BP === 'm') (p.styles || []).filter(function (c) { return c.mq === 'm'; }).forEach(applyStyleEntry); // mobile overrides (only inside the 390px frame)
     (p.removed || []).forEach(function (sel) { safeAll(sel).forEach(function (el) { el.style.setProperty('display', 'none', 'important'); }); });
+    (p.videos || []).forEach(function (c) {
+      var el = c.selector && safeQ(c.selector); if (!el) return;
+      if (c.mode === 'image' && c.image) setHeroImage(el, c.image);
+      else if (c.mp4) setHeroVideo(el, c.mp4, c.webm, c.poster);
+    });
   }
   function safeQ(s) { try { return document.querySelector(s); } catch (e) { return null; } }
   function safeAll(s) { try { return [].slice.call(document.querySelectorAll(s)); } catch (e) { return []; } }
