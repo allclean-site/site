@@ -124,3 +124,16 @@ p, .text-size-large, .faq-paragraph { text-wrap: pretty; }
 /* Reading comfort: long-form paragraphs get the recommended 1.5 leading
    (template ships 1.4; headings/buttons keep their own tighter values). */
 p.text-size-large, .faq-paragraph, .card_testimonial-marquee .text-size-large { line-height: 1.5; }
+
+/* Service-card heading safety net: the card reserves its bottom-right corner for an
+   absolutely-positioned arrow button (content_nav-service has padding-right:120px for it).
+   A 3-line heading grows tall enough to run under that button, visually clipping the last
+   word — happened with a long RU title before it was shortened. Cap at 2 lines with an
+   ellipsis so any future long title degrades gracefully instead of colliding with the icon. */
+.card_scroll-service .heading-style-h4,
+.link_service .heading-style-h4 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
