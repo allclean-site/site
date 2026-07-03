@@ -66,6 +66,7 @@ const MAP = {
   'СЕРВИС ДЛЯ ЗАНЯТЫХ ЖИТЕЛЕЙ КИШИНЁВА': 'SERVICIU PENTRU LOCUITORII OCUPAȚI DIN CHIȘINĂU',
   'Никаких скрытых платежей. Вы видите цену до начала работы.': 'Fără plăți ascunse. Vedeți prețul înainte de începerea lucrului.',
   'Каждый клинер проверен, с подтверждённой репутацией и застрахован.': 'Fiecare curățător este verificat, cu reputație confirmată și asigurat.',
+  'Собственная команда': 'Echipă proprie',
   'Натуральные средства': 'Soluții naturale',
   'Экологичны и безопасны для детей и животных.': 'Ecologice și sigure pentru copii și animale.',
   'Полная экипировка': 'Echipament complet',
