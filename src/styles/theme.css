@@ -95,16 +95,20 @@ p, .text-size-large, .faq-paragraph { text-wrap: pretty; }
 /* Mobile heading safety: scale display headings to the phone viewport and allow
    hyphenation for very long Russian words (ПРОФЕССИОНАЛЬНЫЕ…) that exceed 375px. */
 @media (max-width: 767px) {
+  /* word-break (not just overflow-wrap) is needed for editor-authored headings where words end up
+     joined by &nbsp; (contenteditable's own quirk when merging word-divs) — plain overflow-wrap
+     doesn't force a break at a non-breaking space, so a long nbsp-joined run still overflows. */
   main h1, main .heading-style-h1 {
     font-size: clamp(2rem, 11vw, 3.25rem);
     line-height: 1.12;
     overflow-wrap: break-word;
+    word-break: break-word;
     hyphens: auto;
   }
   main .content_cta, main [class^="headline_"] { max-width: 100%; }
 }
 @media (max-width: 767px) {
-  main h2 { font-size: clamp(1.6rem, 9vw, 2.6rem); overflow-wrap: break-word; }
+  main h2 { font-size: clamp(1.6rem, 9vw, 2.6rem); overflow-wrap: break-word; word-break: break-word; }
 }
 @media (max-width: 767px) {
   /* standard grid-blowout guard: a child's intrinsic min-content must not widen the track */

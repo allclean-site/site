@@ -442,7 +442,12 @@ const tileIco: Record<string, string> = { surfaces: '🧴', kitchen: '🍳', bat
   }
   @media (max-width: 560px) {
     .calc-body { padding: 20px; }
-    .calc-cards, .calc-tiles { grid-template-columns: 1fr 1fr; }
+    /* minmax(0,1fr), not bare 1fr: a grid track's default min-width is auto (content's own intrinsic
+       width), so a long card label (e.g. "Поддерживающая") forces its column wider than half the
+       row, pushing the other card past the panel edge. minmax(0,…) lets the column — and its text —
+       shrink/wrap to fit instead of overflowing. */
+    .calc-cards, .calc-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .calc-card { min-width: 0; }
     .calc-nav { padding: 14px 18px; } .calc-back, .calc-next { flex: 1; }
   }
 </style>
