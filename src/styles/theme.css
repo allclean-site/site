@@ -92,15 +92,18 @@ p, .text-size-large, .faq-paragraph { text-wrap: pretty; }
 /* About hero: 104px uppercase in an 812px column wrapped into 7-8 lines.
    Scale the display size to the column instead (still the same typeface/colour). */
 .heading_about, .heading_about h1, .headline_about h1 { font-size: clamp(2.5rem, 4.6vw, 4.25rem); line-height: 1.08; }
-/* Mobile heading safety: scale display headings to the phone viewport and allow
-   hyphenation for very long Russian words (ПРОФЕССИОНАЛЬНЫЕ…) that exceed 375px. */
+/* Mobile type scale — the template's own headings measured 40+px on a 375px phone (H1 fills over
+   half the screen before any content shows) and small badge labels dropped to 10px, below readable
+   minimum. Recomputed with the standard fluid-type formula (min at a 320px phone, max at the 767px
+   tablet handoff) instead of the template's plain vw clamp, so it actually scales down: H1 ~28-36px,
+   H2 ~22-28px (was ~41px/~34px on a 375px phone) — matches typical mobile UI conventions. Also allows
+   hyphenation/word-break for very long Russian words (ПРОФЕССИОНАЛЬНЫЕ…) and editor-authored headings
+   where words end up joined by &nbsp; (contenteditable's own quirk when merging word-divs) — plain
+   overflow-wrap doesn't force a break at a non-breaking space, so a long nbsp-joined run still overflows. */
 @media (max-width: 767px) {
-  /* word-break (not just overflow-wrap) is needed for editor-authored headings where words end up
-     joined by &nbsp; (contenteditable's own quirk when merging word-divs) — plain overflow-wrap
-     doesn't force a break at a non-breaking space, so a long nbsp-joined run still overflows. */
   main h1, main .heading-style-h1 {
-    font-size: clamp(2rem, 11vw, 3.25rem);
-    line-height: 1.12;
+    font-size: clamp(1.75rem, 8.5vw, 2.25rem);
+    line-height: 1.15;
     overflow-wrap: break-word;
     word-break: break-word;
     hyphens: auto;
@@ -108,7 +111,10 @@ p, .text-size-large, .faq-paragraph { text-wrap: pretty; }
   main .content_cta, main [class^="headline_"] { max-width: 100%; }
 }
 @media (max-width: 767px) {
-  main h2 { font-size: clamp(1.6rem, 9vw, 2.6rem); overflow-wrap: break-word; word-break: break-word; }
+  main h2 { font-size: clamp(1.375rem, 6.4vw, 1.75rem); line-height: 1.2; overflow-wrap: break-word; word-break: break-word; }
+  /* small uppercase badge labels (Услуги / О нас / "4.9 в Google") — template shrinks these to 10px
+     on mobile via a CSS variable; 10px is below comfortable reading size, restore to 12px. */
+  main .label-large { font-size: .75rem !important; }
 }
 @media (max-width: 767px) {
   /* standard grid-blowout guard: a child's intrinsic min-content must not widen the track */
