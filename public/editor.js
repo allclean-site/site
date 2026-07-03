@@ -365,10 +365,25 @@
   // ---------- replace actions ----------
   function replaceImage(img) {
     pickFile(function (url) {
+      var origSrc = (img.getAttribute('src') || '').split('?')[0];
       img.removeAttribute('srcset'); img.removeAttribute('sizes'); img.src = url;
       if (insideAdded(img)) { syncAdded(img); setStatus('✓ фото заменено'); return; }
-      var slot = img.getAttribute('data-slot') || cssPath(img); if (!img.getAttribute('data-slot')) img.setAttribute('data-slot', slot);
-      CH.images = CH.images.filter(function (c) { return c.slot !== slot; }); CH.images.push({ slot: slot, url: url }); setStatus('✓ фото заменено');
+      // Duplicate marquee/carousel tracks repeat the same card 2-3× for an infinite-scroll illusion —
+      // every copy starts with the identical default src. Editing one should update all of them, so find
+      // every OTHER still-untouched image sharing that original src and record + update each one under
+      // its OWN selector (bake/applyOverrides treat `slot` as a CSS selector to match, not a group key).
+      var targets = [img];
+      if (!img.getAttribute('data-slot') && origSrc) {
+        document.querySelectorAll('img').forEach(function (im) {
+          if (im !== img && !im.getAttribute('data-slot') && (im.getAttribute('src') || '').split('?')[0] === origSrc) targets.push(im);
+        });
+      }
+      targets.forEach(function (im) {
+        if (im !== img) { im.removeAttribute('srcset'); im.removeAttribute('sizes'); im.src = url; }
+        var slot = im.getAttribute('data-slot') || cssPath(im); if (!im.getAttribute('data-slot')) im.setAttribute('data-slot', slot);
+        CH.images = CH.images.filter(function (c) { return c.slot !== slot; }); CH.images.push({ slot: slot, url: url });
+      });
+      setStatus(targets.length > 1 ? '✓ фото заменено (' + targets.length + ' мест)' : '✓ фото заменено');
     });
   }
   function replaceIcon(svg) {
