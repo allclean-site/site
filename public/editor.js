@@ -238,13 +238,24 @@
   var TAGS = 'h1,h2,h3,h4,h5,h6,p,a,span,div,li,button,strong,em,blockquote';
   var INLINE = { B: 1, I: 1, EM: 1, STRONG: 1, SPAN: 1, A: 1, BR: 1, SMALL: 1, SUP: 1, SUB: 1, U: 1, MARK: 1, CODE: 1 };
   var INLINE_LEAF = { A: 1, SPAN: 1, STRONG: 1, EM: 1, B: 1, SMALL: 1, U: 1, MARK: 1 };
-  // Does el carry its OWN text — a direct text node OR an inline child (span/strong/…) holding text?
+  // Is el SAFELY inline — an INLINE-tagged element whose entire subtree is also inline-only?
+  // Plain `INLINE[tagName]` isn't enough: an <a> wrapping a whole card (image + heading DIVs) has
+  // tag "A" (inline) but block content inside — treating it as inline would make the OUTER wrapper
+  // swallow the card's text as one flat blob AND block the real heading underneath from ever being
+  // marked (guarded out because its ancestor is "already editable"). Recursing into children catches
+  // real inline runs (<a>text</a>, <strong>text</strong>) while rejecting card-shaped anchors.
+  function isSimpleInline(el) {
+    if (!INLINE[el.tagName]) return false;
+    for (var i = 0; i < el.children.length; i++) if (!isSimpleInline(el.children[i])) return false;
+    return true;
+  }
+  // Does el carry its OWN text — a direct text node OR a simple-inline child (span/strong/…) holding text?
   // Used to allow text-only block children (split lines) while still excluding pure layout containers
   // (whose text lives only inside nested BLOCK descendants). Formatted headings (text wrapped in a
   // <span> by the format bar) count as having own text, so they stay editable.
-  function hasDirectText(el) { for (var n = el.firstChild; n; n = n.nextSibling) { if (n.nodeType === 3 && (n.nodeValue || '').trim()) return true; if (n.nodeType === 1 && INLINE[n.tagName] && (n.textContent || '').trim()) return true; } return false; }
+  function hasDirectText(el) { for (var n = el.firstChild; n; n = n.nextSibling) { if (n.nodeType === 3 && (n.nodeValue || '').trim()) return true; if (n.nodeType === 1 && isSimpleInline(n) && (n.textContent || '').trim()) return true; } return false; }
   // a DIV/P that only wraps text/inline — the Webflow "second line" split pattern (<h2>text<div>text</div></h2>)
-  function isTextLeafBlock(ch) { if (ch.tagName !== 'DIV' && ch.tagName !== 'P') return false; for (var i = 0; i < ch.children.length; i++) { var g = ch.children[i]; if (INLINE[g.tagName] || isTextLeafBlock(g)) continue; return false; } return true; }
+  function isTextLeafBlock(ch) { if (ch.tagName !== 'DIV' && ch.tagName !== 'P') return false; for (var i = 0; i < ch.children.length; i++) { var g = ch.children[i]; if (isSimpleInline(g) || isTextLeafBlock(g)) continue; return false; } return true; }
   function markEditable() {
     document.querySelectorAll(TAGS).forEach(function (el) {
       if (el.closest('#eed') || el.hasAttribute('data-eedit')) return;
@@ -253,7 +264,7 @@
       // Allow block children ONLY when the element itself directly holds text and the child is a text-only
       // line wrapper (split heading/paragraph). Pure layout containers have no direct text → stay excluded.
       var dt = hasDirectText(el);
-      for (var i = 0; i < el.children.length; i++) { var ch = el.children[i]; if (INLINE[ch.tagName]) continue; if (dt && isTextLeafBlock(ch)) continue; return; }
+      for (var i = 0; i < el.children.length; i++) { var ch = el.children[i]; if (isSimpleInline(ch)) continue; if (dt && isTextLeafBlock(ch)) continue; return; }
       el.setAttribute('data-eedit', ''); el.dataset.eorig = t;
     });
   }
@@ -461,7 +472,17 @@
   var hbAnchor = null, hbHideT = null;
   function isBg(el) { try { return getComputedStyle(el).backgroundImage.indexOf('url(') >= 0; } catch (e) { return false; } }
   function bgAncestor(t) { var el = t; while (el && el !== document.body) { if (el.tagName !== 'IMG' && isBg(el)) { var r = el.getBoundingClientRect(); if (r.width * r.height > 40000) return el; } el = el.parentElement; } return null; }
-  function actionsFor(t) {
+  // Card grids often lay a full-card <a> overlay (position:absolute;inset:0) over the image to make
+  // the whole card clickable — hovering the image then hits the overlay, not the <img>, so
+  // t.closest('img') finds nothing. Fall back to a hit-test at the real cursor point: elementsFromPoint
+  // returns every element stacked there regardless of who's "on top", so the covered <img> still shows up.
+  function findImgUnderPoint(x, y) {
+    if (typeof x !== 'number') return null;
+    var stack = document.elementsFromPoint(x, y) || [];
+    for (var i = 0; i < stack.length; i++) { var n = stack[i]; if (n.closest && n.closest('#eed,#eed-hb,#eedmob-ov')) continue; if (n.tagName === 'IMG') return n; }
+    return null;
+  }
+  function actionsFor(t, x, y) {
     var acts = [], anchor = null;
     var videoCont = t.closest('.video_hero-home, .w-background-video');
     if (!videoCont && t.closest('video')) videoCont = t.closest('video').closest('.video_hero-home, .w-background-video') || t.closest('video');
@@ -470,7 +491,7 @@
       acts.push({ l: '📷 фото', run: function () { replaceHeroImage(videoCont); } });
       return { acts: acts, anchor: videoCont };  // hero media container: video OR photo (skip generic bg/img)
     }
-    var img = t.closest('img'); var svg = !img && t.closest('svg'); var bg = bgAncestor(t);
+    var img = t.closest('img') || findImgUnderPoint(x, y); var svg = !img && t.closest('svg'); var bg = bgAncestor(t);
     var link = t.closest('a,button'); var txt = t.closest('[data-eedit]');
     if (img) { acts.push({ l: '📷 фото', run: function () { replaceImage(img); } }); anchor = img; }
     if (svg) { acts.push({ l: '✦ иконка', run: function () { replaceIcon(svg); } }); anchor = anchor || svg; }
@@ -481,15 +502,15 @@
   }
   function placeHB() { if (!hbAnchor) return; var r = hbAnchor.getBoundingClientRect(); hb.style.top = (window.scrollY + r.top + 6) + 'px'; hb.style.left = (window.scrollX + r.left + 6) + 'px'; }
   function hideHB() { hb.style.display = 'none'; hbAnchor = null; }
-  function showHB(t) {
-    var info = actionsFor(t);
+  function showHB(t, x, y) {
+    var info = actionsFor(t, x, y);
     if (!info.acts.length || !info.anchor) { hideHB(); return; }
     if (info.anchor === hbAnchor) { hb.style.display = 'flex'; return; }
     hbAnchor = info.anchor; hb.innerHTML = '';
     info.acts.forEach(function (a) { var b = document.createElement('button'); b.className = 'eed-badge' + (a.c ? ' ' + a.c : ''); b.textContent = a.l; b.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); a.run(); }); hb.appendChild(b); });
     hb.style.display = 'flex'; placeHB();
   }
-  document.addEventListener('pointerover', function (e) { if (delMode || blkMode) return; var t = e.target; if (t.closest('#eed,#eedmob-ov,#eed-hb')) { clearTimeout(hbHideT); return; } clearTimeout(hbHideT); showHB(t); }, true);
+  document.addEventListener('pointerover', function (e) { if (delMode || blkMode) return; var t = e.target; if (t.closest('#eed,#eedmob-ov,#eed-hb')) { clearTimeout(hbHideT); return; } clearTimeout(hbHideT); showHB(t, e.clientX, e.clientY); }, true);
   document.addEventListener('pointerout', function (e) { var to = e.relatedTarget; if (to && to.closest && to.closest('#eed-hb,#eed')) return; clearTimeout(hbHideT); hbHideT = setTimeout(hideHB, 300); }, true);
   window.addEventListener('scroll', placeHB, true);
   window.addEventListener('resize', placeHB);

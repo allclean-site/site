@@ -1,5 +1,8 @@
 ---
 // PricingContent
+import CalculatorPicker from './CalculatorPicker.astro';
+interface Props { locale?: 'ru' | 'ro' }
+const { locale = 'ru' } = Astro.props;
 ---
       <main class="main-wrapper">
         <section class="seciton_hero-pricing">
@@ -926,6 +929,7 @@
             </div>
           </div>
         </section>
+        <CalculatorPicker locale={locale} />
         <section class="section_pricing-add-ons">
           <div class="padding-global">
             <div class="w-layout-blockcontainer container-large w-container">
