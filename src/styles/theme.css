@@ -127,11 +127,13 @@ p.text-size-large, .faq-paragraph, .card_testimonial-marquee .text-size-large { 
 
 /* "КАК ЭТО / РАБОТАЕТ?" heading: the second line is a nested <div> (forces the break).
    Slightly looser than the tight 1:1 default so the two rows don't touch, without the
-   extra margin-top on top of it (that combination read as too much gap). !important:
-   the homepage still has an old page-scoped override baking an inline line-height:80px
-   directly onto this element — inline style beats any external selector regardless of
-   specificity, so only !important here can still win and keep the homepage in sync too. */
-.headline_hiw h2.margin-0 { line-height: 1.05 !important; }
+   extra margin-top on top of it (that combination read as too much gap).
+   The homepage still carries an old page-scoped override baking its OWN
+   `line-height:80px !important` via a long nth-of-type-chained selector. Repeating the
+   class to out-specify it doesn't survive Astro/Vite's CSS minifier (it collapses
+   `.foo.foo.foo` back down to `.foo`, discarding the specificity boost) — an id is
+   immune to that and beats any number of classes outright, so target the id instead. */
+#hiw-heading { line-height: 1.05 !important; }
 
 /* Desktop-only heading widths/line-heights dialed in on the homepage via the editor's width
    tool — these live in a page-scoped override there, so other pages never saw them and fell
