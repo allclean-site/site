@@ -31,8 +31,8 @@ const desc = article.seo_description || article.excerpt || '';
     {article.cover_url && <meta property="og:image" content={article.cover_url} />}
   </Fragment>
   <div class="page-wrapper">
-    <Header lang="ro" />
+    <Header lang="ro" altHref={ruUrl} />
     <BlogPostContent article={article} locale="ro" />
-    <Footer lang="ro" />
+    <Footer lang="ro" altHref={ruUrl} />
   </div>
 </Base>

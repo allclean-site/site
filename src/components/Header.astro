@@ -1,6 +1,7 @@
 ---
-interface Props { lang?: 'ru' | 'ro' }
-const { lang = 'ru' } = Astro.props;
+import LangSwitcher from './LangSwitcher.astro';
+interface Props { lang?: 'ru' | 'ro'; altHref?: string }
+const { lang = 'ru', altHref } = Astro.props;
 const base = lang === 'ro' ? '/ro' : '';
 const tt = (ru: string, ro: string) => (lang === 'ro' ? ro : ru);
 ---
@@ -309,6 +310,7 @@ const tt = (ru: string, ro: string) => (lang === 'ro' ? ro : ru);
                     ><div>{tt("Вопросы", "Întrebări")}</div></a
                   >
                   <div class="nav_bottom-right">
+                    <LangSwitcher lang={lang} altHref={altHref} place="header-mobile" />
                     <div class="text-size-small tone-medium">
                       © All Clean
                     </div>
@@ -411,6 +413,7 @@ const tt = (ru: string, ro: string) => (lang === 'ro' ? ro : ru);
               </nav>
             </div>
             <div class="right_nav">
+              <LangSwitcher lang={lang} altHref={altHref} place="header" />
               <a
                 href={base + "/book-cleaning"}
                 button=""
@@ -489,6 +492,14 @@ const tt = (ru: string, ro: string) => (lang === 'ro' ? ro : ru);
       </div>
 
 <style is:global>
+  /* The desktop top-bar language toggle (.right_nav) is the SECOND LangSwitcher instance in
+     this file (the first inside .nav_bottom-right is mobile-menu-only, hidden by default via
+     sparkles.css and only shown ≤991px). At ≤991px the compact top bar has just enough room
+     for logo + CTA + hamburger — adding the toggle there clipped the hamburger. Hide THIS one
+     below that same breakpoint; the mobile-menu copy already covers it. */
+  @media screen and (max-width: 991px) {
+    .right_nav > .lang-toggle { display: none; }
+  }
   /* Solid header matching the page background — no glass/blur/noise. */
   .navbar { transition: background-color .3s ease, box-shadow .3s ease; transform: none !important; }
   .nav-bg { transition: background-color .3s ease; }

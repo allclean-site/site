@@ -1,6 +1,7 @@
 ---
-interface Props { lang?: 'ru' | 'ro' }
-const { lang = 'ru' } = Astro.props;
+import LangSwitcher from './LangSwitcher.astro';
+interface Props { lang?: 'ru' | 'ro'; altHref?: string }
+const { lang = 'ru', altHref } = Astro.props;
 const base = lang === 'ro' ? '/ro' : '';
 const tt = (ru: string, ro: string) => (lang === 'ro' ? ro : ru);
 ---
@@ -247,6 +248,7 @@ const tt = (ru: string, ro: string) => (lang === 'ro' ? ro : ru);
                     <div class="text-size-small tone-medium">
                       © All Clean
                     </div>
+                    <LangSwitcher lang={lang} altHref={altHref} place="footer" />
                     <div class="footer_socials">
                       <a
                         href="https://facebook.com"
