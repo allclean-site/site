@@ -46,7 +46,7 @@ const bookHref = locale === 'ru' ? '/book-cleaning' : '/ro/book-cleaning';
         <div class="master_faq">
           <div class="headline_faq">
             <div class="master_label"><div class="label-large">{tx.faqLabel}</div></div>
-            <h2><strong>{tx.faqTitle}</strong></h2>
+            <h2><strong id="faq-heading">{tx.faqTitle}</strong></h2>
           </div>
           <div class="faq-block svc-faq">
             {faq.map((f) => (

@@ -146,6 +146,16 @@ p.text-size-large, .faq-paragraph, .card_testimonial-marquee .text-size-large { 
   .headline_testimonials h2.margin-0 { width: 920px; max-width: 920px; line-height: 92px; }
 }
 
+/* FAQ heading ("ОТВЕТЫ НА ВАШИ ВОПРОСЫ") width/line-height dialed in on the homepage —
+   same story as HowItWorks above. Both the homepage's own Faq.astro instance AND the
+   copy embedded in /pricing carry their OWN stale page-scoped override (with a DIFFERENT,
+   older width than the homepage's current one), so a plain class rule loses on both —
+   target the shared id on all three markup instances (Faq.astro, PricingContent.astro,
+   ServiceLanding.astro) instead of fighting three different nth-of-type specificities. */
+@media (min-width: 768px) {
+  #faq-heading { width: 829px !important; max-width: 829px !important; line-height: 78px !important; }
+}
+
 /* ContactTiles strip: on the homepage it sits inside the hero's own container/spacing.
    On other pages it's inserted as its own mini-section between the page's hero and the
    next block, so it needs its own (smaller than a full section) vertical padding. */
