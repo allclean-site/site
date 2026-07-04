@@ -125,11 +125,21 @@ p, .text-size-large, .faq-paragraph { text-wrap: pretty; }
    (template ships 1.4; headings/buttons keep their own tighter values). */
 p.text-size-large, .faq-paragraph, .card_testimonial-marquee .text-size-large { line-height: 1.5; }
 
-/* "КАК ЭТО / РАБОТАЕТ?" heading: the second line is a nested <div> (forces the break),
-   but it inherits the same tight heading line-height as the first line, so the two rows
-   sit almost touching. Give the wrapped line proper breathing room. */
-.headline_hiw h2.margin-0 { line-height: 1.15; }
-.headline_hiw h2.margin-0 > div { margin-top: 0.15em; }
+/* "КАК ЭТО / РАБОТАЕТ?" heading: the second line is a nested <div> (forces the break).
+   Slightly looser than the tight 1:1 default so the two rows don't touch, without the
+   extra margin-top on top of it (that combination read as too much gap). */
+.headline_hiw h2.margin-0 { line-height: 1.08; }
+
+/* Desktop-only heading widths/line-heights dialed in on the homepage via the editor's width
+   tool — these live in a page-scoped override there, so other pages never saw them and fell
+   back to the raw template defaults (narrower/tighter). Bake them into the shared components
+   so every page matches the homepage, same 768px+ cutoff apply-overrides.mjs itself uses for
+   these dimension properties (baking them below 768px risks overflowing narrow phones). */
+@media (min-width: 768px) {
+  .content_home-about h2.heading-style-h3 { width: 468px; max-width: 468px; }
+  .content_cta h2 { width: 920px; max-width: 920px; line-height: 92px; }
+  .headline_testimonials h2.margin-0 { width: 920px; max-width: 920px; line-height: 92px; }
+}
 
 /* ContactTiles strip: on the homepage it sits inside the hero's own container/spacing.
    On other pages it's inserted as its own mini-section between the page's hero and the
