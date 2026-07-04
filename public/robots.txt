@@ -1,4 +1,33 @@
 User-agent: *
 Allow: /
+Disallow: /api/
 
-Sitemap: https://allclean.pages.dev/sitemap-index.xml
+# AI / answer-engine crawlers — explicitly welcome (content is written to be cited)
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+Sitemap: https://allclean.md/sitemap-index.xml

@@ -13,7 +13,7 @@ interface Props {
 }
 const { title, description = '', lang = 'ru', ruAlternate, roAlternate, ogImage } = Astro.props;
 
-const site = Astro.site ?? new URL('https://allclean.example');
+const site = Astro.site ?? new URL('https://allclean.md');
 // Path without the /ro locale prefix, so we can build both alternates.
 const basePath = Astro.url.pathname.replace(/^\/ro(?=\/|$)/, '') || '/';
 const ruUrl = ruAlternate ?? new URL(basePath, site).href;

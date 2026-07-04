@@ -11,7 +11,7 @@ const article = await getArticle('ro', slug!);
 if (!article) return new Response('Articol negăsit', { status: 404 });
 
 const otherSlug = await counterpartSlug(article.group_id, 'ru');
-const site = Astro.site ?? new URL('https://allclean.pages.dev');
+const site = Astro.site ?? new URL('https://allclean.md');
 const roUrl = new URL('/ro/blog/' + article.slug, site).href;
 const ruUrl = otherSlug ? new URL('/blog/' + otherSlug, site).href : roUrl;
 const desc = article.seo_description || article.excerpt || '';

@@ -14,7 +14,7 @@ const { slug } = Astro.params;
 const service = getService(slug!)!;
 const calc = await getCalculator(service.calcSlug);
 const L = service.ro;
-const SITE = 'https://allclean.pages.dev';
+const SITE = 'https://allclean.md';
 const jsonld = buildServiceJsonLd(service, 'ro', SITE);
 ---
 <Base

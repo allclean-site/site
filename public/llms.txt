@@ -26,22 +26,22 @@
 - Скидки на регулярное и абонементное обслуживание (еженедельно, ежедневно).
 
 ## Страницы услуг (с калькулятором стоимости)
-- Уборка квартир и домов: https://allclean.pages.dev/services/home-cleaning
-- Уборка офисов: https://allclean.pages.dev/services/office
-- Уборка после ремонта: https://allclean.pages.dev/services/post-construction
-- Мойка окон и фасадов: https://allclean.pages.dev/services/windows
-- Чистка ковров и ковролина: https://allclean.pages.dev/services/carpet
-- Химчистка мягкой мебели: https://allclean.pages.dev/services/upholstery
-- Уборка складов и промышленных помещений: https://allclean.pages.dev/services/warehouse
-- Уборка магазинов и супермаркетов: https://allclean.pages.dev/services/retail
-- Реставрация полов (линолеум, паркет, мрамор): https://allclean.pages.dev/services/floor-restoration
-- Мойка и дезинфекция пищевых производств: https://allclean.pages.dev/services/disinfection
+- Уборка квартир и домов: https://allclean.md/services/home-cleaning
+- Уборка офисов: https://allclean.md/services/office
+- Уборка после ремонта: https://allclean.md/services/post-construction
+- Мойка окон и фасадов: https://allclean.md/services/windows
+- Чистка ковров и ковролина: https://allclean.md/services/carpet
+- Химчистка мягкой мебели: https://allclean.md/services/upholstery
+- Уборка складов и промышленных помещений: https://allclean.md/services/warehouse
+- Уборка магазинов и супермаркетов: https://allclean.md/services/retail
+- Реставрация полов (линолеум, паркет, мрамор): https://allclean.md/services/floor-restoration
+- Мойка и дезинфекция пищевых производств: https://allclean.md/services/disinfection
 
 ## Ключевые страницы
-- Услуги: https://allclean.pages.dev/services
-- Цены: https://allclean.pages.dev/pricing
-- Запись на уборку: https://allclean.pages.dev/book-cleaning
-- Блог: https://allclean.pages.dev/blog
-- О нас: https://allclean.pages.dev/about
+- Услуги: https://allclean.md/services
+- Цены: https://allclean.md/pricing
+- Запись на уборку: https://allclean.md/book-cleaning
+- Блог: https://allclean.md/blog
+- О нас: https://allclean.md/about
 
-Румынская версия сайта: префикс /ro (например, https://allclean.pages.dev/ro/services/office).
+Румынская версия сайта: префикс /ro (например, https://allclean.md/ro/services/office).
