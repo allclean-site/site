@@ -162,6 +162,23 @@ p.text-size-large, .faq-paragraph, .card_testimonial-marquee .text-size-large { 
    next block, so it needs its own (smaller than a full section) vertical padding. */
 .section_contact-tiles { padding-top: 2.5rem; padding-bottom: 2.5rem; }
 
+/* Hero heading (home + every service page share this component): the animated multi-city
+   swap-text was removed (Hero.astro now renders one static word list ending in the city),
+   but the words themselves vary wildly in width — the template's 104px desktop size fits
+   short words like "УБОРКА" (418px) fine, but a long service word can be nearly 800px
+   ("ДЕЗИНФЕКЦИЯ", "ПРОИЗВОДСТВ") against a 528px column, roughly 50% over. No single
+   font-size shrinks that much without looking timid on the (far more common) short-word
+   pages, so: trim the size a bit for general headroom, AND let an outlier word wrap onto
+   a second line inside its own slot instead of overflowing the column horizontally.
+   word-break/overflow-wrap apply at every width (harmless, just a safety net), but the
+   104px->88px font-size is desktop-only — the existing mobile clamp above (max-width:767px)
+   already sizes this correctly for phones and must not be fought over by a same-priority
+   rule with no breakpoint of its own. */
+.heading_hero-home .heading-style-h1 { overflow-wrap: break-word; word-break: break-word; hyphens: auto; }
+@media (min-width: 768px) {
+  .heading_hero-home .heading-style-h1 { font-size: 5.5rem; }
+}
+
 /* Service-card heading: content_nav-service reserves padding-right:120px for the corner
    arrow button, but the button itself is only ~52px wide (1.25rem icon + 2×16px padding)
    sitting 24px from the card edge — its left edge is ~76px in, not 120px. The extra ~44px

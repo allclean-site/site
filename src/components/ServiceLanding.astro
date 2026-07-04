@@ -28,7 +28,7 @@ const bookHref = locale === 'ru' ? '/book-cleaning' : '/ro/book-cleaning';
 <main class="main-wrapper service-landing">
   <Hero
     words={hero.words}
-    cities={hero.cities}
+    city={hero.cities?.[0]}
     primaryHref={bookHref}
     primaryText={tx.book}
     secondaryHref="#calc-section"

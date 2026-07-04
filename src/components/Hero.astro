@@ -3,7 +3,7 @@ import ContactTiles from './ContactTiles.astro';
 // Home hero lifted from All Clean. Parameterized for service pages (design unchanged).
 const {
   words = ['УБОРКА', 'ДЛЯ', 'ЗАНЯТЫХ', 'ЛЮДЕЙ', 'В'],
-  cities = ['КИШИНЁВЕ', 'ЧОКАНЕ', 'БОТАНИКЕ', 'РЫШКАНОВКЕ', 'КИШИНЁВЕ'],
+  city = 'КИШИНЁВЕ',
   primaryHref = '/book-cleaning',
   primaryText = 'Записаться на уборку',
   secondaryHref = '/pricing',
@@ -92,13 +92,7 @@ const {
                     </div>
                     <h1 id="" class="heading_hero-home">
                       {words.map((w: string) => <div class="heading-style-h1">{w}</div>)}
-                      <div class="wrap_swap-text">
-                        {cities.map((c: string) => (
-                          <div class="text-swap">
-                            <div class="heading-style-h1">{c}</div>
-                          </div>
-                        ))}
-                      </div>
+                      <div class="heading-style-h1">{city}</div>
                     </h1>
                   </div>
                   <div class="button-group_left">
