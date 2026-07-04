@@ -14,6 +14,13 @@
   // Breakpoint being edited: 'base' (all widths, the desktop view) or 'm' (mobile ≤767px, set when the
   // editor runs inside the 📱 mobile iframe via ?bp=m). Style edits are recorded into the matching bucket.
   var BP = /[?&]bp=m\b/.test(location.search) ? 'm' : 'base';
+  // Elements tagged with one of these ids are "synced blocks": editing one on the HOMEPAGE
+  // (RU '/' or RO '/ro') propagates to every other page at build time (apply-overrides.mjs
+  // merges the homepage's #id-selector entries into pages that have no local override for
+  // that same id); editing the SAME element on any other page stays local to that page only,
+  // exactly like every other override. See apply-overrides.mjs for the merge side of this.
+  var SYNC_IDS = ['team-photo', 'team-heading', 'cta-heading', 'hiw-heading', 'faq-heading', 'testimonials-heading'];
+  function isHomePage() { return PAGE === '/' || PAGE === '/ro'; }
   // nbsp-insensitive text read: the build's typography pass bakes non-breaking spaces
   // into the page, but saved override strings must keep matching across rebuilds.
   function txt(el) { return (el.textContent || '').replace(/ /g, ' ').trim(); }
@@ -278,7 +285,10 @@
     if (insideAdded(el)) { el.dataset.eorig = txt(el); syncAdded(el); return; }
     var nw = txt(el), old = el.dataset.eorig || '';
     if (!nw || nw === old) return;
-    if (el.children.length) { var sel = cssPath(el); CH.textsel = CH.textsel.filter(function (c) { return c.selector !== sel; }); CH.textsel.push({ selector: sel, html: el.innerHTML }); }
+    // Sync-tagged elements always go through textsel (selector-keyed via cssPath's #id
+    // shortcut) even with no child elements — texts[] has no selector at all (it matches by
+    // exact old text anywhere on the page), which the build-time sync merge can't target.
+    if (el.children.length || SYNC_IDS.indexOf(el.id) !== -1) { var sel = cssPath(el); CH.textsel = CH.textsel.filter(function (c) { return c.selector !== sel; }); CH.textsel.push({ selector: sel, html: el.innerHTML }); }
     else { CH.texts = CH.texts.filter(function (c) { return c.old !== old; }); CH.texts.push({ old: old, 'new': nw }); }
     el.dataset.eorig = nw; scheduleSave();
   }, true);
@@ -791,6 +801,25 @@
   function safeQ(s) { try { return document.querySelector(s); } catch (e) { return null; } }
   function safeAll(s) { try { return [].slice.call(document.querySelectorAll(s)); } catch (e) { return []; } }
 
+  // Merge the homepage's synced-block entries into a preview-only payload so the editor shows
+  // exactly what apply-overrides.mjs will bake at build time — WITHOUT writing any of it into
+  // CH (this page's own saved state). Only elements this page has never locally touched get the
+  // homepage's value; anything the current page already overrides for that id stays local.
+  function withSyncPreview(p, homePayload) {
+    if (!homePayload) return p;
+    var own = {};
+    (p.textsel || []).forEach(function (c) { own[c.selector] = 1; });
+    (p.images || []).forEach(function (c) { own[c.slot] = 1; });
+    var wantedSel = {}; SYNC_IDS.forEach(function (id) { wantedSel['#' + id] = 1; });
+    var syncTextsel = (homePayload.textsel || []).filter(function (c) { return wantedSel[c.selector] && !own[c.selector]; });
+    var syncImages = (homePayload.images || []).filter(function (c) { return wantedSel[c.slot] && !own[c.slot]; });
+    if (!syncTextsel.length && !syncImages.length) return p;
+    var merged = {}; for (var k in p) merged[k] = p[k];
+    merged.textsel = syncTextsel.concat(p.textsel || []);
+    merged.images = syncImages.concat(p.images || []);
+    return merged;
+  }
+
   markEditable();
   fetch('/api/overrides?project=' + PROJECT + '&locale=' + LANG + '&page=' + encodeURIComponent(PAGE))
     .then(function (r) { return r.json(); })
@@ -800,9 +829,17 @@
       CH.images = p.images || []; CH.backgrounds = p.backgrounds || []; CH.styles = p.styles || []; CH.removed = p.removed || [];
       CH.videos = p.videos || []; CH.blocks = p.blocks && (p.blocks.order || p.blocks.hidden) ? { order: p.blocks.order || [], hidden: p.blocks.hidden || [] } : { order: [], hidden: [] };
       CH.added = p.added || [];
-      applyOverrides(p);
-      applyBlocksLocal();
-      document.querySelectorAll('[data-eedit]').forEach(function (el) { el.dataset.eorig = txt(el); });
-      hist = [snapState()]; hi = 0; updateUndoUI();
+      function finish(homePayload) {
+        applyOverrides(withSyncPreview(p, homePayload));
+        applyBlocksLocal();
+        document.querySelectorAll('[data-eedit]').forEach(function (el) { el.dataset.eorig = txt(el); });
+        hist = [snapState()]; hi = 0; updateUndoUI();
+      }
+      if (isHomePage()) { finish(null); return; }
+      var homePage = LANG === 'ro' ? '/ro' : '/';
+      fetch('/api/overrides?project=' + PROJECT + '&locale=' + LANG + '&page=' + encodeURIComponent(homePage))
+        .then(function (r) { return r.json(); })
+        .then(function (hd) { finish((hd && hd.payload) || {}); })
+        .catch(function () { finish(null); });
     }).catch(function () { ensureLgids(); hist = [snapState()]; hi = 0; updateUndoUI(); });
 })();

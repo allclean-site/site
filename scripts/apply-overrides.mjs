@@ -140,6 +140,33 @@ function applyPayload($, p) {
   }
 }
 
+// "Synced blocks": elements tagged with one of these ids in the shared components (Team photo/
+// heading, CTA heading, HowItWorks heading, FAQ heading, Testimonials heading) get their homepage
+// edit mirrored onto every other page of the SAME locale — unless that page already has its own
+// override for the same id, which always wins locally. Must match editor.js's SYNC_IDS exactly;
+// editor.js is what forces these ids to be saved as a #id-selector textsel/images entry in the
+// first place (cssPath() already shortcuts any id'd element to '#'+id on its own).
+const SYNC_IDS = ['team-photo', 'team-heading', 'cta-heading', 'hiw-heading', 'faq-heading', 'testimonials-heading'];
+const SYNC_SELECTORS = new Set(SYNC_IDS.map((id) => '#' + id));
+
+// Merge `home`'s synced-block entries into `payload` for a non-homepage page: the homepage's
+// #id entry is used only when THIS page has no entry of its own for that same id (local wins).
+function withSyncedBlocks(payload, home) {
+  if (!home) return payload;
+  const own = new Set([
+    ...((payload && payload.textsel) || []).map((c) => c.selector),
+    ...((payload && payload.images) || []).map((c) => c.slot),
+  ]);
+  const syncTextsel = (home.textsel || []).filter((c) => SYNC_SELECTORS.has(c.selector) && !own.has(c.selector));
+  const syncImages = (home.images || []).filter((c) => SYNC_SELECTORS.has(c.slot) && !own.has(c.slot));
+  if (!syncTextsel.length && !syncImages.length) return payload;
+  return {
+    ...(payload || {}),
+    textsel: [...syncTextsel, ...((payload && payload.textsel) || [])],
+    images: [...syncImages, ...((payload && payload.images) || [])],
+  };
+}
+
 async function main() {
   let rows = [];
   try {
@@ -153,6 +180,8 @@ async function main() {
   }
   if (!rows.length) { console.log('[apply-overrides] no overrides'); return; }
   const byPath = new Map(rows.map((r) => [r.page_path, r.payload || {}]));
+  const homeRU = byPath.get('/');
+  const homeRO = byPath.get('/ro');
 
   let files = [];
   console.log(`[apply-overrides] DIST=${DIST}`);
@@ -160,15 +189,21 @@ async function main() {
   let touched = 0;
   for (const file of files) {
     const path = pathFor(file);
+    const isRo = path === '/ro' || path.startsWith('/ro/');
     let payload = byPath.get(path);
     // Mirror language-neutral VIDEO overrides from the RU counterpart onto /ro pages,
     // so a hero video set on /services/X (RU) also shows on /ro/services/X.
-    if (path === '/ro' || path.startsWith('/ro/')) {
+    if (isRo) {
       const ruPath = path.replace(/^\/ro/, '') || '/';
       const ru = byPath.get(ruPath);
       if (ru && Array.isArray(ru.videos) && ru.videos.length) {
         payload = { ...(payload || {}), videos: [ ...((payload && payload.videos) || []), ...ru.videos ] };
       }
+    }
+    // Mirror synced-block edits from the homepage of the SAME locale onto every other page,
+    // unless that page already overrides the same id locally.
+    if (path !== '/' && path !== '/ro') {
+      payload = withSyncedBlocks(payload, isRo ? homeRO : homeRU);
     }
     if (!payload) continue;
     try {
