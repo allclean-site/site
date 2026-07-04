@@ -16,7 +16,8 @@ const t =
         sub: 'Короткие и честные гиды о том, как поддерживать дом чистым, спокойным и под контролем — даже когда жизнь в городе превращается в хаос.',
         read: 'Читать статью',
         empty: 'Скоро здесь появятся статьи.',
-        ctaH: 'ГОТОВЫ К ЧИСТОМУ И СПОКОЙНОМУ ДОМУ?',
+        ctaH1: 'ВЫ ГОТОВЫ',
+        ctaH2: 'К ПОЛНОЙ ЧИСТОТЕ?',
         ctaSub: 'Закажите проверенных клинеров, которые приезжают вовремя, работают с заботой и оставляют дом свежим.',
         book: 'Записаться на уборку',
         price: 'Смотреть цены',
@@ -27,7 +28,8 @@ const t =
         sub: 'Ghiduri scurte și sincere despre cum să-ți menții casa curată, calmă și sub control — chiar și când viața în oraș devine agitată.',
         read: 'Citește articolul',
         empty: 'În curând vor apărea articole.',
-        ctaH: 'GATA PENTRU O CASĂ CURATĂ ȘI LINIȘTITĂ?',
+        ctaH1: 'SUNTEȚI GATA',
+        ctaH2: 'PENTRU CURĂȚENIE COMPLETĂ?',
         ctaSub: 'Rezervă curățători de încredere care vin la timp, lucrează cu grijă și îți lasă casa proaspătă.',
         book: 'Programează curățenia',
         price: 'Vezi prețuri',
@@ -92,7 +94,7 @@ const fmt = (d: string) =>
     <div class="w-layout-blockcontainer container-large w-container">
       <div class="master_cta">
         <div class="content_cta">
-          <h2>{t.ctaH}</h2>
+          <h2>{t.ctaH1}<div>{t.ctaH2}</div></h2>
           <div class="subtext_cta">
             <p class="text-size-large">{t.ctaSub}</p>
           </div>
