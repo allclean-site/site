@@ -3,8 +3,12 @@ import Base from '../../layouts/Base.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import Content from '../../components/FaqContent.astro';
+import { faqRo, buildFaqJsonLd } from '../../data/faq.ts';
+
+const jsonld = buildFaqJsonLd(faqRo);
 ---
 <Base title="Întrebări frecvente — AllClean Chișinău" description="Răspunsuri la întrebări frecvente despre curățenie: prețuri, servicii, programare, plată. Serviciul AllClean în Chișinău." lang="ro">
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(jsonld)} />
   <div class="page-wrapper">
     <Header lang="ro" />
     <Content />
