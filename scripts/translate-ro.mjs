@@ -211,6 +211,7 @@ const MAP = {
   'ул. Месаджер, 7': 'str. Mesager 7',
   'Кишинёв, MD-2069': 'Chișinău, MD-2069',
   'Сколько длится уборка?': 'Cât durează curățenia?',
+  'Для моментов, когда «давно пора». Техника изнутри, плинтусы, труднодоступные места, работа с деталями — ничего не упустим.': 'Pentru momentele în care „a trecut prea mult timp”. Interiorul electrocasnicelor, plinte, zonele greu accesibile, lucrul de detaliu — nu scăpăm nimic.',
 };
 
 async function walk(dir) {

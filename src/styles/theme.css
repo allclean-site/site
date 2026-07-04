@@ -144,6 +144,7 @@ p.text-size-large, .faq-paragraph, .card_testimonial-marquee .text-size-large { 
   .content_home-about h2.heading-style-h3 { width: 468px; max-width: 468px; }
   .content_cta h2 { width: 920px; max-width: 920px; line-height: 92px; }
   .headline_testimonials h2.margin-0 { width: 920px; max-width: 920px; line-height: 92px; }
+  #features-heading { width: 924px; max-width: 924px; font-size: 64px; line-height: 60px; }
 }
 
 /* FAQ heading ("ОТВЕТЫ НА ВАШИ ВОПРОСЫ") width/line-height dialed in on the homepage —
