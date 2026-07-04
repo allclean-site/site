@@ -19,7 +19,7 @@
   // merges the homepage's #id-selector entries into pages that have no local override for
   // that same id); editing the SAME element on any other page stays local to that page only,
   // exactly like every other override. See apply-overrides.mjs for the merge side of this.
-  var SYNC_IDS = ['team-photo', 'team-heading', 'cta-heading', 'hiw-heading', 'faq-heading', 'testimonials-heading'];
+  var SYNC_IDS = ['team-photo', 'team-heading', 'cta-heading', 'hiw-heading', 'faq-heading', 'testimonials-heading', 'features-heading', 'features-photo'];
   function isHomePage() { return PAGE === '/' || PAGE === '/ro'; }
   // nbsp-insensitive text read: the build's typography pass bakes non-breaking spaces
   // into the page, but saved override strings must keep matching across rebuilds.

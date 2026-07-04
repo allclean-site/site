@@ -66,6 +66,8 @@ const MAP = {
   'Записаться на уборку': 'Programează o curățenie',
   'ЧЕМ МЫ ОТЛИЧАЕМСЯ': 'CE NE DEOSEBEȘTE',
   'СЕРВИС ДЛЯ ЗАНЯТЫХ ЖИТЕЛЕЙ КИШИНЁВА': 'SERVICIU PENTRU LOCUITORII OCUPAȚI DIN CHIȘINĂU',
+  'Мы специализируемся': 'Suntem specializați',
+  'не только на квартирах.': 'nu doar pe apartamente.',
   'Никаких скрытых платежей. Вы видите цену до начала работы.': 'Fără plăți ascunse. Vedeți prețul înainte de începerea lucrului.',
   'Каждый клинер проверен, с подтверждённой репутацией и застрахован.': 'Fiecare curățător este verificat, cu reputație confirmată și asigurat.',
   'Собственная команда': 'Echipă proprie',

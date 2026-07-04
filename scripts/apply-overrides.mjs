@@ -146,7 +146,7 @@ function applyPayload($, p) {
 // override for the same id, which always wins locally. Must match editor.js's SYNC_IDS exactly;
 // editor.js is what forces these ids to be saved as a #id-selector textsel/images entry in the
 // first place (cssPath() already shortcuts any id'd element to '#'+id on its own).
-const SYNC_IDS = ['team-photo', 'team-heading', 'cta-heading', 'hiw-heading', 'faq-heading', 'testimonials-heading'];
+const SYNC_IDS = ['team-photo', 'team-heading', 'cta-heading', 'hiw-heading', 'faq-heading', 'testimonials-heading', 'features-heading', 'features-photo'];
 const SYNC_SELECTORS = new Set(SYNC_IDS.map((id) => '#' + id));
 
 // Merge `home`'s synced-block entries into `payload` for a non-homepage page: the homepage's
