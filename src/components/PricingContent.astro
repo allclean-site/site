@@ -1,4 +1,6 @@
 ---
+import ContactTiles from './ContactTiles.astro';
+import Testimonials from './Testimonials.astro';
 // PricingContent
 import CalculatorPicker from './CalculatorPicker.astro';
 interface Props { locale?: 'ru' | 'ro' }
@@ -929,6 +931,14 @@ const { locale = 'ru' } = Astro.props;
             </div>
           </div>
         </section>
+        <section class="section_contact-tiles">
+          <div class="padding-global">
+            <div class="w-layout-blockcontainer container-large w-container">
+              <ContactTiles />
+            </div>
+          </div>
+        </section>
+        <Testimonials />
         <CalculatorPicker locale={locale} />
         <section class="section_pricing-add-ons">
           <div class="padding-global">

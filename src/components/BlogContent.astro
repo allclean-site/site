@@ -1,4 +1,5 @@
 ---
+import ContactTiles from './ContactTiles.astro';
 import type { Article, Locale } from '../lib/articles';
 
 interface Props {
@@ -89,6 +90,13 @@ const fmt = (d: string) =>
     </div>
   </section>
 </main>
+<section class="section_contact-tiles">
+  <div class="padding-global">
+    <div class="w-layout-blockcontainer container-large w-container">
+      <ContactTiles />
+    </div>
+  </div>
+</section>
 <section class="section_cta">
   <div class="padding-global">
     <div class="w-layout-blockcontainer container-large w-container">

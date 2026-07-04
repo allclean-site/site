@@ -1,4 +1,6 @@
 ---
+import ContactTiles from './ContactTiles.astro';
+import Testimonials from './Testimonials.astro';
 // ServicesContent
 ---
       <main class="main-wrapper">
@@ -713,38 +715,14 @@
             </div>
           </div>
         </section>
-        <section class="section_services-testimonial">
+        <section class="section_contact-tiles">
           <div class="padding-global">
             <div class="w-layout-blockcontainer container-large w-container">
-              <div class="testimonial_service">
-                <h2 class="heading-style-h3 margin-0">
-                  “They saved my apartment… and my sanity.I booked a cleaning at
-                  10 PM after a week of pure Manhattan chaos, and I swear my
-                  studio looked like a reset button was hit. I didn’t know 890 MDL
-                  could buy me peace of mind.”
-                </h2>
-                <div class="author_testimonial">
-                  <div class="image-wrap_author-testimonial">
-                    <img
-                      src="/images/content/author.avif"
-                      loading="lazy"
-                      alt="Smiling woman with dark hair wearing a white blazer and black turtleneck sweater against a plain gray background."
-                      class="image_cover"
-                    />
-                  </div>
-                  <div class="text-wrap_author-testimonial">
-                    <div class="text-size-small text_body-bold">
-                      Ava Thompson
-                    </div>
-                    <div class="text-size-small tone-medium">
-                      Marketing Manager, Upper East Side
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <ContactTiles />
             </div>
           </div>
         </section>
+        <Testimonials />
       </main>
       <section class="section_cta">
         <div class="padding-global">

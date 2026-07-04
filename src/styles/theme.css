@@ -125,11 +125,26 @@ p, .text-size-large, .faq-paragraph { text-wrap: pretty; }
    (template ships 1.4; headings/buttons keep their own tighter values). */
 p.text-size-large, .faq-paragraph, .card_testimonial-marquee .text-size-large { line-height: 1.5; }
 
-/* Service-card heading safety net: the card reserves its bottom-right corner for an
-   absolutely-positioned arrow button (content_nav-service has padding-right:120px for it).
-   A 3-line heading grows tall enough to run under that button, visually clipping the last
-   word — happened with a long RU title before it was shortened. Cap at 2 lines with an
-   ellipsis so any future long title degrades gracefully instead of colliding with the icon. */
+/* "КАК ЭТО / РАБОТАЕТ?" heading: the second line is a nested <div> (forces the break),
+   but it inherits the same tight heading line-height as the first line, so the two rows
+   sit almost touching. Give the wrapped line proper breathing room. */
+.headline_hiw h2.margin-0 { line-height: 1.15; }
+.headline_hiw h2.margin-0 > div { margin-top: 0.15em; }
+
+/* ContactTiles strip: on the homepage it sits inside the hero's own container/spacing.
+   On other pages it's inserted as its own mini-section between the page's hero and the
+   next block, so it needs its own (smaller than a full section) vertical padding. */
+.section_contact-tiles { padding-top: 2.5rem; padding-bottom: 2.5rem; }
+
+/* Service-card heading: content_nav-service reserves padding-right:120px for the corner
+   arrow button, but the button itself is only ~52px wide (1.25rem icon + 2×16px padding)
+   sitting 24px from the card edge — its left edge is ~76px in, not 120px. The extra ~44px
+   was clipping/wrapping heading text one letter early even though the card had room.
+   Narrow the reserved space down to the button's real footprint (+ a small buffer). */
+.content_nav-service { padding-right: 84px; }
+
+/* Service-card heading safety net: cap at 2 lines with an ellipsis so any future long
+   title degrades gracefully instead of running under the arrow button. */
 .card_scroll-service .heading-style-h4,
 .link_service .heading-style-h4 {
   display: -webkit-box;

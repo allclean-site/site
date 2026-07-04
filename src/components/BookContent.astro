@@ -1,4 +1,6 @@
 ---
+import ContactTiles from './ContactTiles.astro';
+import Testimonials from './Testimonials.astro';
 // BookContent
 const { lang = 'ru' } = Astro.props;
 const t = lang === 'ro'
@@ -391,6 +393,14 @@ const t = lang === 'ro'
             </div>
           </div>
         </section>
+        <section class="section_contact-tiles">
+          <div class="padding-global">
+            <div class="w-layout-blockcontainer container-large w-container">
+              <ContactTiles />
+            </div>
+          </div>
+        </section>
+        <Testimonials />
         <section class="section_book-about">
           <div class="padding-global">
             <div class="w-layout-blockcontainer container-large w-container">

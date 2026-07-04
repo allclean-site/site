@@ -1,4 +1,5 @@
 ---
+import ContactTiles from './ContactTiles.astro';
 import { marked } from 'marked';
 import type { Article, Locale } from '../lib/articles';
 
@@ -79,6 +80,13 @@ const faq = article.meta?.faq ?? [];
     </div>
   </section>
 </main>
+<section class="section_contact-tiles">
+  <div class="padding-global">
+    <div class="w-layout-blockcontainer container-large w-container">
+      <ContactTiles />
+    </div>
+  </div>
+</section>
 <section class="section_cta">
   <div class="padding-global">
     <div class="w-layout-blockcontainer container-large w-container">
