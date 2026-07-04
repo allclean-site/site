@@ -115,6 +115,7 @@ const MAP = {
   'Вариант 2': 'Varianta 2',
   'Вариант 3': 'Varianta 3',
   'КИШИНЁВЕ': 'CHIȘINĂU',
+  'В КИШИНЁВЕ': 'ÎN CHIȘINĂU',
   'ЧОКАНЕ': 'CIOCANA',
   'БОТАНИКЕ': 'BOTANICA',
   'РЫШКАНОВКЕ': 'RÂȘCANI',

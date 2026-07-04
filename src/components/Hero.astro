@@ -91,8 +91,8 @@ const {
                       >
                     </div>
                     <h1 id="" class="heading_hero-home">
-                      {words.map((w: string) => <div class="heading-style-h1">{w}</div>)}
-                      <div class="heading-style-h1">{city}</div>
+                      {words.slice(0, -1).map((w: string) => <div class="heading-style-h1">{w}</div>)}
+                      <div class="heading-style-h1">{words[words.length - 1]} {city}</div>
                     </h1>
                   </div>
                   <div class="button-group_left">

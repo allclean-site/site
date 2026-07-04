@@ -176,7 +176,7 @@ p.text-size-large, .faq-paragraph, .card_testimonial-marquee .text-size-large { 
    rule with no breakpoint of its own. */
 .heading_hero-home .heading-style-h1 { overflow-wrap: break-word; word-break: break-word; hyphens: auto; }
 @media (min-width: 768px) {
-  .heading_hero-home .heading-style-h1 { font-size: 5.5rem; }
+  .heading_hero-home .heading-style-h1 { font-size: 3.75rem; }
 }
 
 /* Service-card heading: content_nav-service reserves padding-right:120px for the corner
