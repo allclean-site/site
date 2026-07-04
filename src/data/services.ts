@@ -594,11 +594,11 @@ export function buildServiceJsonLd(service: Service, locale: 'ru' | 'ro', site: 
         provider: {
           '@type': 'LocalBusiness',
           name: 'All Clean',
-          telephone: '+373 79 955 044',
+          telephone: '+37379955044',
           email: 'info@allclean.md',
           address: {
             '@type': 'PostalAddress',
-            streetAddress: locale === 'ru' ? 'ул. Месаджер 7' : 'str. Mesager 7',
+            streetAddress: locale === 'ru' ? 'ул. Месаджер, 7' : 'str. Mesager 7',
             addressLocality: locale === 'ru' ? 'Кишинёв' : 'Chișinău',
             postalCode: 'MD-2069',
             addressCountry: 'MD',

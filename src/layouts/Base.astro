@@ -25,7 +25,10 @@ const ogLocale = lang === 'ru' ? 'ru_MD' : 'ro_MD';
 
 const orgSchema = {
   '@context': 'https://schema.org',
-  '@type': 'LocalBusiness',
+  // HomeAndConstructionBusiness is schema.org's closest documented LocalBusiness subtype for a
+  // home-services company (no dedicated "CleaningService" type exists) — listed alongside the
+  // base type so validators that only know LocalBusiness still match.
+  '@type': ['LocalBusiness', 'HomeAndConstructionBusiness'],
   name: 'All Clean',
   description:
     lang === 'ru'
@@ -43,7 +46,19 @@ const orgSchema = {
   },
   areaServed: lang === 'ru' ? 'Кишинёв' : 'Chișinău',
   priceRange: '$$',
-  openingHours: 'Mo-Su 08:00-21:00',
+  // Structured form (vs. a plain "Mo-Su 08:00-21:00" string) — more reliably parsed by
+  // Google/GBP-sync and citation tools per the local-SEO audit's recommendation.
+  openingHoursSpecification: {
+    '@type': 'OpeningHoursSpecification',
+    dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+    opens: '08:00',
+    closes: '21:00',
+  },
+  // TODO(owner): once real, claimed profiles exist, add here:
+  //   geo: { '@type': 'GeoCoordinates', latitude: <from GBP dashboard>, longitude: <from GBP dashboard> }
+  //   sameAs: [<Google Business Profile Maps URL>, <real Facebook page>, <real Instagram profile>]
+  //   aggregateRating: { '@type': 'AggregateRating', ratingValue: <live from GBP>, reviewCount: <live from GBP> }
+  // Do NOT fabricate these — wrong/unverifiable values are a known spam signal and a citation-consistency risk.
 };
 ---
 <!doctype html>
