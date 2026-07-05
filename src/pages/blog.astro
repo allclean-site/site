@@ -8,6 +8,10 @@ import { listArticles } from '../lib/articles';
 import { buildBreadcrumbJsonLd } from '../lib/breadcrumbs.ts';
 
 const articles = await listArticles('ru');
+// SSR page (fetches from Supabase) was never edge-cached — every hit took a 2s+
+// TTFB round trip. Let Vercel's CDN serve a cached copy and revalidate in the
+// background instead of blocking every visitor on a fresh Supabase fetch.
+Astro.response.headers.set('Cache-Control', 's-maxage=300, stale-while-revalidate=3600');
 const site = (Astro.site ?? new URL('https://allclean.md')).href.replace(/\/$/, '');
 const breadcrumbs = buildBreadcrumbJsonLd(site, [
   { name: 'Главная', path: '/' },

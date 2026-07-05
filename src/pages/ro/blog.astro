@@ -8,6 +8,7 @@ import { listArticles } from '../../lib/articles';
 import { buildBreadcrumbJsonLd } from '../../lib/breadcrumbs.ts';
 
 const articles = await listArticles('ro');
+Astro.response.headers.set('Cache-Control', 's-maxage=300, stale-while-revalidate=3600');
 const site = (Astro.site ?? new URL('https://allclean.md')).href.replace(/\/$/, '');
 const breadcrumbs = buildBreadcrumbJsonLd(site, [
   { name: 'Acasă', path: '/ro' },

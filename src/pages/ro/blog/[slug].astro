@@ -11,6 +11,7 @@ const { slug } = Astro.params;
 const article = await getArticle('ro', slug!);
 if (!article) return new Response('Articol negăsit', { status: 404 });
 
+Astro.response.headers.set('Cache-Control', 's-maxage=300, stale-while-revalidate=3600');
 const otherSlug = await counterpartSlug(article.group_id, 'ru');
 const site = Astro.site ?? new URL('https://allclean.md');
 const roUrl = new URL('/ro/blog/' + article.slug, site).href;
