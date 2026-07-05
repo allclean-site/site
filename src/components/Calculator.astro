@@ -273,7 +273,7 @@ const tileIco: Record<string, string> = { surfaces: '🧴', kitchen: '🍳', bat
     }
     function order() { return stepEls.filter(stepActive).map(function (el) { return Number(el.dataset.step); }); }
     var pos = 0;
-    function showStep(p) {
+    function showStep(p, scroll) {
       applyFieldVisibility();
       var ord = order();
       pos = Math.max(0, Math.min(ord.length - 1, p));
@@ -283,10 +283,12 @@ const tileIco: Record<string, string> = { surfaces: '🧴', kitchen: '🍳', bat
       document.getElementById(uid + '-bar').style.width = ((pos + 1) / ord.length * 100) + '%';
       document.getElementById(uid + '-back').style.visibility = pos === 0 ? 'hidden' : 'visible';
       document.getElementById(uid + '-next').style.display = pos === ord.length - 1 ? 'none' : '';
-      root.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      // Only scroll on user-initiated step navigation (next/back clicks) — never on
+      // initial render, which used to hijack the page's scroll position on load.
+      if (scroll) root.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
-    document.getElementById(uid + '-next').addEventListener('click', function () { showStep(pos + 1); });
-    document.getElementById(uid + '-back').addEventListener('click', function () { showStep(pos - 1); });
+    document.getElementById(uid + '-next').addEventListener('click', function () { showStep(pos + 1, true); });
+    document.getElementById(uid + '-back').addEventListener('click', function () { showStep(pos - 1, true); });
 
     var fileInput = document.getElementById(uid + '-file'), photosBox = document.getElementById(uid + '-photos');
     document.getElementById(uid + '-add-photo').addEventListener('click', function () { if (photos.length >= 6) return; fileInput.click(); });
