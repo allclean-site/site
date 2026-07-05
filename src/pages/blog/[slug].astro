@@ -5,6 +5,7 @@ import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import BlogPostContent from '../../components/BlogPostContent.astro';
 import { getArticle, counterpartSlug } from '../../lib/articles';
+import { buildBreadcrumbJsonLd } from '../../lib/breadcrumbs.ts';
 
 const { slug } = Astro.params;
 const article = await getArticle('ru', slug!);
@@ -15,6 +16,11 @@ const site = Astro.site ?? new URL('https://allclean.md');
 const ruUrl = new URL('/blog/' + article.slug, site).href;
 const roUrl = otherSlug ? new URL('/ro/blog/' + otherSlug, site).href : ruUrl;
 const desc = article.seo_description || article.excerpt || '';
+const breadcrumbs = buildBreadcrumbJsonLd(site.href.replace(/\/$/, ''), [
+  { name: 'Главная', path: '/' },
+  { name: 'Блог', path: '/blog' },
+  { name: article.title, path: '/blog/' + article.slug },
+]);
 ---
 <Base
   title={article.seo_title || article.title}
@@ -25,6 +31,7 @@ const desc = article.seo_description || article.excerpt || '';
 >
   <Fragment slot="head">
     {article.jsonld && <script type="application/ld+json" set:html={JSON.stringify(article.jsonld)} is:inline />}
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbs)} is:inline />
     <meta property="og:type" content="article" />
     <meta property="og:title" content={article.seo_title || article.title} />
     {desc && <meta property="og:description" content={desc} />}

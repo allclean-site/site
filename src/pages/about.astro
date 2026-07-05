@@ -3,8 +3,16 @@ import Base from '../layouts/Base.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import Content from '../components/AboutContent.astro';
+import { buildBreadcrumbJsonLd } from '../lib/breadcrumbs.ts';
+
+const site = (Astro.site ?? new URL('https://allclean.md')).href.replace(/\/$/, '');
+const breadcrumbs = buildBreadcrumbJsonLd(site, [
+  { name: 'Главная', path: '/' },
+  { name: 'О нас', path: '/about' },
+]);
 ---
 <Base title="О нас — AllClean Кишинёв" description="AllClean — клининговая служба в Кишинёве. Чистые дома, спокойствие хозяев. Уборка, которую делают люди, которым не всё равно." lang="ru">
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(breadcrumbs)} />
   <div class="page-wrapper">
     <Header />
     <Content />

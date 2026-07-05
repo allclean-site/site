@@ -50,7 +50,16 @@ export async function getArticle(locale: Locale, slug: string): Promise<Article 
   const rows = await supaGet<Article[]>(
     `select=${FULL_FIELDS}&project_id=eq.${PROJECT_ID}&locale=eq.${locale}&slug=eq.${encodeURIComponent(slug)}&status=eq.published&limit=1`,
   );
-  return rows[0] ?? null;
+  const article = rows[0] ?? null;
+  if (article?.jsonld) {
+    // The CMS baked mainEntityOfPage.@id with the old allclean.pages.dev domain at
+    // creation time; the site has since moved to allclean.md. Fix it on the way out
+    // rather than requiring a CMS/Supabase write for every existing + future article.
+    article.jsonld = JSON.parse(
+      JSON.stringify(article.jsonld).replaceAll('https://allclean.pages.dev', 'https://allclean.md'),
+    );
+  }
+  return article;
 }
 
 /** Slug of the same article in the other locale (for hreflang), or null. */

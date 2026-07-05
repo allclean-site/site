@@ -3,8 +3,16 @@ import Base from '../../layouts/Base.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import Content from '../../components/PricingContent.astro';
+import { buildBreadcrumbJsonLd } from '../../lib/breadcrumbs.ts';
+
+const site = (Astro.site ?? new URL('https://allclean.md')).href.replace(/\/$/, '');
+const breadcrumbs = buildBreadcrumbJsonLd(site, [
+  { name: 'Acasă', path: '/ro' },
+  { name: 'Prețuri', path: '/ro/pricing' },
+]);
 ---
 <Base title="Prețuri curățenie — AllClean Chișinău" description="Prețuri transparente pentru curățenia apartamentelor și caselor în Chișinău. Fără costuri ascunse — prețul îl știi dinainte." lang="ro">
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(breadcrumbs)} />
   <div class="page-wrapper">
     <Header lang="ro" />
     <Content locale="ro" />
