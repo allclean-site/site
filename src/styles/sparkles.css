@@ -2056,7 +2056,7 @@ textarea.w-input, textarea.w-select {
 
 @font-face {
   font-family: Bricolagegrotesque;
-  src: url("https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cac6/69306858b15f4695998f9b36_BricolageGrotesque-Medium.ttf") format("truetype");
+  src: url("/fonts/webflow/BricolageGrotesque-Medium.woff2") format("woff2");
   font-weight: 500;
   font-style: normal;
   font-display: swap;
@@ -2064,7 +2064,7 @@ textarea.w-input, textarea.w-select {
 
 @font-face {
   font-family: Bricolagegrotesque;
-  src: url("https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cac6/693068580c1e904f6878fcd4_BricolageGrotesque-ExtraLight.ttf") format("truetype");
+  src: url("/fonts/webflow/BricolageGrotesque-ExtraLight.woff2") format("woff2");
   font-weight: 200;
   font-style: normal;
   font-display: swap;
@@ -2072,7 +2072,7 @@ textarea.w-input, textarea.w-select {
 
 @font-face {
   font-family: Bricolagegrotesque;
-  src: url("https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cac6/69306858cceca06508fc1857_BricolageGrotesque-Bold.ttf") format("truetype"), url("https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cac6/6930685836f1553eed93b808_BricolageGrotesque-ExtraBold.ttf") format("truetype");
+  src: url("/fonts/webflow/BricolageGrotesque-Bold.woff2") format("woff2"), url("/fonts/webflow/BricolageGrotesque-ExtraBold.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -2080,7 +2080,7 @@ textarea.w-input, textarea.w-select {
 
 @font-face {
   font-family: Bricolagegrotesque;
-  src: url("https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cac6/69306858fefacc2497a8f02b_BricolageGrotesque-SemiBold.ttf") format("truetype");
+  src: url("/fonts/webflow/BricolageGrotesque-SemiBold.woff2") format("woff2");
   font-weight: 600;
   font-style: normal;
   font-display: swap;
@@ -2088,7 +2088,7 @@ textarea.w-input, textarea.w-select {
 
 @font-face {
   font-family: Bricolagegrotesque;
-  src: url("https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cac6/69306858440838e1bb301be5_BricolageGrotesque-Light.ttf") format("truetype");
+  src: url("/fonts/webflow/BricolageGrotesque-Light.woff2") format("woff2");
   font-weight: 300;
   font-style: normal;
   font-display: swap;
@@ -2096,7 +2096,7 @@ textarea.w-input, textarea.w-select {
 
 @font-face {
   font-family: Bricolagegrotesque;
-  src: url("https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cac6/6930685d6302ceb7ca396b2f_BricolageGrotesque-Regular.ttf") format("truetype");
+  src: url("/fonts/webflow/BricolageGrotesque-Regular.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -2104,7 +2104,7 @@ textarea.w-input, textarea.w-select {
 
 @font-face {
   font-family: Geist Mono;
-  src: url("https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cac6/69bd2865c319969a5de24261_GeistMono-Medium.ttf") format("truetype");
+  src: url("/fonts/webflow/GeistMono-Medium.woff2") format("woff2");
   font-weight: 500;
   font-style: normal;
   font-display: swap;
@@ -2112,7 +2112,7 @@ textarea.w-input, textarea.w-select {
 
 @font-face {
   font-family: Decalotype Fix;
-  src: url("https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cac6/69387d3aaae11b03b733c650_Decalotype-ExtraBold-fix.otf") format("opentype"), url("https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cac6/69387d3b8e8f90e14c27c86c_Decalotype-Bold-fix.otf") format("opentype");
+  src: url("/fonts/webflow/Decalotype-ExtraBold-fix.woff2") format("woff2"), url("/fonts/webflow/Decalotype-Bold-fix.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -2120,7 +2120,7 @@ textarea.w-input, textarea.w-select {
 
 @font-face {
   font-family: Decalotype Fix;
-  src: url("https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cac6/69387d3aa8b5fe14d4016dc1_Decalotype-BoldItalic-fix.otf") format("opentype"), url("https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cac6/69387d3a15f1491b9299fc5c_Decalotype-ExtraBoldItalic-fix.otf") format("opentype");
+  src: url("/fonts/webflow/Decalotype-BoldItalic-fix.woff2") format("woff2"), url("/fonts/webflow/Decalotype-ExtraBoldItalic-fix.woff2") format("woff2");
   font-weight: 700;
   font-style: italic;
   font-display: swap;
@@ -2128,7 +2128,7 @@ textarea.w-input, textarea.w-select {
 
 @font-face {
   font-family: Decalotype Fix;
-  src: url("https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cac6/69387d3aff7c6203b2f65f01_Decalotype-Italic-fix.otf") format("opentype");
+  src: url("/fonts/webflow/Decalotype-Italic-fix.woff2") format("woff2");
   font-weight: 400;
   font-style: italic;
   font-display: swap;
@@ -2136,7 +2136,7 @@ textarea.w-input, textarea.w-select {
 
 @font-face {
   font-family: Decalotype Fix;
-  src: url("https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cac6/69387d3aeb6cf459040542fa_Decalotype-LightItalic-fix.otf") format("opentype");
+  src: url("/fonts/webflow/Decalotype-LightItalic-fix.woff2") format("woff2");
   font-weight: 300;
   font-style: italic;
   font-display: swap;
@@ -2144,7 +2144,7 @@ textarea.w-input, textarea.w-select {
 
 @font-face {
   font-family: Decalotype Fix;
-  src: url("https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cac6/69387d3a618de92a9d0d651a_Decalotype-BlackItalic-fix.otf") format("opentype");
+  src: url("/fonts/webflow/Decalotype-BlackItalic-fix.woff2") format("woff2");
   font-weight: 900;
   font-style: italic;
   font-display: swap;
@@ -2152,7 +2152,7 @@ textarea.w-input, textarea.w-select {
 
 @font-face {
   font-family: Decalotype Fix;
-  src: url("https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cac6/69387d3a2881e39a3fb48194_Decalotype-Regular-fix.otf") format("opentype");
+  src: url("/fonts/webflow/Decalotype-Regular-fix.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -2160,7 +2160,7 @@ textarea.w-input, textarea.w-select {
 
 @font-face {
   font-family: Decalotype Fix;
-  src: url("https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cac6/69387d3aaa08854a593058d2_Decalotype-Black-fix.otf") format("opentype");
+  src: url("/fonts/webflow/Decalotype-Black-fix.woff2") format("woff2");
   font-weight: 900;
   font-style: normal;
   font-display: swap;
@@ -2168,7 +2168,7 @@ textarea.w-input, textarea.w-select {
 
 @font-face {
   font-family: Decalotype Fix;
-  src: url("https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cac6/69387d3a88cc6dd65216a329_Decalotype-Light-fix.otf") format("opentype");
+  src: url("/fonts/webflow/Decalotype-Light-fix.woff2") format("woff2");
   font-weight: 300;
   font-style: normal;
   font-display: swap;
@@ -2176,7 +2176,7 @@ textarea.w-input, textarea.w-select {
 
 @font-face {
   font-family: Decalotype Fix;
-  src: url("https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cac6/69387d3a883bdf95b288b4d3_Decalotype-MediumItalic-fix.otf") format("opentype");
+  src: url("/fonts/webflow/Decalotype-MediumItalic-fix.woff2") format("woff2");
   font-weight: 500;
   font-style: italic;
   font-display: swap;
@@ -2184,7 +2184,7 @@ textarea.w-input, textarea.w-select {
 
 @font-face {
   font-family: Decalotype Fix;
-  src: url("https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cac6/69387d3a8bfb078960c85f30_Decalotype-Medium-fix.otf") format("opentype");
+  src: url("/fonts/webflow/Decalotype-Medium-fix.woff2") format("woff2");
   font-weight: 500;
   font-style: normal;
   font-display: swap;
@@ -2192,7 +2192,7 @@ textarea.w-input, textarea.w-select {
 
 @font-face {
   font-family: Decalotype Fix;
-  src: url("https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cac6/69387d3a8565acb1dad60cd4_Decalotype-SemiBold-fix.otf") format("opentype");
+  src: url("/fonts/webflow/Decalotype-SemiBold-fix.woff2") format("woff2");
   font-weight: 600;
   font-style: normal;
   font-display: swap;
@@ -2200,7 +2200,7 @@ textarea.w-input, textarea.w-select {
 
 @font-face {
   font-family: Decalotype Fix;
-  src: url("https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cac6/69387d3b8e8f90e14c27c868_Decalotype-SemiBoldItalic-fix.otf") format("opentype");
+  src: url("/fonts/webflow/Decalotype-SemiBoldItalic-fix.woff2") format("woff2");
   font-weight: 600;
   font-style: italic;
   font-display: swap;
@@ -2208,7 +2208,7 @@ textarea.w-input, textarea.w-select {
 
 @font-face {
   font-family: Raveo Display;
-  src: url("https://cdn.prod.website-files.com/692f17afc3743c9cd4b7cac6/69bd28485af9aba5737d4393_Raveo%20Display%20Regular.otf") format("opentype");
+  src: url("/fonts/webflow/Raveo-Display-Regular.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
