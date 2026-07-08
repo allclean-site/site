@@ -5,8 +5,9 @@ import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import * as cheerio from 'cheerio';
 
-const SUPABASE_URL = 'https://hbdjboimxqwkzxntidzt.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_HovRZnqMhQiTiM8WC-wjBA_lbTH533G';
+// Per-deploy override (client's own Supabase) via env; shared agency instance is the fallback.
+const SUPABASE_URL = process.env.PUBLIC_SUPABASE_URL || 'https://hbdjboimxqwkzxntidzt.supabase.co';
+const SUPABASE_KEY = process.env.PUBLIC_SUPABASE_ANON || 'sb_publishable_HovRZnqMhQiTiM8WC-wjBA_lbTH533G';
 // Vercel's adapter copies the final deployed static HTML into .vercel/output/static
 // (same flat per-route shape the old Cloudflare `dist/` had) — that's what actually
 // ships, so it's what this script must mutate.

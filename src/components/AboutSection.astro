@@ -1,5 +1,6 @@
 ---
 // AboutSection — lifted from All Clean (home).
+import { STORAGE_URL } from '../lib/supabasePublic';
 ---
         <section class="section_home-about">
           <div class="padding-global">
@@ -8,7 +9,7 @@
                 <div class="image-wrap_home-team">
                   <img
                     id="team-photo"
-                    src="https://hbdjboimxqwkzxntidzt.supabase.co/storage/v1/object/public/article-images/allclean/site/1783063601712-p5098r.webp"
+                    src={`${STORAGE_URL}/article-images/allclean/site/1783063601712-p5098r.webp`}
                     loading="lazy"
                     alt="Group of six smiling cleaning staff in beige uniforms holding cleaning supplies in a bright living room."
                     class="image_cover"

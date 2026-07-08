@@ -1,5 +1,6 @@
 ---
 // Features — lifted from All Clean (home).
+import { STORAGE_URL } from '../lib/supabasePublic';
 ---
         <section class="section_home-features">
           <div class="padding-global">
@@ -12,7 +13,7 @@
                 >
                   <img
                     id="features-photo"
-                    src="https://hbdjboimxqwkzxntidzt.supabase.co/storage/v1/object/public/article-images/allclean/site/1783063635199-y3tjex.jpg"
+                    src={`${STORAGE_URL}/article-images/allclean/site/1783063635199-y3tjex.jpg`}
                     loading="lazy"
                     alt="Two smiling cleaning staff in beige uniforms holding cleaning tools against a plain white wall."
                     class="image_cover vertical"

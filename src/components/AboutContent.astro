@@ -1,6 +1,7 @@
 ---
 import ContactTiles from './ContactTiles.astro';
 import Testimonials from './Testimonials.astro';
+import { STORAGE_URL } from '../lib/supabasePublic';
 // AboutContent
 ---
       <main class="main-wrapper">
@@ -14,7 +15,7 @@ import Testimonials from './Testimonials.astro';
               >
                 <div class="image-wrap_hero-about">
                   <img
-                    src="https://hbdjboimxqwkzxntidzt.supabase.co/storage/v1/object/public/article-images/allclean/site/1783063601712-p5098r.webp"
+                    src={`${STORAGE_URL}/article-images/allclean/site/1783063601712-p5098r.webp`}
                     loading="eager"
                     alt="Smiling woman in cleaning uniform holding a spray bottle and blue cloth in a tidy living room."
                     class="image_cover vertical"
@@ -23,7 +24,7 @@ import Testimonials from './Testimonials.astro';
                 <div class="content_hero-about">
                   <div class="image-wrap_hero-about-mobile">
                     <img
-                      src="https://hbdjboimxqwkzxntidzt.supabase.co/storage/v1/object/public/article-images/allclean/site/1783063601712-p5098r.webp"
+                      src={`${STORAGE_URL}/article-images/allclean/site/1783063601712-p5098r.webp`}
                       loading="lazy"
                       alt="Smiling woman in cleaning uniform holding a spray bottle and blue cloth in a tidy living room."
                       class="image_cover about-hero"
